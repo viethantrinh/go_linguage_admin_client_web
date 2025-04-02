@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component} from '@angular/core';
+import {DefaultLayoutComponent} from './shared/components/default-layout/default-layout.component';
 
 @Component({
   selector: 'gl-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [
+    DefaultLayoutComponent,
+  ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'go_linguage_admin_client_web';
+
 }
