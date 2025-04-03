@@ -1,1 +1,7 @@
-<gl-default-layout></gl-default-layout>
+@if (authService.isAuthenticated()) {
+  <gl-default-layout></gl-default-layout>
+} @else {
+  <router-outlet></router-outlet>
+}
+
+

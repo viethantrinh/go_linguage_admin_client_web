@@ -1,4 +1,5 @@
 export const enum APP_ROUTE_TOKEN {
+  AUTH = 'auth',
   DASHBOARD = 'dashboard',
   USER = 'user',
   LEARN_STRUCTURE_TOPIC = 'learn-structure/topic',

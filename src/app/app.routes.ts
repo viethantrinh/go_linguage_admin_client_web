@@ -8,39 +8,44 @@ import {WordComponent} from './features/word/word.component';
 import {SentenceComponent} from './features/sentence/components/sentence.component';
 import {ConversationComponent} from './features/conversation/components/conversation.component';
 import {SongComponent} from './features/song/components/song.component';
+import {AuthComponent} from './features/auth/components/auth.component';
 
 export const routes: Routes = [
   {
+    path: APP_ROUTE_TOKEN.AUTH,
+    component: AuthComponent,
+  },
+  {
     path: APP_ROUTE_TOKEN.DASHBOARD,
-    component: DashboardComponent
+    component: DashboardComponent,
   },
   {
     path: APP_ROUTE_TOKEN.USER,
-    component: UserComponent
+    component: UserComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC,
-    component: TopicComponent
+    component: TopicComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_LESSON,
-    component: LessonComponent
+    component: LessonComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_MATERIAL_WORD,
-    component: WordComponent
+    component: WordComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SENTENCE,
-    component: SentenceComponent
+    component: SentenceComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION,
-    component: ConversationComponent
+    component: ConversationComponent,
   },
   {
     path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,
-    component: SongComponent
+    component: SongComponent,
   },
   {
     path: '',

@@ -1,0 +1,39 @@
+<c-header class="px-3 header-sticky d-flex align-items-center">
+  <c-header-nav class="me-3">
+    <button cButton color="secondary" variant="ghost" size="sm" (click)="onCloseSideBar()">
+      <c-icon [name]="IconSubset.cilHamburgerMenu" size="xxl"></c-icon>
+    </button>
+  </c-header-nav>
+  <c-header-brand [routerLink]="">
+    <p class="p-0 m-0 fs-3 fw-semibold">GoLinguage</p>
+  </c-header-brand>
+  <c-header-nav class="ms-auto header-nav" role="navigation">
+    <c-dropdown>
+      <button cDropdownToggle="" class="py-0 nav-link">
+        <c-avatar shape="rounded-1" src="assets/avatars/1.jpg" status="success"></c-avatar>
+      </button>
+      <ul cDropdownMenu class="pt-0 w-auto">
+        <li>
+          <a cDropdownItem="" routerlink="" href="#" class="dropdown-item">
+            <c-icon [name]="IconSubset.cilUser" class="icon me-2"></c-icon>
+            Profile
+          </a>
+        </li>
+        <li>
+          <a cDropdownItem="" routerlink="" href="#" class="dropdown-item">
+            <c-icon [name]="IconSubset.cilCreditCard" class="icon me-2"></c-icon>
+            Payments
+          </a>
+        </li>
+        <li>
+          <hr cDropdownDivider="" class="dropdown-divider">
+        </li>
+        <li>
+          <a cDropdownItem="" (click)="onSignOut()" class="dropdown-item" style="cursor: pointer">
+            <c-icon [name]="IconSubset.cilAccountLogout" class="icon me-2"></c-icon>
+            Logout
+          </a>
+        </li>
+      </ul>
+    </c-dropdown><!----></c-header-nav>
+</c-header>

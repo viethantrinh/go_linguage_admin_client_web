@@ -1,0 +1,17 @@
+<div class="min-vh-100">
+  <div class="row d-flex">
+    <div class="col" [hidden]="!isSidebarVisible">
+      <gl-sidebar-navigation></gl-sidebar-navigation>
+    </div>
+
+    <div class="col-9 flex-grow-1">
+      <!-- header -->
+      <gl-header (toggleSidebar)="toggleSideBar()"></gl-header>
+      <!-- header -->
+
+      <main class="main p-3">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</div>
