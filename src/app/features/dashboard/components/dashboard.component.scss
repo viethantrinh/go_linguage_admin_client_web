@@ -1,0 +1,74 @@
+.border {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    cursor: pointer;
+  }
+}
+
+// Button icon styles
+.btn-icon {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: rotate(15deg);
+  }
+}
+
+// Random colors for buttons
+.btn-icon-0 {
+  background-color: #FF6B6B;
+}
+
+.btn-icon-1 {
+  background-color: #4ECDC4;
+}
+
+.btn-icon-2 {
+  background-color: #FFD166;
+}
+
+.btn-icon-3 {
+  background-color: #6A0572;
+}
+
+.btn-icon-4 {
+  background-color: #1A535C;
+}
+
+// Chart styles
+.chart-container {
+  position: relative;
+  margin: auto;
+  height: 100%;
+}
+
+:host ::ng-deep {
+  .chartjs-tooltip-key {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+  }
+}
+
+// Optional: Add transition colors to make the effect more noticeable
+.border:hover {
+  background-color: #f8f9fa;
+  border-color: #00DADC !important;
+}
+
+// Optional: Add scale effect for a more dynamic feel
+@media (min-width: 768px) {
+  .border:hover {
+    transform: translateY(-10px) scale(1.02);
+  }
+}

@@ -1,1 +1,85 @@
-<h1>dashboard works!</h1>
+<c-container fluid>
+  <h1 class="mb-4">Dashboard</h1>
+  <c-row class="g-3 mb-5">
+    @for (c of cardData; track c.title; let i = $index) {
+      <c-col sm="3">
+        <div class="border rounded-3 ps-3 pt-3 pe-4 shadow-sm position-relative">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="fs-4 fw-bold">{{ c.title }}</h5>
+              <p class="text-secondary fs-5">
+                @switch (i) {
+                  @case (0) {
+                    {{ dashboardData?.userCount || 0 }}
+                  }
+                  @case (1) {
+                    {{ dashboardData?.topicCount || 0 }}
+                  }
+                  @case (2) {
+                    {{ dashboardData?.lessonCount || 0 }}
+                  }
+                  @case (3) {
+                    {{ dashboardData?.wordCount || 0 }}
+                  }
+                  @case (4) {
+                    {{ dashboardData?.sentenceCount || 0 }}
+                  }
+                  @case (5) {
+                    {{ dashboardData?.levelCount || 0 }}
+                  }
+                  @case (6) {
+                    {{ dashboardData?.moneyCount || 0 }} đ
+                  }
+                  @default {
+                    0
+                  }
+                }
+              </p>
+            </div>
+            <button [ngClass]="'btn-icon btn-icon-' + (i % 5)" class="rounded-circle border-0 mt-2">
+              <c-icon [name]="getIcon(i)" size="xl"></c-icon>
+            </button>
+          </div>
+        </div>
+      </c-col>
+    }
+  </c-row>
+
+  <!-- Doughnut and Pie Charts Section -->
+  <c-row>
+    <c-col md="6" class="mb-4">
+      <div class="border rounded-3 p-3 shadow-sm h-100">
+        <h4 class="mb-3">User Distribution</h4>
+        <c-chart type="doughnut" [data]="doughnutChartData" [options]="doughnutChartOptions" height="260"></c-chart>
+      </div>
+    </c-col>
+    <c-col md="6" class="mb-4">
+      <div class="border rounded-3 p-3 shadow-sm h-100">
+        <h4 class="mb-3">Content Breakdown</h4>
+        <c-chart type="pie" [data]="pieChartData" [options]="pieChartOptions" height="260"></c-chart>
+      </div>
+    </c-col>
+  </c-row>
+
+  <!-- Bar Chart Section -->
+  <c-row class="mb-5">
+    <c-col>
+      <div class="border rounded-3 p-3 shadow-sm">
+        <h4 class="mb-3">Monthly Statistics</h4>
+        <c-chart type="bar" [data]="barChartData" [options]="barChartOptions" height="300"></c-chart>
+      </div>
+    </c-col>
+  </c-row>
+
+  <!-- Line Chart Section -->
+  <c-row class="mb-5">
+    <c-col>
+      <div class="border rounded-3 p-3 shadow-sm">
+        <h4 class="mb-3">Growth Trends</h4>
+        <c-chart type="line" [data]="lineChartData" [options]="lineChartOptions" height="300"></c-chart>
+      </div>
+    </c-col>
+  </c-row>
+
+
+</c-container>
