@@ -28,7 +28,7 @@
                     {{ dashboardData?.levelCount || 0 }}
                   }
                   @case (6) {
-                    {{ dashboardData?.moneyCount || 0 }} đ
+                    {{ (dashboardData?.moneyCount || 0) | currency:'VND' }}
                   }
                   @default {
                     0

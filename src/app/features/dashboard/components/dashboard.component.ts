@@ -1,7 +1,7 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {ColComponent, ContainerComponent, RowComponent} from '@coreui/angular';
 import {cardData} from '../models/card-data';
-import {NgClass} from '@angular/common';
+import {CurrencyPipe, NgClass} from '@angular/common';
 import {IconComponent} from '@coreui/icons-angular';
 import {IconSubset} from '../../../icons/icon-subset';
 import {ChartjsComponent} from '@coreui/angular-chartjs';
@@ -16,12 +16,13 @@ import {DashboardService} from '../services/dashboard.service';
     ColComponent,
     NgClass,
     IconComponent,
-    ChartjsComponent
+    ChartjsComponent,
+    CurrencyPipe
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnChanges {
   protected readonly cardData = cardData;
   dashboardData: DashboardData | null = null;
   loading = true;
@@ -52,18 +53,103 @@ export class DashboardComponent implements OnInit {
     this.initPieChart();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // Update charts when dashboard data changes
+    if (changes['dashboardData'] && this.dashboardData) {
+      this.updateCharts();
+    }
+  }
+
   loadDashboardData(): void {
     this.loading = true;
     this.dashboardService.getDashboardData().subscribe({
       next: (data) => {
         this.dashboardData = data;
         this.loading = false;
+        // Update charts with the new data
+        this.updateCharts();
       },
       error: (error) => {
         console.error('Error fetching dashboard data:', error);
         this.loading = false;
       }
     });
+  }
+
+  updateCharts(): void {
+    if (this.dashboardData) {
+      // this.updateDoughnutChart();
+      this.updatePieChart();
+      // The bar and line charts might need historical data
+      // which isn't provided by the current API
+    }
+  }
+
+  updateDoughnutChart(): void {
+    // Update the doughnut chart with real user data
+    // For now we only have userCount, so we'll use a simplified version
+    const userCount = this.dashboardData?.userCount || 0;
+
+    this.doughnutChartData = {
+      labels: ['Học viên', 'Giáo viên', 'Admin'],
+      datasets: [
+        {
+          data: [
+            Math.round(userCount * 0.8), // Assuming 80% are students
+            Math.round(userCount * 0.15), // Assuming 15% are teachers
+            Math.round(userCount * 0.05)  // Assuming 5% are admins
+          ],
+          backgroundColor: [
+            'rgba(255, 107, 107, 0.7)',
+            'rgba(78, 205, 196, 0.7)',
+            'rgba(255, 209, 102, 0.7)'
+          ],
+          borderColor: [
+            'rgba(255, 107, 107, 1)',
+            'rgba(78, 205, 196, 1)',
+            'rgba(255, 209, 102, 1)'
+          ],
+          borderWidth: 1
+        }
+      ]
+    };
+  }
+
+  updatePieChart(): void {
+    // Update the pie chart with content distribution
+    if (!this.dashboardData) return;
+
+    const { topicCount, lessonCount, wordCount, sentenceCount, levelCount } = this.dashboardData;
+
+    this.pieChartData = {
+      labels: ['Chủ đề', 'Bài học', 'Từ vựng', 'Câu', 'Cấp độ'],
+      datasets: [
+        {
+          data: [
+            topicCount || 0,
+            lessonCount || 0,
+            wordCount || 0,
+            sentenceCount || 0,
+            levelCount || 0
+          ],
+          backgroundColor: [
+            'rgba(255, 107, 107, 0.7)',
+            'rgba(78, 205, 196, 0.7)',
+            'rgba(255, 209, 102, 0.7)',
+            'rgba(106, 5, 114, 0.7)',
+            'rgba(26, 83, 92, 0.7)'
+          ],
+          borderColor: [
+            'rgba(255, 107, 107, 1)',
+            'rgba(78, 205, 196, 1)',
+            'rgba(255, 209, 102, 1)',
+            'rgba(106, 5, 114, 1)',
+            'rgba(26, 83, 92, 1)'
+          ],
+          borderWidth: 1
+        }
+      ]
+    };
   }
 
   initBarChart(): void {

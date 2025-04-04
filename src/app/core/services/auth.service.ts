@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {
-  BASE_LOCAL_URL,
+  BASE_REMOTE_URL,
   INTROSPECT_TOKEN_PATH,
   SIGN_IN_PATH,
   SIGN_OUT_PATH,
@@ -18,7 +18,7 @@ import {APP_ROUTE_TOKEN} from '../routes/app.routes.constants';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly BASE_API_URL: string = BASE_LOCAL_URL;
+  private readonly BASE_API_URL: string = BASE_REMOTE_URL;
 
   // State management with signals
   private authState = signal<AuthState>({
