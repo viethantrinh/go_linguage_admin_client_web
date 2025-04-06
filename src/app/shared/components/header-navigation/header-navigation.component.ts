@@ -15,7 +15,7 @@ import {
 import {RouterLink} from '@angular/router';
 import {IconComponent} from '@coreui/icons-angular';
 import {IconSubset} from '../../../icons/icon-subset';
-import {AuthService} from '../../../core/services/auth.service';
+import {AuthService} from '../../../features/auth/services/auth.service';
 
 @Component({
   selector: 'gl-header',

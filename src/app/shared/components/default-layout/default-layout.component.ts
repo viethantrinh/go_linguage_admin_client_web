@@ -3,9 +3,8 @@ import {DropdownModule, SidebarModule} from '@coreui/angular';
 
 import {Component, inject} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {iconSubset, IconSubset} from '../../../icons/icon-subset';
+import {iconSubset} from '../../../icons/icon-subset';
 import {IconModule, IconSetService} from '@coreui/icons-angular';
-import {navItems} from './nav';
 import {HeaderNavigationComponent} from '../header-navigation/header-navigation.component';
 import {SidebarNavigationComponent} from '../sidebar-navigation/sidebar-navigation.component';
 
@@ -25,7 +24,6 @@ import {SidebarNavigationComponent} from '../sidebar-navigation/sidebar-navigati
 })
 export class DefaultLayoutComponent {
 
-  protected readonly navItems = navItems;
   readonly #iconService = inject(IconSetService);
 
   constructor() {
@@ -39,5 +37,4 @@ export class DefaultLayoutComponent {
     console.log(this.isSidebarVisible)
   }
 
-  protected readonly IconSubset = IconSubset;
 }

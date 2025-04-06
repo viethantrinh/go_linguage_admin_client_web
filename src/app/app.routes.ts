@@ -1,55 +1,63 @@
 import {Routes} from '@angular/router';
 import {APP_ROUTE_TOKEN} from './core/routes/app.routes.constants';
-import {DashboardComponent} from './features/dashboard/components/dashboard.component';
-import {UserComponent} from './features/user/components/user.component';
-import {LessonComponent} from './features/lesson/components/lesson.component';
-import {TopicComponent} from './features/topic/components/topic.component';
-import {WordComponent} from './features/word/word.component';
-import {SentenceComponent} from './features/sentence/components/sentence.component';
-import {ConversationComponent} from './features/conversation/components/conversation.component';
-import {SongComponent} from './features/song/components/song.component';
 import {AuthComponent} from './features/auth/components/auth.component';
+import {GuestGuard} from './core/guards/guest.guard';
+import {AuthGuard} from './core/guards/auth.guard';
+import {DefaultLayoutComponent} from './shared/components/default-layout/default-layout.component';
 
 export const routes: Routes = [
   {
     path: APP_ROUTE_TOKEN.AUTH,
     component: AuthComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.DASHBOARD,
-    component: DashboardComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.USER,
-    component: UserComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC,
-    component: TopicComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_LESSON,
-    component: LessonComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_MATERIAL_WORD,
-    component: WordComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SENTENCE,
-    component: SentenceComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION,
-    component: ConversationComponent,
-  },
-  {
-    path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,
-    component: SongComponent,
+    canActivate: [GuestGuard]
   },
   {
     path: '',
-    redirectTo: APP_ROUTE_TOKEN.DASHBOARD,
-    pathMatch: 'full'
+    component: DefaultLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: APP_ROUTE_TOKEN.DASHBOARD,
+        loadComponent: () => import('./features/dashboard/components/dashboard.component').then(c => c.DashboardComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.USER,
+        loadComponent: () => import('./features/user/components/user.component').then(c => c.UserComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC,
+        loadComponent: () => import('./features/topic/components/topic.component').then(c => c.TopicComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_LESSON,
+        loadComponent: () => import('./features/lesson/components/lesson.component').then(c => c.LessonComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_WORD,
+        loadComponent: () => import('./features/word/word.component').then(c => c.WordComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SENTENCE,
+        loadComponent: () => import('./features/sentence/components/sentence.component').then(c => c.SentenceComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION,
+        loadComponent: () => import('./features/conversation/components/conversation.component').then(c => c.ConversationComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,
+        loadComponent: () => import('./features/song/components/song.component').then(c => c.SongComponent)
+      },
+      {
+        path: '',
+        redirectTo: APP_ROUTE_TOKEN.DASHBOARD,
+        pathMatch: 'full'
+      }
+    ]
   },
+  // Fallback route
+  {
+    path: '**',
+    redirectTo: APP_ROUTE_TOKEN.AUTH
+  }
 ];

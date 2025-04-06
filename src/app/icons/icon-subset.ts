@@ -24,6 +24,7 @@ import {
   cilArrowBottom,
   cilArrowRight,
   cilArrowTop,
+  cilBan,
   cilBasket,
   cilBell,
   cilBold,
@@ -34,6 +35,7 @@ import {
   cilChart,
   cilChartPie,
   cilCheck,
+  cilCheckCircle,
   cilChevronLeft,
   cilChevronRight,
   cilCloudDownload,
@@ -197,7 +199,9 @@ export const iconSubset = {
   cilUserUnfollow,
   cilFeaturedPlaylist,
   cilBook,
-  cilHamburgerMenu
+  cilHamburgerMenu,
+  cilBan,
+  cilCheckCircle
 };
 
 export enum IconSubset {
