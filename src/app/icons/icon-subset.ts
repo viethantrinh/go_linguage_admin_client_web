@@ -78,6 +78,7 @@ import {
   cilPen,
   cilPencil,
   cilPeople,
+  cilPlus,
   cilPrint,
   cilPuzzle,
   cilReportSlash,
@@ -201,7 +202,8 @@ export const iconSubset = {
   cilBook,
   cilHamburgerMenu,
   cilBan,
-  cilCheckCircle
+  cilCheckCircle,
+  cilPlus
 };
 
 export enum IconSubset {

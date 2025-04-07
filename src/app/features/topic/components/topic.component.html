@@ -1,1 +1,143 @@
-<p>topic works!</p>
+<c-container fluid>
+  <!-- Header with title, button, and search/filter controls -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h1>Quản lý chủ đề</h1>
+      <!-- Add new topic button -->
+      <button cButton class="btn me-3 border-0" color="primary" style="background: rgba(78, 205, 196, 0.7)">
+        <svg cIcon name="cilPlus" class="me-1"></svg>
+        Thêm chủ đề
+      </button>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <!-- Search input -->
+      <div class="input-group me-3" style="width: 450px;">
+        <span class="input-group-text">
+          <svg cIcon name="cilSearch"></svg>
+        </span>
+        <input cFormControl placeholder="Tìm kiếm chủ đề..." (input)="onSearch($event)"/>
+      </div>
+      <!-- Filter dropdown -->
+      <select cSelect [(ngModel)]="selectedFilter" (change)="applyFilter()">
+        <option value="all">Tất cả</option>
+        <option value="premium">Premium</option>
+        <option value="free">Free</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Topic list card -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="text-center my-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Topic table -->
+      <table cTable hover *ngIf="!loading">
+        <thead>
+        <tr>
+          <th scope="col">Mã ID</th>
+          <th scope="col">Hình ảnh</th>
+          <th scope="col">Tên</th>
+          <th scope="col">Loại</th>
+          <th scope="col">Ngày tạo</th>
+          <th scope="col">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let topic of filteredTopics | slice: (currentPage-1) * itemsPerPage : currentPage * itemsPerPage">
+          <th scope="row">{{ topic.id }}</th>
+          <td>
+<!--            TODO: kích lại sau, tắt để tiết kiệm tài nguyên cloud :>-->
+<!--            <img [src]="topic.imageUrl" alt="{{ topic.name }}" class="topic-thumbnail" width="40" height="40">-->
+          </td>
+          <td>{{ topic.name }}</td>
+          <td>
+            <span class="badge"
+                  [ngStyle]="{'background-color': topic.isPremium ? 'rgba(255, 209, 102, 0.7)' : 'rgba(78, 205, 196, 0.7)', 'color': '#fff'}">
+              {{ topic.isPremium ? 'Premium' : 'Free' }}
+            </span>
+          </td>
+          <td>{{ topic.createdDate | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <div class="d-flex gap-2">
+              <!-- Edit button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}">
+                <svg cIcon name="cilPencil"></svg>
+              </button>
+              <!-- Delete button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openDeleteModal(topic)">
+                <svg cIcon name="cilTrash"></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination controls -->
+      <div *ngIf="!loading && filteredTopics.length > 0" class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          <span>Hiển thị {{ (currentPage - 1) * itemsPerPage + 1 }}
+            đến {{ Math.min(currentPage * itemsPerPage, filteredTopics.length) }}
+            trên tổng số {{ filteredTopics.length }}
+            chủ đề
+          </span>
+        </div>
+        <c-pagination aria-label="Page navigation">
+          <li cPageItem [disabled]="currentPage === 1">
+            <a cPageLink (click)="changePage(currentPage - 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === 1 ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === 1 ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Previous</a>
+          </li>
+          <li cPageItem *ngFor="let page of getPageNumbers()" [active]="page === currentPage">
+            <a cPageLink (click)="changePage(page)"
+               style="cursor: pointer"
+               [ngStyle]="{'background-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : 'transparent',
+                          'color': page === currentPage ? '#fff' : 'rgba(78, 205, 196, 0.9)',
+                          'border-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : '#dee2e6'}">{{ page }}</a>
+          </li>
+          <li cPageItem [disabled]="currentPage === totalPages">
+            <a cPageLink (click)="changePage(currentPage + 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === totalPages ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === totalPages ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Next</a>
+          </li>
+        </c-pagination>
+      </div>
+
+      <!-- No topics found message -->
+      <div *ngIf="!loading && filteredTopics.length === 0" class="text-center my-3">
+        <p>No topics found.</p>
+      </div>
+    </c-card-body>
+  </c-card>
+
+  <!-- Delete Confirmation Modal -->
+  <c-modal [visible]="deleteModalVisible" (visibleChange)="deleteModalVisible = $event">
+    <c-modal-header>
+      <h5 cModalTitle>Confirm Delete</h5>
+      <button cButtonClose (click)="deleteModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body>
+      Are you sure you want to delete topic <strong>{{ selectedTopic?.name }}</strong>?
+      This action cannot be undone.
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="deleteModalVisible = false">Cancel</button>
+      <button cButton color="danger" [disabled]="loading" (click)="deleteTopic()">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Delete
+      </button>
+    </c-modal-footer>
+  </c-modal>
+</c-container>
