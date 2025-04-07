@@ -1,22 +1,31 @@
+// Common color variables
+$primary-color: rgba(78, 205, 196, 0.7);
+$warning-color: rgba(255, 209, 102, 0.7);
+$danger-color: rgba(255, 107, 107, 0.7);
+$neutral-color: #6c757d;
+
+// Layout
 .sticky-column {
   position: sticky;
-  top: 20px; /* Khoảng cách từ đỉnh trang khi bắt đầu sticky */
-  height: fit-content; /* Chiều cao phù hợp với nội dung */
+  top: 20px;
+  height: fit-content;
+  z-index: 1; // Ensure sticky content stays above other content
 }
 
-/* Đảm bảo container cha có đủ chiều cao để scroll hoạt động */
 .scrollable-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+// Drag and drop styles
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-  0 8px 10px 1px rgba(0, 0, 0, 0.14),
-  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
   background-color: white;
 }
 
@@ -35,4 +44,46 @@
 .drag-handle {
   cursor: move;
   color: #aaa;
+
+  &:hover {
+    color: #666;
+  }
+}
+
+// Lesson type badges
+.lesson-type-badge {
+  &.type-1 {
+    background-color: $primary-color;
+  }
+
+  &.type-2 {
+    background-color: $warning-color;
+  }
+
+  &.type-3 {
+    background-color: $danger-color;
+  }
+}
+
+// Buttons
+.action-btn {
+  &.primary {
+    background-color: $primary-color;
+    color: #fff;
+    border: none;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+
+  &.danger {
+    background-color: $danger-color;
+    color: #fff;
+    border: none;
+
+    &:hover {
+      background-color: darken($danger-color, 10%);
+    }
+  }
 }

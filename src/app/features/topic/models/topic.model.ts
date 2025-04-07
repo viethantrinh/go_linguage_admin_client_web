@@ -16,3 +16,20 @@ export interface TopicForm {
   createdDate: Date;
   // displayOrder: number;
 }
+
+// Define interfaces for better type safety
+export interface Lesson {
+  id?: number;
+  title: string;
+  typeId: number;
+}
+
+export interface LessonType {
+  id: number;
+  name: string;
+}
+
+export interface TopicLevel {
+  id: number;
+  name: string;
+}

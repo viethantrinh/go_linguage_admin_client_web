@@ -168,12 +168,13 @@
 
                 <!-- Image preview area -->
                 <div *ngIf="imagePreview" class="mb-3 position-relative">
-                  <img
-                    [src]="imagePreview"
-                    class="img-thumbnail"
-                    style="max-width: 100%; max-height: 200px; cursor: pointer;"
-                    (click)="fileInput.click()"
-                    alt="Topic thumbnail">
+                  <!-- TODO: kích sau, tránh tốn tài nguyên cloud -->
+<!--                  <img-->
+<!--                    [src]="imagePreview"-->
+<!--                    class="img-thumbnail"-->
+<!--                    style="max-width: 100%; max-height: 200px; cursor: pointer;"-->
+<!--                    (click)="fileInput.click()"-->
+<!--                    alt="Topic thumbnail">-->
                   <p class="mt-2 small text-muted">Nhấn vào ảnh để sửa hoặc cập nhật</p>
                 </div>
 
