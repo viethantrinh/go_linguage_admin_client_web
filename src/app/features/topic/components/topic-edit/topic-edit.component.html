@@ -27,20 +27,45 @@
                 <ul class="list-group" *ngIf="lessons.length > 0">
                   <li *ngFor="let lesson of lessons; let i = index"
                       class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
+
+                    <!-- Display mode (when not editing) -->
+                    <div *ngIf="editingLessonIndex !== i">
                       <span class="me-2 fw-bold">{{ i + 1 }}.</span>
                       <span>{{ lesson.title }}</span>
                       <span class="badge ms-2" [ngStyle]="{'background-color': getTypeColor(lesson.typeId)}">
                         {{ getTypeName(lesson.typeId) }}
                       </span>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div *ngIf="editingLessonIndex !== i" class="d-flex gap-2">
                       <button cButton color="light" size="sm" class="btn-icon" (click)="editLesson(i)">
                         <svg cIcon name="cilPencil" size="sm"></svg>
                       </button>
                       <button cButton color="light" size="sm" class="btn-icon" (click)="removeLesson(i)">
                         <svg cIcon name="cilTrash" size="sm"></svg>
                       </button>
+                    </div>
+
+                    <!-- Edit mode (when editing) -->
+                    <div *ngIf="editingLessonIndex === i" class="w-100">
+                      <form [formGroup]="editLessonForm" class="d-flex align-items-center"
+                            (submit)="saveEditedLesson()">
+                        <span class="me-2 fw-bold">{{ i + 1 }}.</span>
+                        <div class="input-group">
+                          <input cFormControl
+                                 formControlName="editTitle"
+                                 class="form-control"
+                                 placeholder="Tên bài học">
+                          <select cSelect formControlName="editTypeId" style="max-width: 150px;">
+                            <option *ngFor="let type of lessonTypes" [ngValue]="type.id">{{ type.name }}</option>
+                          </select>
+                          <button cButton type="submit" color="success" size="sm" [disabled]="editLessonForm.invalid">
+                            <svg cIcon name="cilCheck" size="sm"></svg>
+                          </button>
+                          <button cButton type="button" color="danger" size="sm" (click)="cancelEditing()">
+                            <svg cIcon name="cilX" size="sm"></svg>
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </li>
                 </ul>
@@ -55,7 +80,7 @@
                            placeholder="Nhập tên bài học mới"
                            (keyup.enter)="addLesson()">
                     <select cSelect formControlName="lessonTypeId" style="max-width: 150px;">
-                      <option *ngFor="let type of lessonTypes" [value]="type.id">{{ type.name }}</option>
+                      <option *ngFor="let type of lessonTypes" [ngValue]="type.id">{{ type.name }}</option>
                     </select>
                     <button cButton
                             [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
@@ -150,6 +175,7 @@
                 <!-- Upload prompt -->
                 <div *ngIf="!imagePreview">
                   <a
+                    style="color: rgba(78, 205, 196, 0.7)"
                     href="javascript:void(0)"
                     class="text-decoration-none"
                     (click)="fileInput.click()">
@@ -168,16 +194,23 @@
       <button cButton
               [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
               type="button"
-              [disabled]="topicForm.invalid"
+              [disabled]="topicForm.invalid || isSubmitting"
               (click)="onSubmit()">
+        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
         Xác nhận
       </button>
       <button cButton
               [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
               type="button"
+              [disabled]="isSubmitting"
               routerLink="/topics">
         Hủy
       </button>
+    </div>
+
+    <!-- Error message alert -->
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      {{ errorMessage }}
     </div>
   </form>
 </c-container>
