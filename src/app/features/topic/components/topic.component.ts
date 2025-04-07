@@ -25,15 +25,8 @@ import {finalize} from 'rxjs/operators';
 import {TopicService} from '../services/topic.service';
 import {Router} from '@angular/router';
 import {APP_ROUTE_TOKEN} from '../../../core/routes/app.routes.constants';
+import {TopicForm} from '../models/topic.model';
 
-// Define Topic model
-interface Topic {
-  id: number;
-  name: string;
-  imageUrl: string;
-  isPremium: boolean;
-  createdDate: Date;
-}
 
 /**
  * TopicComponent is responsible for managing topic data, including displaying,
@@ -69,11 +62,11 @@ interface Topic {
   styleUrl: './topic.component.scss'
 })
 export class TopicComponent implements OnInit {
-  topics: Topic[] = [];
-  filteredTopics: Topic[] = [];
+  topics: TopicForm[] = [];
+  filteredTopics: TopicForm[] = [];
   selectedFilter = 'all';
   deleteModalVisible = false;
-  selectedTopic: Topic | null = null;
+  selectedTopic: TopicForm | null = null;
   loading = false;
 
   // Pagination
@@ -87,7 +80,7 @@ export class TopicComponent implements OnInit {
   readonly router = inject(Router);
 
   // Sample data for demonstration purposes
-  sampleTopics: Topic[] = [
+  sampleTopics: TopicForm[] = [
     {id: 1, name: 'English for Beginners', imageUrl: 'assets/images/topics/english_beginners.jpg', isPremium: false, createdDate: new Date('2023-01-15')},
     {id: 2, name: 'Business English', imageUrl: 'assets/images/topics/business_english.jpg', isPremium: true, createdDate: new Date('2023-02-20')},
     {id: 3, name: 'TOEFL Preparation', imageUrl: 'assets/images/topics/toefl_prep.jpg', isPremium: true, createdDate: new Date('2023-03-10')},
@@ -226,7 +219,7 @@ export class TopicComponent implements OnInit {
   /**
    * Open the delete modal for a topic.
    */
-  openDeleteModal(topic: Topic): void {
+  openDeleteModal(topic: TopicForm): void {
     this.selectedTopic = topic;
     this.deleteModalVisible = true;
   }
@@ -260,7 +253,9 @@ export class TopicComponent implements OnInit {
     this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC_EDIT}`]).then()
   }
 
-  onEditTopic() {
-    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC_EDIT}`]).then()
+  onEditTopic(id: number) {
+    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC_EDIT}`], {
+      queryParams: { id: id }
+    }).then();
   }
 }

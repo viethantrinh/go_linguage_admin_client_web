@@ -2,32 +2,16 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {Topic} from '../models/topic.model';
+import {ApiResponse} from '../../../core/models/api-response.model';
 
-// Define Topic model to match API response
-export interface Topic {
-  id: number;
-  name: string;
-  imageUrl: string;
-  displayOrder: number;
-  createdAt: string;
-  isPremium: boolean;
-}
-
-// Define API response structure
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  timestamp: string;
-  result: T;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class TopicService {
-  private readonly BASE_URL = `${BASE_REMOTE_URL}/topics/admin`;
-  private readonly BASE_URL_2 = `${BASE_LOCAL_URL}/topics/admin`;
+  private readonly BASE_URL = `${BASE_LOCAL_URL}/topics/admin`;
   private readonly http = inject(HttpClient);
 
   /**

@@ -14,7 +14,7 @@ import {
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
-import {Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {TopicService} from '../../services/topic.service';
 import {finalize} from 'rxjs/operators';
 import {APP_ROUTE_TOKEN} from '../../../../core/routes/app.routes.constants';
@@ -62,18 +62,19 @@ export class TopicEditComponent implements OnInit {
 
   lessons: { id?: number, title: string, typeId: number }[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private topicService: TopicService,
-    private router: Router
-  ) {}
-
   // Add these properties for editing state
   editingLessonIndex: number | null = null;
   editLessonForm!: FormGroup;
 
   isSubmitting = false;
   errorMessage: string | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private topicService: TopicService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.topicForm = this.fb.group({
@@ -89,6 +90,14 @@ export class TopicEditComponent implements OnInit {
     this.editLessonForm = this.fb.group({
       editTitle: ['', Validators.required],
       editTypeId: [1]
+    });
+
+    // check if had id
+    this.route.queryParams.subscribe(params => {
+      const topicId = params['id'];
+      if (topicId) {
+        console.log('Topic id to edit: ', topicId)
+      }
     });
   }
 
@@ -314,6 +323,5 @@ export class TopicEditComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
-
 
 }
