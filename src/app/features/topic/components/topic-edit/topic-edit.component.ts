@@ -18,6 +18,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {TopicService} from '../../services/topic.service';
 import {finalize} from 'rxjs/operators';
 import {APP_ROUTE_TOKEN} from '../../../../core/routes/app.routes.constants';
+import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'gl-topic-edit',
@@ -38,6 +39,7 @@ import {APP_ROUTE_TOKEN} from '../../../../core/routes/app.routes.constants';
     IconDirective,
     RouterLink,
     FormSelectDirective,
+    DragDropModule
   ],
   templateUrl: './topic-edit.component.html',
   styleUrl: './topic-edit.component.scss'
@@ -159,7 +161,7 @@ export class TopicEditComponent implements OnInit {
       lessons: this.lessons.map((lesson, index) => ({
         id: lesson.id, // Include ID for existing lessons, will be undefined for new ones
         name: lesson.title,
-        displayOrder: index + 1,
+        displayOrder: index + 1, // Use the current index as the display order
         lessonTypeId: lesson.typeId
       }))
     };
@@ -360,26 +362,7 @@ export class TopicEditComponent implements OnInit {
     console.log(`${type.toUpperCase()}: ${message}`);
 
     // Navigate back to topics list
-    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC}`]);
-  }
-
-  // Add a method for handling file upload separately or as part of the main submission
-  submitWithImage() {
-    const topicData = this.prepareFormData();
-    if (!topicData) return;
-
-    const formData = new FormData();
-    // Add the JSON data as a string
-    formData.append('topicData', JSON.stringify(topicData));
-
-    // Add the image file if present
-    const thumbnailFile = this.topicForm.get('thumbnailFile')?.value;
-    if (thumbnailFile) {
-      formData.append('image', thumbnailFile);
-    }
-
-    // Then send the formData to your API
-    // this.topicService.createTopicWithImage(formData).subscribe(...);
+    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC}`]).then();
   }
 
   onFileSelected(event: Event) {
@@ -401,4 +384,7 @@ export class TopicEditComponent implements OnInit {
     }
   }
 
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.lessons, event.previousIndex, event.currentIndex);
+  }
 }
