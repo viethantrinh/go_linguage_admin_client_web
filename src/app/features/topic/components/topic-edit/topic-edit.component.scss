@@ -1,0 +1,12 @@
+.sticky-column {
+  position: sticky;
+  top: 20px; /* Khoảng cách từ đỉnh trang khi bắt đầu sticky */
+  height: fit-content; /* Chiều cao phù hợp với nội dung */
+}
+
+/* Đảm bảo container cha có đủ chiều cao để scroll hoạt động */
+.scrollable-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

@@ -23,6 +23,8 @@ import {
 import {IconDirective} from '@coreui/icons-angular';
 import {finalize} from 'rxjs/operators';
 import {TopicService} from '../services/topic.service';
+import {Router} from '@angular/router';
+import {APP_ROUTE_TOKEN} from '../../../core/routes/app.routes.constants';
 
 // Define Topic model
 interface Topic {
@@ -82,6 +84,7 @@ export class TopicComponent implements OnInit {
 
   readonly fb = inject(FormBuilder);
   readonly topicService = inject(TopicService);
+  readonly router = inject(Router);
 
   // Sample data for demonstration purposes
   sampleTopics: Topic[] = [
@@ -251,5 +254,13 @@ export class TopicComponent implements OnInit {
           this.deleteModalVisible = false;
         }
       });
+  }
+
+  onCreateTopic() {
+    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC_EDIT}`]).then()
+  }
+
+  onEditTopic() {
+    this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_TOPIC_EDIT}`]).then()
   }
 }
