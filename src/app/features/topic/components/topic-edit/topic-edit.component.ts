@@ -69,6 +69,9 @@ export class TopicEditComponent implements OnInit {
   isSubmitting = false;
   errorMessage: string | null = null;
 
+  isEditMode = false;
+  topicId: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private topicService: TopicService,
@@ -83,7 +86,7 @@ export class TopicEditComponent implements OnInit {
       isPremium: [false],
       thumbnailFile: [null],
       lessonTitle: [''],
-      lessonTypeId: [1] // Default to type 1 (Lý thuyết)
+      lessonTypeId: [1] // Default to type 1 (Bài học chính)
     });
 
     // Initialize edit lesson form
@@ -92,13 +95,54 @@ export class TopicEditComponent implements OnInit {
       editTypeId: [1]
     });
 
-    // check if had id
+    // Check if we're in edit mode by looking for an ID in query params
     this.route.queryParams.subscribe(params => {
       const topicId = params['id'];
       if (topicId) {
-        console.log('Topic id to edit: ', topicId)
+        this.isEditMode = true;
+        this.topicId = +topicId;
+        this.loadTopicDetails(this.topicId);
       }
     });
+  }
+
+  // Add this method to load topic details
+  loadTopicDetails(id: number): void {
+    this.isSubmitting = true;
+    this.errorMessage = null;
+
+    this.topicService.getTopicDetail(id)
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+        })
+      )
+      .subscribe({
+        next: (topicDetail) => {
+          // Populate the form with the topic details
+          this.topicForm.patchValue({
+            title: topicDetail.name,
+            levelId: topicDetail.levelId,
+            isPremium: topicDetail.isPremium
+          });
+
+          // Load existing lessons
+          this.lessons = topicDetail.lessons.map((lesson: any) => ({
+            id: lesson.id,
+            title: lesson.name,
+            typeId: lesson.lessonTypeId
+          }));
+
+          // Load image if available
+          if (topicDetail.imageUrl) {
+            this.imagePreview = topicDetail.imageUrl;
+          }
+        },
+        error: (error) => {
+          console.error('Error loading topic details:', error);
+          this.errorMessage = 'Không thể tải thông tin chủ đề. Vui lòng thử lại.';
+        }
+      });
   }
 
   // Add this method to prepare data for API submission
@@ -107,21 +151,16 @@ export class TopicEditComponent implements OnInit {
       return null;
     }
 
-    this.lessons.map((lesson, index) => ({
-      name: lesson.title,
-      displayOrder: index + 1,
-      lessonTypeId: lesson.typeId || 1
-    }))
-
     // Create the request object according to API format
     return {
       name: this.topicForm.get('title')?.value,
       isPremium: this.topicForm.get('isPremium')?.value,
       levelTypeId: this.topicForm.get('levelId')?.value,
       lessons: this.lessons.map((lesson, index) => ({
+        id: lesson.id, // Include ID for existing lessons, will be undefined for new ones
         name: lesson.title,
         displayOrder: index + 1,
-        lessonTypeId: lesson.typeId // Use the actual lesson type ID
+        lessonTypeId: lesson.typeId
       }))
     };
   }
@@ -217,7 +256,17 @@ export class TopicEditComponent implements OnInit {
     const topicData = this.prepareFormData();
     console.log('Submitting topic data:', topicData);
 
-    // First, create the topic
+    if (this.isEditMode && this.topicId) {
+      // Update existing topic
+      this.updateTopic(topicData);
+    } else {
+      // Create new topic
+      this.createTopic(topicData);
+    }
+  }
+
+  // Split the submission logic into create and update methods
+  private createTopic(topicData: any) {
     this.topicService.createTopic(topicData)
       .pipe(
         finalize(() => {
@@ -229,18 +278,46 @@ export class TopicEditComponent implements OnInit {
       .subscribe({
         next: (createdTopic) => {
           console.log('Topic created:', createdTopic);
-
-          // If there's an image, upload it
           if (this.imageExists()) {
             this.uploadTopicImage(createdTopic.id);
           } else {
-            // No image to upload, navigate back to topics list
             this.navigateToTopics('Chủ đề đã được tạo thành công');
           }
         },
         error: (error) => {
           console.error('Error creating topic:', error);
           this.errorMessage = 'Không thể tạo chủ đề. Vui lòng thử lại.';
+          this.isSubmitting = false;
+        }
+      });
+  }
+
+  private updateTopic(topicData: any) {
+    // Add the topic ID for update
+    topicData.id = this.topicId;
+
+    this.topicService.updateTopic(topicData)
+      .pipe(
+        finalize(() => {
+          if (!this.imageExists() || typeof this.topicForm.get('thumbnailFile')?.value !== 'object') {
+            this.isSubmitting = false;
+          }
+        })
+      )
+      .subscribe({
+        next: (updatedTopic) => {
+          console.log('Topic updated:', updatedTopic);
+
+          // Only upload image if a new file was selected
+          if (this.imageExists() && typeof this.topicForm.get('thumbnailFile')?.value === 'object') {
+            this.uploadTopicImage(updatedTopic.id);
+          } else {
+            this.navigateToTopics('Chủ đề đã được cập nhật thành công');
+          }
+        },
+        error: (error) => {
+          console.error('Error updating topic:', error);
+          this.errorMessage = 'Không thể cập nhật chủ đề. Vui lòng thử lại.';
           this.isSubmitting = false;
         }
       });

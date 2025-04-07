@@ -55,4 +55,20 @@ export class TopicService {
         map(response => response.result)
       );
   }
+
+  getTopicDetail(id: number): Observable<any> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.get<ApiResponse<any>>(`${this.BASE_URL}/${id}/detail`, { headers })
+      .pipe(
+        map(response => response.result)
+      );
+  }
+
+  updateTopic(topicData: any): Observable<any> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.put<ApiResponse<any>>(`${this.BASE_URL}/update`, topicData, { headers })
+      .pipe(
+        map(response => response.result)
+      );
+  }
 }

@@ -14,4 +14,5 @@ export interface TopicForm {
   imageUrl: string;
   isPremium: boolean;
   createdDate: Date;
+  // displayOrder: number;
 }
