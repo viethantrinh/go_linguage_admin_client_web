@@ -13,19 +13,19 @@
                     {{ dashboardData?.userCount || 0 }}
                   }
                   @case (1) {
-                    {{ dashboardData?.topicCount || 0 }}
+                    {{ dashboardData?.levelCount || 0 }}
                   }
                   @case (2) {
-                    {{ dashboardData?.lessonCount || 0 }}
+                    {{ dashboardData?.topicCount || 0 }}
                   }
                   @case (3) {
-                    {{ dashboardData?.wordCount || 0 }}
+                    {{ dashboardData?.lessonCount || 0 }}
                   }
                   @case (4) {
-                    {{ dashboardData?.sentenceCount || 0 }}
+                    {{ dashboardData?.wordCount || 0 }}
                   }
                   @case (5) {
-                    {{ dashboardData?.levelCount || 0 }}
+                    {{ dashboardData?.sentenceCount || 0 }}
                   }
                   @case (6) {
                     {{ (dashboardData?.moneyCount || 0) | currency:'VND' }}
