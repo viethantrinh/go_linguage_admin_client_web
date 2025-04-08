@@ -1,8 +1,7 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {finalize, Subject, takeUntil} from 'rxjs';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 import {APP_ROUTE_TOKEN} from '../../../../core/routes/app.routes.constants';
 import {LessonType} from '../../../topic/models/topic.model';
@@ -20,6 +19,9 @@ import {
 } from '@coreui/angular';
 import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
+import {TopicService} from '../../../topic/services/topic.service';
+import {LessonService} from '../../services/lesson.service';
+import {CreateLessonRequest} from '../../models/lesson.model';
 
 // Define an interface for exercises
 interface Exercise {
@@ -64,6 +66,13 @@ interface ExerciseType {
 export class LessonEditComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
+  // Services
+  private readonly topicService = inject(TopicService);
+  private readonly lessonService = inject(LessonService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   // Forms
   lessonForm!: FormGroup;
   editExerciseForm!: FormGroup;
@@ -81,32 +90,19 @@ export class LessonEditComponent implements OnInit, OnDestroy {
 
   // Constants
   readonly lessonTypes: LessonType[] = [
-    { id: 1, name: 'Bài học chính' },
-    { id: 2, name: 'Bài học nói' },
-    { id: 3, name: 'Bài học kiểm tra' }
+    {id: 1, name: 'Bài học chính'},
+    {id: 2, name: 'Bài học nói'},
+    {id: 3, name: 'Bài học kiểm tra'}
   ];
 
   readonly exerciseTypes: ExerciseType[] = [
-    { id: 1, name: 'Bài tập trắc nghiệm' },
-    { id: 2, name: 'Bài tập điền từ' },
-    { id: 3, name: 'Bài tập sắp xếp' },
-    { id: 4, name: 'Bài tập ghép đôi' }
+    {id: 1, name: 'Từ vựng'},
+    {id: 2, name: 'Trắc nghiệm'},
+    {id: 3, name: 'Nối từ'},
+    {id: 4, name: 'Sắp xếp từ thành câu'},
+    {id: 5, name: 'Phát âm'},
+    {id: 6, name: 'Hội thoại'},
   ];
-
-  // Sample topics for demo purposes
-  readonly sampleTopics = [
-    { id: 1, name: 'English for Beginners' },
-    { id: 2, name: 'Business English' },
-    { id: 3, name: 'TOEFL Preparation' },
-    { id: 4, name: 'Travel Vocabulary' },
-    { id: 5, name: 'Everyday Conversations' }
-  ];
-
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
 
   ngOnInit(): void {
     this.initForms();
@@ -127,7 +123,6 @@ export class LessonEditComponent implements OnInit, OnDestroy {
       title: ['', Validators.required],
       typeId: [1, Validators.required],
       topicId: [null, Validators.required],
-      content: [''],
       exerciseTitle: [''],
       exerciseTypeId: [1]
     });
@@ -142,8 +137,20 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    * Load topics for the dropdown
    */
   private loadTopics(): void {
-    // In a real app, this would be a service call
-    this.topics = this.sampleTopics;
+    this.topicService.getTopics()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (topics) => {
+          this.topics = topics.map(topic => ({
+            id: topic.id,
+            name: topic.name
+          }));
+        },
+        error: (error) => {
+          console.error('Error loading topics', error);
+          this.errorMessage = 'Unable to load topics. Please try again.';
+        }
+      });
   }
 
   /**
@@ -179,11 +186,10 @@ export class LessonEditComponent implements OnInit, OnDestroy {
         title: 'Sample Lesson ' + id,
         typeId: 1,
         topicId: 2,
-        content: 'This is a sample lesson content.',
         exercises: [
-          { id: 1, title: 'Exercise 1', typeId: 1 },
-          { id: 2, title: 'Exercise 2', typeId: 2 },
-          { id: 3, title: 'Exercise 3', typeId: 3 }
+          {id: 1, title: 'Exercise 1', typeId: 1},
+          {id: 2, title: 'Exercise 2', typeId: 2},
+          {id: 3, title: 'Exercise 3', typeId: 3}
         ]
       };
 
@@ -191,7 +197,6 @@ export class LessonEditComponent implements OnInit, OnDestroy {
         title: lessonDetail.title,
         typeId: lessonDetail.typeId,
         topicId: lessonDetail.topicId,
-        content: lessonDetail.content
       });
 
       this.exercises = lessonDetail.exercises;
@@ -295,11 +300,16 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    */
   getTypeColor(typeId: number): string {
     switch (typeId) {
-      case 1: return 'rgba(78, 205, 196, 0.7)';
-      case 2: return 'rgba(255, 209, 102, 0.7)';
-      case 3: return 'rgba(255, 107, 107, 0.7)';
-      case 4: return 'rgba(6, 214, 160, 0.7)';
-      default: return '#6c757d';
+      case 1:
+        return 'rgba(78, 205, 196, 0.7)';
+      case 2:
+        return 'rgba(255, 209, 102, 0.7)';
+      case 3:
+        return 'rgba(255, 107, 107, 0.7)';
+      case 4:
+        return 'rgba(6, 214, 160, 0.7)';
+      default:
+        return '#6c757d';
     }
   }
 
@@ -347,16 +357,14 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    * Prepare the form data for submission.
    * @returns The prepared form data.
    */
-  private prepareFormData(): any {
+  private prepareFormData(): CreateLessonRequest {
     return {
-      title: this.lessonForm.get('title')?.value,
-      typeId: this.lessonForm.get('typeId')?.value,
+      name: this.lessonForm.get('title')?.value,
+      lessonTypeId: this.lessonForm.get('typeId')?.value,
       topicId: this.lessonForm.get('topicId')?.value,
-      content: this.lessonForm.get('content')?.value,
       exercises: this.exercises.map((exercise, index) => ({
-        id: exercise.id,
-        title: exercise.title,
-        typeId: exercise.typeId,
+        name: exercise.title,
+        exerciseTypeId: exercise.typeId,
         displayOrder: index + 1
       }))
     };
@@ -366,15 +374,25 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    * Create a new lesson.
    * @param lessonData The data for the new lesson.
    */
-  private createLesson(lessonData: any): void {
-    // In a real app, this would call a lesson service
-    console.log('Creating lesson with data:', lessonData);
-
-    // Simulate API call
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.navigateToLessons('Bài học đã được tạo thành công');
-    }, 1000);
+  private createLesson(lessonData: CreateLessonRequest): void {
+    this.lessonService.createLesson(lessonData)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isSubmitting = false)
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000) {
+            this.navigateToLessons('Bài học đã được tạo thành công');
+          } else {
+            this.errorMessage = `Error: ${response.message}`;
+          }
+        },
+        error: (error) => {
+          console.error('Error creating lesson:', error);
+          this.errorMessage = 'Có lỗi xảy ra khi tạo bài học. Vui lòng thử lại.';
+        }
+      });
   }
 
   /**

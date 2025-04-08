@@ -11,3 +11,14 @@ export interface Lesson {
 
 export interface LessonResponse extends ApiResponse<Lesson[]> {}
 export interface DeleteLessonResponse extends ApiResponse<null> {}
+
+export interface CreateLessonRequest {
+  name: string;
+  lessonTypeId: number;
+  topicId: number;
+  exercises: {
+    name: string;
+    exerciseTypeId: number;
+    displayOrder: number;
+  }[];
+}

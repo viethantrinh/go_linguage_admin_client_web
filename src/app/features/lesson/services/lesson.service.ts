@@ -2,7 +2,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
-import {DeleteLessonResponse, LessonResponse} from '../models/lesson.model';
+import {CreateLessonRequest, DeleteLessonResponse, LessonResponse} from '../models/lesson.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -29,4 +30,14 @@ export class LessonService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
     return this.http.delete<DeleteLessonResponse>(`${this.baseUrl}/${id}`, {headers: headers});
   }
+
+  /**
+   * Create a new lesson with exercises
+   * @param lessonData The data for the new lesson
+   */
+  createLesson(lessonData: CreateLessonRequest): Observable<LessonResponse> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.post<LessonResponse>(`${this.baseUrl}/create`, lessonData, {headers: headers});
+  }
 }
+
