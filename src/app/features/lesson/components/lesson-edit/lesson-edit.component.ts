@@ -21,7 +21,7 @@ import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
 import {TopicService} from '../../../topic/services/topic.service';
 import {LessonService} from '../../services/lesson.service';
-import {CreateLessonRequest} from '../../models/lesson.model';
+import {CreateLessonRequest, UpdateLessonRequest} from '../../models/lesson.model';
 
 // Define an interface for exercises
 interface Exercise {
@@ -177,31 +177,38 @@ export class LessonEditComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.errorMessage = null;
 
-    // In a real app, this would call a lesson service
-    // For now, simulate a service call
-    setTimeout(() => {
-      // Mock lesson data
-      const lessonDetail = {
-        id: id,
-        title: 'Sample Lesson ' + id,
-        typeId: 1,
-        topicId: 2,
-        exercises: [
-          {id: 1, title: 'Exercise 1', typeId: 1},
-          {id: 2, title: 'Exercise 2', typeId: 2},
-          {id: 3, title: 'Exercise 3', typeId: 3}
-        ]
-      };
+    this.lessonService.getLessonDetail(id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isSubmitting = false)
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000) {
+            const lessonDetail = response.result;
 
-      this.lessonForm.patchValue({
-        title: lessonDetail.title,
-        typeId: lessonDetail.typeId,
-        topicId: lessonDetail.topicId,
+            // Update form with lesson details
+            this.lessonForm.patchValue({
+              title: lessonDetail.name,
+              typeId: lessonDetail.lessonTypeId,
+              topicId: lessonDetail.topicId,
+            });
+
+            // Map exercises to component model
+            this.exercises = lessonDetail.exercises.map(exercise => ({
+              id: exercise.id,
+              title: exercise.name,
+              typeId: exercise.exerciseTypeId
+            }));
+          } else {
+            this.errorMessage = `Error: ${response.message}`;
+          }
+        },
+        error: (error) => {
+          console.error('Error loading lesson details:', error);
+          this.errorMessage = 'Có lỗi xảy ra khi tải thông tin bài học. Vui lòng thử lại.';
+        }
       });
-
-      this.exercises = lessonDetail.exercises;
-      this.isSubmitting = false;
-    }, 500);
   }
 
   /**
@@ -301,15 +308,19 @@ export class LessonEditComponent implements OnInit, OnDestroy {
   getTypeColor(typeId: number): string {
     switch (typeId) {
       case 1:
-        return 'rgba(78, 205, 196, 0.7)';
+        return 'rgba(78, 205, 196, 0.7)';  // Teal - existing
       case 2:
-        return 'rgba(255, 209, 102, 0.7)';
+        return 'rgba(255, 209, 102, 0.7)'; // Yellow - existing
       case 3:
-        return 'rgba(255, 107, 107, 0.7)';
+        return 'rgba(255, 107, 107, 0.7)'; // Red - existing
       case 4:
-        return 'rgba(6, 214, 160, 0.7)';
+        return 'rgba(6, 214, 160, 0.7)';   // Green - existing
+      case 5:
+        return 'rgba(118, 120, 237, 0.7)'; // Purple - new
+      case 6:
+        return 'rgba(41, 128, 185, 0.7)';  // Blue - new
       default:
-        return '#6c757d';
+        return '#6c757d';                  // Grey - default
     }
   }
 
@@ -363,6 +374,7 @@ export class LessonEditComponent implements OnInit, OnDestroy {
       lessonTypeId: this.lessonForm.get('typeId')?.value,
       topicId: this.lessonForm.get('topicId')?.value,
       exercises: this.exercises.map((exercise, index) => ({
+        ...(exercise.id ? { id: exercise.id } : {}), // Include id only if it exists
         name: exercise.title,
         exerciseTypeId: exercise.typeId,
         displayOrder: index + 1
@@ -399,17 +411,33 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    * Update an existing lesson.
    * @param lessonData The data for the lesson to update.
    */
-  private updateLesson(lessonData: any): void {
-    lessonData.id = this.lessonId;
+  private updateLesson(lessonData: CreateLessonRequest): void {
+    const updateRequest: UpdateLessonRequest = {
+      id: this.lessonId!,
+      name: lessonData.name,
+      lessonTypeId: lessonData.lessonTypeId,
+      topicId: lessonData.topicId,
+      exercises: lessonData.exercises
+    };
 
-    // In a real app, this would call a lesson service
-    console.log('Updating lesson with data:', lessonData);
-
-    // Simulate API call
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.navigateToLessons('Bài học đã được cập nhật thành công');
-    }, 1000);
+    this.lessonService.updateLesson(updateRequest)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isSubmitting = false)
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000) {
+            this.navigateToLessons('Bài học đã được cập nhật thành công');
+          } else {
+            this.errorMessage = `Error: ${response.message}`;
+          }
+        },
+        error: (error) => {
+          console.error('Error updating lesson:', error);
+          this.errorMessage = 'Có lỗi xảy ra khi cập nhật bài học. Vui lòng thử lại.';
+        }
+      });
   }
 
   /**

@@ -22,3 +22,29 @@ export interface CreateLessonRequest {
     displayOrder: number;
   }[];
 }
+
+export interface LessonDetail {
+  id: number;
+  lessonTypeId: number;
+  topicId: number;
+  name: string;
+  exercises: {
+    id?: number;
+    name: string;
+    exerciseTypeId: number;
+    displayOrder: number;
+  }[];
+}
+
+export interface UpdateLessonRequest {
+  id: number;
+  name: string;
+  lessonTypeId: number;
+  topicId: number;
+  exercises: {
+    id?: number;
+    name: string;
+    exerciseTypeId: number;
+    displayOrder: number;
+  }[];
+}
