@@ -2,6 +2,7 @@
 $primary-color: rgba(78, 205, 196, 0.7);
 $warning-color: rgba(255, 209, 102, 0.7);
 $danger-color: rgba(255, 107, 107, 0.7);
+$success-color: rgba(6, 214, 160, 0.7);
 $neutral-color: #6c757d;
 
 // Layout
@@ -50,8 +51,8 @@ $neutral-color: #6c757d;
   }
 }
 
-// Lesson type badges
-.lesson-type-badge {
+// Exercise type badges
+.exercise-type-badge {
   &.type-1 {
     background-color: $primary-color;
   }
@@ -63,6 +64,16 @@ $neutral-color: #6c757d;
   &.type-3 {
     background-color: $danger-color;
   }
+
+  &.type-4 {
+    background-color: $success-color;
+  }
+}
+
+// Text editor adjustments
+textarea {
+  resize: vertical;
+  min-height: 150px;
 }
 
 // Buttons
@@ -73,7 +84,7 @@ $neutral-color: #6c757d;
 //    border: none;
 //
 //    &:hover {
-//      background-color: $primary-color, 10%;
+//      background-color: darken($primary-color, 5%);
 //    }
 //  }
 //
@@ -83,7 +94,7 @@ $neutral-color: #6c757d;
 //    border: none;
 //
 //    &:hover {
-//      background-color: $danger-color, 10%;
+//      background-color: darken($danger-color, 5%);
 //    }
 //  }
 //}

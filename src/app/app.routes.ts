@@ -37,6 +37,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/lesson/components/lesson.component').then(c => c.LessonComponent)
       },
       {
+        path: APP_ROUTE_TOKEN.LEARN_STRUCTURE_LESSON_EDIT,
+        loadComponent: () => import('./features/lesson/components/lesson-edit/lesson-edit.component').then(c => c.LessonEditComponent)
+      },
+      {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_WORD,
         loadComponent: () => import('./features/word/word.component').then(c => c.WordComponent)
       },
