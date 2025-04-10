@@ -15,13 +15,21 @@ import {
   FormControlDirective,
   FormDirective,
   FormLabelDirective,
-  FormSelectDirective
+  FormSelectDirective,
+  ModalBodyComponent,
+  ModalComponent,
+  ModalFooterComponent,
+  ModalHeaderComponent,
+  ModalTitleDirective
 } from '@coreui/angular';
-import {NgForOf, NgIf, NgStyle} from '@angular/common';
+import {NgForOf, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
 import {TopicService} from '../../../topic/services/topic.service';
 import {LessonService} from '../../services/lesson.service';
 import {CreateLessonRequest, UpdateLessonRequest} from '../../models/lesson.model';
+import {
+  VocabularyExerciseComponent
+} from '../../../exercise/vocabulary-exercise/components/vocabulary-exercise.component';
 
 // Define an interface for exercises
 interface Exercise {
@@ -58,7 +66,16 @@ interface ExerciseType {
     ButtonDirective,
     FormSelectDirective,
     CardTitleDirective,
-    RouterLink
+    RouterLink,
+    ModalFooterComponent,
+    NgSwitchDefault,
+    NgSwitch,
+    VocabularyExerciseComponent,
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalBodyComponent,
+    NgSwitchCase,
+    ModalTitleDirective
   ],
   templateUrl: './lesson-edit.component.html',
   styleUrl: './lesson-edit.component.scss'
@@ -448,5 +465,42 @@ export class LessonEditComponent implements OnInit, OnDestroy {
   private navigateToLessons(message: string, type: 'success' | 'error' | 'warning' = 'success'): void {
     console.log(`${type.toUpperCase()}: ${message}`);
     this.router.navigate([`/${APP_ROUTE_TOKEN.LEARN_STRUCTURE_LESSON}`]).then();
+  }
+
+  // Add to your properties section
+  showExerciseContentEditor = false;
+  selectedExercise: Exercise | null = null;
+
+  /**
+   * Opens the exercise content editor modal for a specific exercise
+   * @param exercise The exercise to edit
+   */
+  openExerciseContentEditor(exercise: Exercise): void {
+    // Check if lesson is saved - needed for proper context
+    if (!this.isEditMode || !this.lessonId) {
+      alert('Vui lòng lưu bài học trước khi chỉnh sửa chi tiết bài tập.');
+      return;
+    }
+
+    this.selectedExercise = { ...exercise };
+    this.showExerciseContentEditor = true;
+  }
+
+  /**
+   * Closes the exercise content editor modal
+   */
+  closeExerciseContentEditor(): void {
+    this.showExerciseContentEditor = false;
+    this.selectedExercise = null;
+  }
+
+  /**
+   * Handle event when exercise content is saved
+   */
+  onExerciseContentSaved(): void {
+    // Show success message or update UI as needed
+    console.log('Exercise content saved successfully!');
+    this.closeExerciseContentEditor()
+    // You could reload the lesson details here if needed
   }
 }

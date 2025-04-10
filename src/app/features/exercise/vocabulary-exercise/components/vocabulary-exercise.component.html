@@ -1,0 +1,93 @@
+<div class="vocabulary-exercise-editor">
+  <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <form [formGroup]="vocabularyForm" (ngSubmit)="saveVocabulary()">
+      <div *ngIf="exerciseDetail" class="mb-3">
+        <h5>{{ exerciseDetail.exerciseName }}</h5>
+      </div>
+
+      <p class="mb-3">
+        Chọn từ vựng để liên kết với bài tập này. Học viên sẽ học từ vựng này khi làm bài tập.
+      </p>
+
+      <div *ngIf="vocabularyWords.length === 0" class="alert alert-info">
+        Chủ đề này chưa có từ vựng. Hãy thêm từ vựng cho chủ đề trước khi liên kết bài tập.
+      </div>
+
+      <div *ngIf="vocabularyWords.length > 0" class="mb-4">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Chọn từ vựng:</label>
+        </div>
+
+        <div class="vocabulary-list">
+          <div *ngFor="let word of vocabularyWords" class="vocabulary-item card mb-2"
+               [class.selected]="vocabularyForm.get('wordId')?.value === word.wordId"
+               [class.disabled]="isWordDisabled(word)">
+            <div class="card-body">
+              <div class="form-check d-flex align-items-center">
+                <div>
+                  <input class="form-check-input"
+                         type="radio"
+                         [id]="'vocab-' + word.wordId"
+                         [value]="word.wordId"
+                         formControlName="wordId"
+                         [disabled]="isWordDisabled(word)">
+                </div>
+                <!-- Modify the label to prevent clicks when disabled -->
+                <label class="form-check-label w-100" [for]="isWordDisabled(word) ? null : 'vocab-' + word.wordId"
+                       [class.text-muted]="isWordDisabled(word)">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      <div *ngIf="word.imageUrl" class="me-3" style="width: 50px; height: 50px;">
+                        <img [src]="word.imageUrl" class="img-fluid rounded" alt="Vocabulary image">
+                      </div>
+                      <div>
+                        <div class="fw-bold">{{ word.englishText }}</div>
+                        <div>{{ word.vietnameseText }}</div>
+                        <!-- Add explicit message for disabled items -->
+                        <div *ngIf="isWordDisabled(word)" class="small text-danger">
+                          Từ vựng này đã được sử dụng trong bài tập khác
+                        </div>
+                      </div>
+                    </div>
+                    <button *ngIf="word.audioUrl"
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            (click)="$event.stopPropagation(); playAudio(word.audioUrl)"
+                            [disabled]="isWordDisabled(word)">
+                      <svg cIcon name="cilVolumeHigh" size="sm"></svg>
+                    </button>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="vocabularyForm.get('wordId')?.invalid && vocabularyForm.get('wordId')?.touched"
+             class="text-danger mt-2">
+          Vui lòng chọn một từ vựng
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button cButton
+                [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': '#fff', 'border': 'none'}"
+                type="submit"
+                [disabled]="isLoading || vocabularyForm.invalid">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ selectedWordId ? 'Cập nhật' : 'Xác nhận' }}
+        </button>
+      </div>
+    </form>
+  </ng-container>
+</div>

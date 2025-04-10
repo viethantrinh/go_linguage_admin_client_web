@@ -45,6 +45,10 @@
                       </span>
                     </div>
                     <div *ngIf="editingExerciseIndex !== i" class="d-flex gap-2">
+                      <button cButton color="light" size="sm" class="btn-icon"
+                              (click)="openExerciseContentEditor(exercise)">
+                        <svg cIcon name="cilList" size="sm"></svg>
+                      </button>
                       <button cButton color="light" size="sm" class="btn-icon" (click)="editExercise(i)">
                         <svg cIcon name="cilPencil" size="sm"></svg>
                       </button>
@@ -128,7 +132,8 @@
                   <option [ngValue]="null" disabled>Chọn chủ đề</option>
                   <option *ngFor="let topic of topics" [ngValue]="topic.id">{{ topic.name }}</option>
                 </select>
-                <div *ngIf="lessonForm.get('topicId')?.invalid && lessonForm.get('topicId')?.touched" class="text-danger">
+                <div *ngIf="lessonForm.get('topicId')?.invalid && lessonForm.get('topicId')?.touched"
+                     class="text-danger">
                   Vui lòng chọn chủ đề
                 </div>
               </div>
@@ -164,4 +169,60 @@
       {{ errorMessage }}
     </div>
   </form>
+
+  <!-- Exercise Content Editor Modal -->
+  <c-modal [visible]="showExerciseContentEditor" size="lg" (visibleChange)="showExerciseContentEditor = $event">
+    <c-modal-header>
+      <h5 cModalTitle>
+        {{ selectedExercise?.title || 'Bài tập' }} - {{ selectedExercise ? getExerciseTypeName(selectedExercise.typeId) : '' }}
+      </h5>
+    </c-modal-header>
+    <c-modal-body>
+      <!-- Dynamic Exercise Editor based on type -->
+      <div [ngSwitch]="selectedExercise?.typeId">
+        <gl-vocabulary-exercise *ngSwitchCase="1"
+                                [exercise]="selectedExercise"
+                                [lessonId]="lessonId"
+                                (exerciseSaved)="onExerciseContentSaved()">
+        </gl-vocabulary-exercise>
+
+<!--        <gl-multiple-choice-exercise *ngSwitchCase="2"-->
+<!--                                     [exercise]="selectedExercise"-->
+<!--                                     [lessonId]="lessonId"-->
+<!--                                     (exerciseSaved)="onExerciseContentSaved()">-->
+<!--        </gl-multiple-choice-exercise>-->
+
+<!--        <gl-matching-exercise *ngSwitchCase="3"-->
+<!--                              [exercise]="selectedExercise"-->
+<!--                              [lessonId]="lessonId"-->
+<!--                              (exerciseSaved)="onExerciseContentSaved()">-->
+<!--        </gl-matching-exercise>-->
+
+<!--        <gl-sentence-arrange-exercise *ngSwitchCase="4"-->
+<!--                                      [exercise]="selectedExercise"-->
+<!--                                      [lessonId]="lessonId"-->
+<!--                                      (exerciseSaved)="onExerciseContentSaved()">-->
+<!--        </gl-sentence-arrange-exercise>-->
+
+<!--        <gl-pronunciation-exercise *ngSwitchCase="5"-->
+<!--                                   [exercise]="selectedExercise"-->
+<!--                                   [lessonId]="lessonId"-->
+<!--                                   (exerciseSaved)="onExerciseContentSaved()">-->
+<!--        </gl-pronunciation-exercise>-->
+
+<!--        <gl-conversation-exercise *ngSwitchCase="6"-->
+<!--                                  [exercise]="selectedExercise"-->
+<!--                                  [lessonId]="lessonId"-->
+<!--                                  (exerciseSaved)="onExerciseContentSaved()">-->
+<!--        </gl-conversation-exercise>-->
+
+        <div *ngSwitchDefault class="text-center p-4">
+          <p class="text-muted">Loại bài tập này chưa được hỗ trợ.</p>
+        </div>
+      </div>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="closeExerciseContentEditor()">Đóng</button>
+    </c-modal-footer>
+  </c-modal>
 </c-container>

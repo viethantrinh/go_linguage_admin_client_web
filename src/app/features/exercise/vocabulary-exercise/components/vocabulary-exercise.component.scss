@@ -1,0 +1,31 @@
+.vocabulary-item {
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled) {
+    border-color: #4ecdc4;
+  }
+
+  &.selected {
+    background-color: rgba(78, 205, 196, 0.1);
+    border-color: #4ecdc4;
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .form-check-label {
+    cursor: pointer;
+  }
+
+  .form-check-input:disabled + .form-check-label {
+    cursor: not-allowed;
+  }
+}
+
+.vocabulary-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
