@@ -1,5 +1,5 @@
 <c-container fluid class="scrollable-container">
-  <h1 class="mb-4">{{ isEditMode ? 'Chỉnh sửa bài học' : 'Tạo bài học mới' }}</h1>
+  <h1 class="mb-4">{{ isEditMode() ? 'Chỉnh sửa bài học' : 'Tạo bài học mới' }}</h1>
   <form cForm [formGroup]="lessonForm">
     <!-- Title field (full width) -->
     <div class="mb-3">
@@ -23,30 +23,29 @@
             <div class="mb-3">
               <!-- Exercise list -->
               <div class="exercises-container mb-3">
-                <div *ngIf="exercises.length === 0" class="text-center py-3">
+                <div *ngIf="exercises().length === 0" class="text-center py-3">
                   <p class="text-muted">Chưa có bài tập nào. Hãy thêm bài tập đầu tiên.</p>
                 </div>
 
-                <ul class="list-group" *ngIf="exercises.length > 0" cdkDropList (cdkDropListDropped)="drop($event)">
-                  <li *ngFor="let exercise of exercises; let i = index"
-                      class="list-group-item d-flex justify-content-between align-items-center"
-                      cdkDrag>
+                <ul class="list-group" *ngIf="exercises().length > 0" cdkDropList (cdkDropListDropped)="drop($event)">
+                  <li *ngFor="let exercise of exercises(); let i = index"
+                    class="list-group-item d-flex justify-content-between align-items-center" cdkDrag>
                     <!-- Drag handle -->
-                    <div cdkDragHandle class="drag-handle me-2" *ngIf="editingExerciseIndex !== i">
+                    <div cdkDragHandle class="drag-handle me-2" *ngIf="editingExerciseIndex() !== i">
                       <svg cIcon name="cilMenu" size="sm" style="cursor: grab;"></svg>
                     </div>
 
                     <!-- Normal view mode -->
-                    <div *ngIf="editingExerciseIndex !== i" class="flex-grow-1">
+                    <div *ngIf="editingExerciseIndex() !== i" class="flex-grow-1">
                       <span class="me-2 fw-bold">{{ i + 1 }}.</span>
                       <span>{{ exercise.title }}</span>
                       <span class="badge ms-2" [ngStyle]="{'background-color': getTypeColor(exercise.typeId)}">
                         {{ getExerciseTypeName(exercise.typeId) }}
                       </span>
                     </div>
-                    <div *ngIf="editingExerciseIndex !== i" class="d-flex gap-2">
+                    <div *ngIf="editingExerciseIndex() !== i" class="d-flex gap-2">
                       <button cButton color="light" size="sm" class="btn-icon"
-                              (click)="openExerciseContentEditor(exercise)">
+                        (click)="openExerciseContentEditor(exercise)">
                         <svg cIcon name="cilList" size="sm"></svg>
                       </button>
                       <button cButton color="light" size="sm" class="btn-icon" (click)="editExercise(i)">
@@ -58,15 +57,13 @@
                     </div>
 
                     <!-- Edit mode (when editing) -->
-                    <div *ngIf="editingExerciseIndex === i" class="w-100">
+                    <div *ngIf="editingExerciseIndex() === i" class="w-100">
                       <form [formGroup]="editExerciseForm" class="d-flex align-items-center"
-                            (submit)="saveEditedExercise()">
+                        (submit)="saveEditedExercise()">
                         <span class="me-2 fw-bold">{{ i + 1 }}.</span>
                         <div class="input-group">
-                          <input cFormControl
-                                 formControlName="editTitle"
-                                 class="form-control"
-                                 placeholder="Tên bài tập">
+                          <input cFormControl formControlName="editTitle" class="form-control"
+                            placeholder="Tên bài tập">
                           <select cSelect formControlName="editTypeId" style="max-width: 170px;">
                             <option *ngFor="let type of exerciseTypes" [ngValue]="type.id">{{ type.name }}</option>
                           </select>
@@ -87,16 +84,14 @@
               <div class="add-exercise-form">
                 <div class="mb-2">
                   <div class="input-group">
-                    <input cFormControl
-                           formControlName="exerciseTitle"
-                           placeholder="Nhập tên bài tập mới"
-                           (keyup.enter)="addExercise()">
+                    <input cFormControl formControlName="exerciseTitle" placeholder="Nhập tên bài tập mới"
+                      (keyup.enter)="addExercise()">
                     <select cSelect formControlName="exerciseTypeId" style="max-width: 170px;">
                       <option *ngFor="let type of exerciseTypes" [ngValue]="type.id">{{ type.name }}</option>
                     </select>
                     <button cButton
-                            [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
-                            (click)="addExercise()">
+                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="addExercise()">
                       <svg cIcon name="cilPlus" class="me-1"></svg>
                       Thêm bài tập
                     </button>
@@ -130,10 +125,10 @@
                 <label cLabel for="topicId">Chủ đề</label>
                 <select cSelect id="topicId" formControlName="topicId" class="form-control">
                   <option [ngValue]="null" disabled>Chọn chủ đề</option>
-                  <option *ngFor="let topic of topics" [ngValue]="topic.id">{{ topic.name }}</option>
+                  <option *ngFor="let topic of topics()" [ngValue]="topic.id">{{ topic.name }}</option>
                 </select>
                 <div *ngIf="lessonForm.get('topicId')?.invalid && lessonForm.get('topicId')?.touched"
-                     class="text-danger">
+                  class="text-danger">
                   Vui lòng chọn chủ đề
                 </div>
               </div>
@@ -145,76 +140,68 @@
 
     <!-- Form buttons section -->
     <div class="d-flex gap-2 justify-content-start">
-      <button cButton
-              [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
-              type="button"
-              [disabled]="lessonForm.invalid || isSubmitting"
-              (click)="onSubmit()">
-        <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"
-              aria-hidden="true"></span>
-        {{ isEditMode ? 'Cập nhật' : 'Tạo mới' }}
+      <button cButton [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
+        type="button" [disabled]="lessonForm.invalid || isSubmitting()" (click)="onSubmit()">
+        <span *ngIf="isSubmitting()" class="spinner-border spinner-border-sm me-2" role="status"
+          aria-hidden="true"></span>
+        {{ isEditMode() ? 'Cập nhật' : 'Tạo mới' }}
       </button>
-      <a cButton
-         [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
-         type="button"
-         [disabled]="isSubmitting"
-         routerLink="/learn-structure/lesson"
-      >
+      <a cButton [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+        type="button" [disabled]="isSubmitting()" routerLink="/learn-structure/lesson">
         Hủy
       </a>
     </div>
 
     <!-- Error message alert -->
-    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
-      {{ errorMessage }}
+    <div *ngIf="errorMessage()" class="alert alert-danger mt-3">
+      {{ errorMessage() }}
     </div>
   </form>
 
   <!-- Exercise Content Editor Modal -->
-  <c-modal [visible]="showExerciseContentEditor" size="lg" (visibleChange)="showExerciseContentEditor = $event">
+  <c-modal [visible]="showExerciseContentEditor()" size="lg" (visibleChange)="showExerciseContentEditor.set($event)">
     <c-modal-header>
       <h5 cModalTitle>
-        {{ selectedExercise?.title || 'Bài tập' }} - {{ selectedExercise ? getExerciseTypeName(selectedExercise.typeId) : '' }}
+        {{ selectedExercise()?.title || 'Bài tập' }} - {{ selectedExercise() ?
+        getExerciseTypeName(selectedExercise()!.typeId) : '' }}
       </h5>
     </c-modal-header>
     <c-modal-body>
       <!-- Dynamic Exercise Editor based on type -->
-      <div [ngSwitch]="selectedExercise?.typeId">
-        <gl-vocabulary-exercise *ngSwitchCase="1"
-                                [exercise]="selectedExercise"
-                                [lessonId]="lessonId"
-                                (exerciseSaved)="onExerciseContentSaved()">
+      <div [ngSwitch]="selectedExercise()?.typeId">
+        <gl-vocabulary-exercise *ngSwitchCase="1" [exercise]="selectedExercise()" [lessonId]="lessonId()"
+          (exerciseSaved)="onExerciseContentSaved()">
         </gl-vocabulary-exercise>
 
-<!--        <gl-multiple-choice-exercise *ngSwitchCase="2"-->
-<!--                                     [exercise]="selectedExercise"-->
-<!--                                     [lessonId]="lessonId"-->
-<!--                                     (exerciseSaved)="onExerciseContentSaved()">-->
-<!--        </gl-multiple-choice-exercise>-->
+        <!--        <gl-multiple-choice-exercise *ngSwitchCase="2"-->
+        <!--                                     [exercise]="selectedExercise()"-->
+        <!--                                     [lessonId]="lessonId()"-->
+        <!--                                     (exerciseSaved)="onExerciseContentSaved()">-->
+        <!--        </gl-multiple-choice-exercise>-->
 
-<!--        <gl-matching-exercise *ngSwitchCase="3"-->
-<!--                              [exercise]="selectedExercise"-->
-<!--                              [lessonId]="lessonId"-->
-<!--                              (exerciseSaved)="onExerciseContentSaved()">-->
-<!--        </gl-matching-exercise>-->
+        <!--        <gl-matching-exercise *ngSwitchCase="3"-->
+        <!--                              [exercise]="selectedExercise()"-->
+        <!--                              [lessonId]="lessonId()"-->
+        <!--                              (exerciseSaved)="onExerciseContentSaved()">-->
+        <!--        </gl-matching-exercise>-->
 
-<!--        <gl-sentence-arrange-exercise *ngSwitchCase="4"-->
-<!--                                      [exercise]="selectedExercise"-->
-<!--                                      [lessonId]="lessonId"-->
-<!--                                      (exerciseSaved)="onExerciseContentSaved()">-->
-<!--        </gl-sentence-arrange-exercise>-->
+        <!--        <gl-sentence-arrange-exercise *ngSwitchCase="4"-->
+        <!--                                      [exercise]="selectedExercise()"-->
+        <!--                                      [lessonId]="lessonId()"-->
+        <!--                                      (exerciseSaved)="onExerciseContentSaved()">-->
+        <!--        </gl-sentence-arrange-exercise>-->
 
-<!--        <gl-pronunciation-exercise *ngSwitchCase="5"-->
-<!--                                   [exercise]="selectedExercise"-->
-<!--                                   [lessonId]="lessonId"-->
-<!--                                   (exerciseSaved)="onExerciseContentSaved()">-->
-<!--        </gl-pronunciation-exercise>-->
+        <!--        <gl-pronunciation-exercise *ngSwitchCase="5"-->
+        <!--                                   [exercise]="selectedExercise()"-->
+        <!--                                   [lessonId]="lessonId()"-->
+        <!--                                   (exerciseSaved)="onExerciseContentSaved()">-->
+        <!--        </gl-pronunciation-exercise>-->
 
-<!--        <gl-conversation-exercise *ngSwitchCase="6"-->
-<!--                                  [exercise]="selectedExercise"-->
-<!--                                  [lessonId]="lessonId"-->
-<!--                                  (exerciseSaved)="onExerciseContentSaved()">-->
-<!--        </gl-conversation-exercise>-->
+        <!--        <gl-conversation-exercise *ngSwitchCase="6"-->
+        <!--                                  [exercise]="selectedExercise()"-->
+        <!--                                  [lessonId]="lessonId()"-->
+        <!--                                  (exerciseSaved)="onExerciseContentSaved()">-->
+        <!--        </gl-conversation-exercise>-->
 
         <div *ngSwitchDefault class="text-center p-4">
           <p class="text-muted">Loại bài tập này chưa được hỗ trợ.</p>
@@ -226,13 +213,11 @@
     </c-modal-footer>
   </c-modal>
 
-  <!-- Toast container -->
+  <!-- Optimized toast container -->
   <c-toaster [placement]="position" class="p-3" style="z-index: 1000000" position="fixed">
-    <c-toast *ngFor="let toast of toasts"
-             [color]="toast.color"
-             [visible]="toastVisible">
+    <c-toast *ngFor="let toast of toasts" [color]="toast.color" [visible]="toastVisible()">
       <c-toast-header>
-        <svg cIcon [name]="IconSubset.cilCheck" size="sm" class="me-2"></svg>
+        <svg cIcon [name]="toast.icon" size="sm" class="me-2"></svg>
         <strong class="me-auto">{{ toast.title }}</strong>
       </c-toast-header>
       <c-toast-body cTextColor="white">{{ toast.message }}</c-toast-body>
