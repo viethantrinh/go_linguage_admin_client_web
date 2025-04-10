@@ -20,7 +20,9 @@ import {
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
-  ModalTitleDirective
+  ModalTitleDirective,
+  TextColorDirective,
+  ToastModule
 } from '@coreui/angular';
 import {NgForOf, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
@@ -30,6 +32,7 @@ import {CreateLessonRequest, UpdateLessonRequest} from '../../models/lesson.mode
 import {
   VocabularyExerciseComponent
 } from '../../../exercise/vocabulary-exercise/components/vocabulary-exercise.component';
+import {IconSubset} from '../../../../icons/icon-subset';
 
 // Define an interface for exercises
 interface Exercise {
@@ -75,7 +78,9 @@ interface ExerciseType {
     ModalHeaderComponent,
     ModalBodyComponent,
     NgSwitchCase,
-    ModalTitleDirective
+    ModalTitleDirective,
+    ToastModule,
+    TextColorDirective
   ],
   templateUrl: './lesson-edit.component.html',
   styleUrl: './lesson-edit.component.scss'
@@ -121,6 +126,10 @@ export class LessonEditComponent implements OnInit, OnDestroy {
     {id: 6, name: 'Hội thoại'},
   ];
 
+  // Add toast properties
+  toasts: Array<any> = [];
+  position = 'top-end';
+
   ngOnInit(): void {
     this.initForms();
     this.loadTopics();
@@ -130,6 +139,25 @@ export class LessonEditComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  showToast(message: string, success: boolean = true): void {
+    this.toasts.push({
+      message,
+      title: success ? 'Thành công' : 'Lỗi',
+      autohide: true,
+      delay: 4000, // Tăng lên 5 giây
+      color: success ? 'success' : 'danger',
+      icon: success ? 'cilCheck' : 'cilX'
+    });
+    this.toggleVisible();
+
+    console.log('Current toasts:', this.toasts);
+
+    // Tăng thời gian xóa toast khỏi mảng
+    setTimeout(() => {
+      this.toasts.shift();
+    }, 4500);
   }
 
   /**
@@ -412,14 +440,17 @@ export class LessonEditComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.code === 1000) {
+            this.showToast('Bài học mới đã được tạo thành công');
             this.navigateToLessons('Bài học đã được tạo thành công');
           } else {
             this.errorMessage = `Error: ${response.message}`;
+            this.showToast(response.message || 'Đã xảy ra lỗi khi tạo bài học', false);
           }
         },
         error: (error) => {
           console.error('Error creating lesson:', error);
           this.errorMessage = 'Có lỗi xảy ra khi tạo bài học. Vui lòng thử lại.';
+          this.showToast(error.error?.message || 'Đã xảy ra lỗi khi tạo bài học mới', false);
         }
       });
   }
@@ -445,13 +476,16 @@ export class LessonEditComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.code === 1000) {
-            this.navigateToLessons('Bài học đã được cập nhật thành công');
+            this.showToast('Bài học đã được cập nhật thành công');
+            this.loadLessonDetails(this.lessonId!);
           } else {
             this.errorMessage = `Error: ${response.message}`;
+            this.showToast(response.message || 'Đã xảy ra lỗi khi cập nhật bài học', false);
           }
         },
         error: (error) => {
           console.error('Error updating lesson:', error);
+          this.showToast(error.error?.message || 'Đã xảy ra lỗi khi cập nhật bài học', false);
           this.errorMessage = 'Có lỗi xảy ra khi cập nhật bài học. Vui lòng thử lại.';
         }
       });
@@ -499,8 +533,15 @@ export class LessonEditComponent implements OnInit, OnDestroy {
    */
   onExerciseContentSaved(): void {
     // Show success message or update UI as needed
-    console.log('Exercise content saved successfully!');
+    this.showToast('Bài tập đã được cập nhật thành công');
     this.closeExerciseContentEditor()
     // You could reload the lesson details here if needed
   }
+
+  toastVisible = false;
+  toggleVisible() {
+    return this.toastVisible = !this.toastVisible;
+  }
+
+  protected readonly IconSubset = IconSubset;
 }

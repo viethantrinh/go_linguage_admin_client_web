@@ -225,4 +225,17 @@
       <button cButton color="secondary" (click)="closeExerciseContentEditor()">Đóng</button>
     </c-modal-footer>
   </c-modal>
+
+  <!-- Toast container -->
+  <c-toaster [placement]="position" class="p-3" style="z-index: 1000000" position="fixed">
+    <c-toast *ngFor="let toast of toasts"
+             [color]="toast.color"
+             [visible]="toastVisible">
+      <c-toast-header>
+        <svg cIcon [name]="IconSubset.cilCheck" size="sm" class="me-2"></svg>
+        <strong class="me-auto">{{ toast.title }}</strong>
+      </c-toast-header>
+      <c-toast-body cTextColor="white">{{ toast.message }}</c-toast-body>
+    </c-toast>
+  </c-toaster>
 </c-container>
