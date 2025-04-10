@@ -100,6 +100,7 @@ import {
   cilUserFemale,
   cilUserFollow,
   cilUserUnfollow,
+  cilVolumeHigh,
   cilX
 } from '@coreui/icons';
 
@@ -205,7 +206,8 @@ export const iconSubset = {
   cilBan,
   cilCheckCircle,
   cilPlus,
-  cilX
+  cilX,
+  cilVolumeHigh
 };
 
 export enum IconSubset {
