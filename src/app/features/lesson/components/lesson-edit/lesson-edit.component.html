@@ -159,11 +159,14 @@
   </form>
 
   <!-- Exercise Content Editor Modal -->
-  <c-modal [visible]="showExerciseContentEditor()" size="lg" (visibleChange)="showExerciseContentEditor.set($event)">
+  <c-modal [visible]="showExerciseContentEditor()" size="lg" (visibleChange)="handleModalVisibilityChange($event)"
+    [backdrop]="'static'">
     <c-modal-header>
       <h5 cModalTitle>
-        {{ selectedExercise()?.title || 'Bài tập' }} - {{ selectedExercise() ?
-        getExerciseTypeName(selectedExercise()!.typeId) : '' }}
+        {{ selectedExercise()?.title || 'Bài tập' }} - {{
+        selectedExercise() ?
+        getExerciseTypeName(selectedExercise()!.typeId) : ''
+        }}
       </h5>
     </c-modal-header>
     <c-modal-body>
@@ -173,11 +176,9 @@
           (exerciseSaved)="onExerciseContentSaved()">
         </gl-vocabulary-exercise>
 
-        <!--        <gl-multiple-choice-exercise *ngSwitchCase="2"-->
-        <!--                                     [exercise]="selectedExercise()"-->
-        <!--                                     [lessonId]="lessonId()"-->
-        <!--                                     (exerciseSaved)="onExerciseContentSaved()">-->
-        <!--        </gl-multiple-choice-exercise>-->
+        <gl-multiple-choice-exercise *ngSwitchCase="2" [exercise]="selectedExercise()" [lessonId]="lessonId()"
+          (exerciseSaved)="onExerciseContentSaved()">
+        </gl-multiple-choice-exercise>
 
         <!--        <gl-matching-exercise *ngSwitchCase="3"-->
         <!--                              [exercise]="selectedExercise()"-->

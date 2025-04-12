@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {
   CreateLessonRequest,
   DeleteLessonResponse,
@@ -16,7 +16,7 @@ import {ApiResponse} from '../../../core/models/api-response.model';
   providedIn: 'root'
 })
 export class LessonService {
-  private readonly baseUrl = `${BASE_REMOTE_URL}/lessons/admin`;
+  private readonly baseUrl = `${BASE_LOCAL_URL}/lessons/admin`;
 
   constructor(private http: HttpClient) {
   }
@@ -52,7 +52,6 @@ export class LessonService {
    * @param id The ID of the lesson to retrieve
    */
   getLessonDetail(id: number): Observable<ApiResponse<LessonDetail>> {
-    console.log(id);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
     return this.http.get<ApiResponse<LessonDetail>>(`${this.baseUrl}/${id}/detail`, {headers: headers});
   }
@@ -62,7 +61,6 @@ export class LessonService {
    * @param lessonData The updated lesson data
    */
   updateLesson(lessonData: UpdateLessonRequest): Observable<LessonResponse> {
-    console.log(lessonData);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
     return this.http.put<LessonResponse>(`${this.baseUrl}/update`, lessonData, {headers: headers});
   }

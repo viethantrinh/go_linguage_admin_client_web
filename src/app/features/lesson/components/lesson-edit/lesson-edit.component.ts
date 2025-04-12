@@ -33,6 +33,7 @@ import { LessonType } from '../../../topic/models/topic.model';
 import { TopicService } from '../../../topic/services/topic.service';
 import { CreateLessonRequest, UpdateLessonRequest } from '../../models/lesson.model';
 import { LessonService } from '../../services/lesson.service';
+import { MultipleChoiceExerciseComponent } from '../../../exercise/multiple-choice-exercise/multiple-choice-exercise.component';
 
 // Define an interface for exercises
 interface Exercise {
@@ -99,7 +100,8 @@ const EXERCISE_TYPE_COLORS: Record<number, string> = {
     NgSwitchCase,
     ModalTitleDirective,
     ToastModule,
-    TextColorDirective
+    TextColorDirective,
+    MultipleChoiceExerciseComponent
   ],
   templateUrl: './lesson-edit.component.html',
   styleUrl: './lesson-edit.component.scss'
@@ -546,4 +548,15 @@ export class LessonEditComponent implements OnInit, OnDestroy {
     this.showToast('Bài tập đã được cập nhật thành công');
     this.closeExerciseContentEditor();
   }
+
+    /**
+   * Handles modal visibility changes from any source (backdrop click, ESC key, etc.)
+   * @param visible - Whether the modal should be visible
+   */
+    handleModalVisibilityChange(visible: boolean): void {
+      if (!visible) {
+        // If modal is being closed, reset state
+        this.closeExerciseContentEditor();
+      }
+    }
 }

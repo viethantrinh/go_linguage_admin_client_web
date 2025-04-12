@@ -1,1 +1,240 @@
-<p>multiple-choice-exercise works!</p>
+<c-container fluid>
+  <c-alert *ngIf="errorMessage" color="danger">
+    {{ errorMessage }}
+  </c-alert>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-3">
+    <c-spinner color="primary" size="sm">
+      <span class="visually-hidden">Đang tải...</span>
+    </c-spinner>
+  </div>
+
+  <form [formGroup]="multipleChoiceForm" (ngSubmit)="saveMultipleChoice()" *ngIf="!isLoading">
+    <!-- Exercise title and instruction (display only) -->
+    <div class="mb-3">
+      <h5>{{ exercise?.exercise_name || 'Bài tập trắc nghiệm' }}</h5>
+      <p cTextColor="medium">{{ exercise?.instruction || 'Chọn đáp án đúng cho câu hỏi' }}</p>
+    </div>
+
+    <!-- Question Type Selection -->
+    <div class="mb-3">
+      <label cLabel>Loại câu hỏi</label>
+      <select cSelect formControlName="questionType">
+        <option *ngFor="let type of questionTypes" [value]="type">
+          {{ type === 'word' ? 'Từ vựng' : type === 'sentence' ? 'Câu' : 'Âm thanh' }}
+        </option>
+      </select>
+      <div *ngIf="multipleChoiceForm.get('questionType')?.invalid && multipleChoiceForm.get('questionType')?.touched"
+        cTextColor="danger">
+        Vui lòng chọn loại câu hỏi
+      </div>
+    </div>
+
+    <!-- Question Content Selection -->
+    <div class="mb-3">
+      <label cLabel>Nội dung câu hỏi</label>
+
+      <!-- No content warning -->
+      <div
+        *ngIf="(multipleChoiceForm.get('questionType')?.value === 'word' && words.length === 0) || 
+                  ((multipleChoiceForm.get('questionType')?.value === 'sentence' || multipleChoiceForm.get('questionType')?.value === 'audio') && sentences.length === 0)"
+        class="alert alert-info">
+        Chủ đề này chưa có {{ multipleChoiceForm.get('questionType')?.value === 'word' ? 'từ vựng' : 'câu' }}.
+        Hãy thêm {{ multipleChoiceForm.get('questionType')?.value === 'word' ? 'từ vựng' : 'câu' }} cho chủ đề trước khi
+        tạo bài tập.
+      </div>
+
+      <!-- Word selection cards - shown when question type is WORD -->
+      <div *ngIf="multipleChoiceForm.get('questionType')?.value === 'word' && words.length > 0" class="content-list">
+        <div *ngFor="let word of words" class="content-item card mb-2"
+          [class.selected]="multipleChoiceForm.get('questionId')?.value === word.wordId || exerciseDetail?.relatedWordId === word.wordId"
+          [class.disabled]="isContentDisabled(word.wordId, OptionType.WORD)">
+          <div class="card-body">
+            <div class="form-check d-flex align-items-center">
+              <div>
+                <input class="form-check-input" type="radio" [id]="'word-' + word.wordId" [value]="word.wordId"
+                  formControlName="questionId" [disabled]="isContentDisabled(word.wordId, OptionType.WORD)"
+                  [checked]="exerciseDetail?.relatedWordId === word.wordId">
+              </div>
+              <label class="form-check-label w-100"
+                [for]="isContentDisabled(word.wordId, OptionType.WORD) ? null : 'word-' + word.wordId"
+                [class.text-muted]="isContentDisabled(word.wordId, OptionType.WORD)">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <div *ngIf="word.imageUrl" class="me-3" style="width: 50px; height: 50px;">
+                      <img [src]="word.imageUrl" class="img-fluid rounded" alt="Word image">
+                    </div>
+                    <div>
+                      <div class="fw-bold">{{ word.englishText }}</div>
+                      <div>{{ word.vietnameseText }}</div>
+                      <div *ngIf="isContentDisabled(word.wordId, OptionType.WORD)" class="small text-danger">
+                        Từ vựng này đã được sử dụng trong bài tập khác
+                      </div>
+                    </div>
+                  </div>
+                  <button *ngIf="word.audioUrl" type="button" class="btn btn-sm btn-outline-secondary"
+                    (click)="$event.stopPropagation(); playAudio(word.audioUrl)"
+                    [disabled]="isContentDisabled(word.wordId, OptionType.WORD)">
+                    <svg cIcon name="cilVolumeHigh" size="sm"></svg>
+                  </button>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sentence selection cards - shown when question type is SENTENCE or AUDIO -->
+      <div
+        *ngIf="(multipleChoiceForm.get('questionType')?.value === 'sentence' || multipleChoiceForm.get('questionType')?.value === 'audio') && sentences.length > 0"
+        class="content-list">
+        <div *ngFor="let sentence of sentences" class="content-item card mb-2"
+          [class.selected]="multipleChoiceForm.get('questionId')?.value === sentence.sentenceId || exerciseDetail?.relatedSentenceId === sentence.sentenceId"
+          [class.disabled]="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE)">
+          <div class="card-body">
+            <div class="form-check d-flex align-items-center">
+              <div>
+                <input class="form-check-input" type="radio" [id]="'sentence-' + sentence.sentenceId"
+                  [value]="sentence.sentenceId" formControlName="questionId"
+                  [disabled]="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE)"
+                  [checked]="exerciseDetail?.relatedSentenceId === sentence.sentenceId">
+              </div>
+              <label class="form-check-label w-100"
+                [for]="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE) ? null : 'sentence-' + sentence.sentenceId"
+                [class.text-muted]="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE)">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-bold">{{ sentence.englishText }}</div>
+                    <div>{{ sentence.vietnameseText }}</div>
+                    <div *ngIf="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE)" class="small text-danger">
+                      Câu này đã được sử dụng trong bài tập khác
+                    </div>
+                  </div>
+                  <button *ngIf="sentence.audioUrl" type="button" class="btn btn-sm btn-outline-secondary"
+                    (click)="$event.stopPropagation(); playAudio(sentence.audioUrl)"
+                    [disabled]="isContentDisabled(sentence.sentenceId, OptionType.SENTENCE)">
+                    <svg cIcon name="cilVolumeHigh" size="sm"></svg>
+                  </button>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="multipleChoiceForm.get('questionId')?.invalid && multipleChoiceForm.get('questionId')?.touched"
+        cTextColor="danger">
+        Vui lòng chọn nội dung câu hỏi
+      </div>
+    </div>
+
+    <!-- Source and Target Language Selection -->
+    <c-row class="mb-3">
+      <c-col md="6">
+        <label cLabel>Ngôn ngữ nguồn</label>
+        <select cSelect formControlName="sourceLanguage">
+          <option *ngFor="let language of languageTypes" [value]="language">
+            {{ language === 'english' ? 'Tiếng Anh' : 'Tiếng Việt' }}
+          </option>
+        </select>
+        <div
+          *ngIf="multipleChoiceForm.get('sourceLanguage')?.invalid && multipleChoiceForm.get('sourceLanguage')?.touched"
+          cTextColor="danger">
+          Vui lòng chọn ngôn ngữ nguồn
+        </div>
+      </c-col>
+      <c-col md="6">
+        <label cLabel>Ngôn ngữ đích</label>
+        <select cSelect formControlName="targetLanguage">
+          <option *ngFor="let language of languageTypes" [value]="language">
+            {{ language === 'english' ? 'Tiếng Anh' : 'Tiếng Việt' }}
+          </option>
+        </select>
+        <div
+          *ngIf="multipleChoiceForm.get('targetLanguage')?.invalid && multipleChoiceForm.get('targetLanguage')?.touched"
+          cTextColor="danger">
+          Vui lòng chọn ngôn ngữ đích
+        </div>
+      </c-col>
+    </c-row>
+
+    <!-- Options Section -->
+    <div class="mb-3">
+      <label cLabel class="d-flex justify-content-between align-items-center">
+        <span>Các lựa chọn (tối đa 4)</span>
+        <button cButton class="fw-semibold" [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+          size="sm" (click)="addOption()" [disabled]="optionsArray.length >= 4">
+          <svg cIcon name="cilPlus" class="me-1"></svg> Thêm
+        </button>
+      </label>
+
+      <div formArrayName="options">
+        <c-card *ngFor="let option of optionsArray.controls; let i = index" [formGroupName]="i" class="mb-2">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <!-- Option Type Selection - Only shown if question type is not AUDIO -->
+              <c-col md="3" *ngIf="multipleChoiceForm.get('questionType')?.value !== 'audio'">
+                <label cLabel>Loại</label>
+                <select cSelect formControlName="optionType">
+                  <option *ngFor="let type of optionTypes" [value]="type">
+                    {{ type === 'word' ? 'Từ vựng' : 'Câu' }}
+                  </option>
+                </select>
+              </c-col>
+
+              <!-- Option Content Selection -->
+              <c-col [md]="multipleChoiceForm.get('questionType')?.value !== 'audio' ? 6 : 9">
+                <label cLabel>Nội dung</label>
+                <select cSelect formControlName="contentId">
+                  <option [value]="null">-- Chọn nội dung --</option>
+                  <!-- Show words when option type is WORD -->
+                  <ng-container *ngIf="option.get('optionType')?.value === 'word'">
+                    <option *ngFor="let word of words" [value]="word.wordId">
+                      {{ word.englishText }} - {{ word.vietnameseText }}
+                    </option>
+                  </ng-container>
+                  <!-- Show sentences when option type is SENTENCE -->
+                  <ng-container *ngIf="option.get('optionType')?.value === 'sentence'">
+                    <option *ngFor="let sentence of sentences" [value]="sentence.sentenceId">
+                      {{ sentence.englishText }} - {{ sentence.vietnameseText }}
+                    </option>
+                  </ng-container>
+                </select>
+                <div *ngIf="option.get('contentId')?.invalid && option.get('contentId')?.touched" cTextColor="danger">
+                  Vui lòng chọn nội dung
+                </div>
+              </c-col>
+
+              <!-- Correct Answer Selection -->
+              <c-col md="2">
+                <div class="form-check mt-4">
+                  <input cFormCheck type="checkbox" formControlName="isCorrect" id="isCorrect{{i}}">
+                  <label cLabel for="isCorrect{{i}}">
+                    Đáp án đúng
+                  </label>
+                </div>
+              </c-col>
+
+              <!-- Delete Button -->
+              <c-col md="1" class="d-flex align-items-center justify-content-end">
+                <button cButton
+                  [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                  size="sm" (click)="removeOption(i)" [disabled]="optionsArray.length <= 1">
+                  <svg cIcon name="cilTrash"></svg>
+                </button>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="d-flex justify-content-end mt-4">
+      <button cButton [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+        type="submit" [disabled]="multipleChoiceForm.invalid" class="fw-semibold">
+        Lưu bài tập
+      </button>
+    </div>
+  </form>
+</c-container>
