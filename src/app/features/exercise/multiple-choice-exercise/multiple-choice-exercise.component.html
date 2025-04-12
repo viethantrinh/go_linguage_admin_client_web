@@ -1,22 +1,49 @@
+<!-- 
+  Container component from CoreUI library that provides responsive fluid width.
+  The fluid attribute makes it span the full width of the viewport.
+-->
 <c-container fluid>
+  <!-- 
+    Error alert that displays any error messages from the component.
+    Only shown when the errorMessage property is not null.
+    Uses CoreUI alert component with danger (red) styling.
+  -->
   <c-alert *ngIf="errorMessage" color="danger">
     {{ errorMessage }}
   </c-alert>
 
+  <!-- 
+    Loading indicator shown during API calls.
+    Uses CoreUI spinner with primary color.
+    The visually-hidden class provides text for screen readers while hiding visually.
+  -->
   <div *ngIf="isLoading" class="d-flex justify-content-center my-3">
     <c-spinner color="primary" size="sm">
       <span class="visually-hidden">Đang tải...</span>
     </c-spinner>
   </div>
 
+  <!-- 
+    Main form for the multiple choice exercise configuration.
+    Only displayed when not in loading state.
+    Binds to the multipleChoiceForm FormGroup in the component.
+    Submits to saveMultipleChoice method on form submission.
+  -->
   <form [formGroup]="multipleChoiceForm" (ngSubmit)="saveMultipleChoice()" *ngIf="!isLoading">
-    <!-- Exercise title and instruction (display only) -->
+    <!-- 
+      Exercise header showing title and instructions.
+      Uses fallback values if not provided in the exercise object.
+    -->
     <div class="mb-3">
       <h5>{{ exercise?.exercise_name || 'Bài tập trắc nghiệm' }}</h5>
       <p cTextColor="medium">{{ exercise?.instruction || 'Chọn đáp án đúng cho câu hỏi' }}</p>
     </div>
 
-    <!-- Question Type Selection -->
+    <!-- 
+      Question type selection dropdown.
+      Allows choosing between word, sentence, or audio question types.
+      Includes validation error message that shows when control is invalid and touched.
+    -->
     <div class="mb-3">
       <label cLabel>Loại câu hỏi</label>
       <select cSelect formControlName="questionType">
@@ -30,11 +57,17 @@
       </div>
     </div>
 
-    <!-- Question Content Selection -->
+    <!-- 
+      Question content selection section.
+      This complex section dynamically shows different content based on the selected question type.
+    -->
     <div class="mb-3">
       <label cLabel>Nội dung câu hỏi</label>
 
-      <!-- No content warning -->
+      <!-- 
+        Warning message when no content is available for the selected question type.
+        Shows different messages for word vs sentence/audio types.
+      -->
       <div
         *ngIf="(multipleChoiceForm.get('questionType')?.value === 'word' && words.length === 0) || 
                   ((multipleChoiceForm.get('questionType')?.value === 'sentence' || multipleChoiceForm.get('questionType')?.value === 'audio') && sentences.length === 0)"
@@ -44,7 +77,12 @@
         tạo bài tập.
       </div>
 
-      <!-- Word selection cards - shown when question type is WORD -->
+      <!-- 
+        Word selection cards - shown only when question type is WORD.
+        Lists all available words with their English and Vietnamese texts.
+        Shows images if available and provides audio playback buttons.
+        Highlights selected word and disables words used in other exercises.
+      -->
       <div *ngIf="multipleChoiceForm.get('questionType')?.value === 'word' && words.length > 0" class="content-list">
         <div *ngFor="let word of words" class="content-item card mb-2"
           [class.selected]="multipleChoiceForm.get('questionId')?.value === word.wordId || exerciseDetail?.relatedWordId === word.wordId"
@@ -84,7 +122,12 @@
         </div>
       </div>
 
-      <!-- Sentence selection cards - shown when question type is SENTENCE or AUDIO -->
+      <!-- 
+        Sentence selection cards - shown when question type is SENTENCE or AUDIO.
+        Lists all available sentences with their English and Vietnamese translations.
+        Provides audio playback buttons if audio is available.
+        Highlights selected sentence and disables sentences used in other exercises.
+      -->
       <div
         *ngIf="(multipleChoiceForm.get('questionType')?.value === 'sentence' || multipleChoiceForm.get('questionType')?.value === 'audio') && sentences.length > 0"
         class="content-list">
@@ -122,13 +165,22 @@
         </div>
       </div>
 
+      <!-- 
+        Validation error message for question selection.
+        Shown when the questionId control is invalid and touched.
+      -->
       <div *ngIf="multipleChoiceForm.get('questionId')?.invalid && multipleChoiceForm.get('questionId')?.touched"
         cTextColor="danger">
         Vui lòng chọn nội dung câu hỏi
       </div>
     </div>
 
-    <!-- Source and Target Language Selection -->
+    <!-- 
+      Language selection section arranged in two columns.
+      Allows selecting source and target languages for the exercise.
+      Uses CoreUI row and column components for responsive layout.
+      Each dropdown includes validation error messages.
+    -->
     <c-row class="mb-3">
       <c-col md="6">
         <label cLabel>Ngôn ngữ nguồn</label>
@@ -158,21 +210,33 @@
       </c-col>
     </c-row>
 
-    <!-- Options Section -->
+    <!-- 
+      Options section for configuring answer choices.
+      Header includes a button to add more options (up to 4 maximum).
+      Uses FormArray to manage dynamic list of options.
+    -->
     <div class="mb-3">
       <label cLabel class="d-flex justify-content-between align-items-center">
         <span>Các lựa chọn (tối đa 4)</span>
-        <button cButton class="fw-semibold" [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
-          size="sm" (click)="addOption()" [disabled]="optionsArray.length >= 4">
+        <button cButton class="fw-semibold"
+          [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}" size="sm"
+          (click)="addOption()" [disabled]="optionsArray.length >= 4">
           <svg cIcon name="cilPlus" class="me-1"></svg> Thêm
         </button>
       </label>
 
+      <!-- 
+        Container for the options FormArray.
+        Each option is displayed in a card with controls for type, content, and correct answer.
+      -->
       <div formArrayName="options">
         <c-card *ngFor="let option of optionsArray.controls; let i = index" [formGroupName]="i" class="mb-2">
           <c-card-body>
             <c-row class="align-items-center">
-              <!-- Option Type Selection - Only shown if question type is not AUDIO -->
+              <!-- 
+                Option type selection dropdown - Only shown if question type is not AUDIO.
+                For AUDIO questions, only sentence options are allowed.
+              -->
               <c-col md="3" *ngIf="multipleChoiceForm.get('questionType')?.value !== 'audio'">
                 <label cLabel>Loại</label>
                 <select cSelect formControlName="optionType">
@@ -182,7 +246,11 @@
                 </select>
               </c-col>
 
-              <!-- Option Content Selection -->
+              <!-- 
+                Option content selection dropdown.
+                Dynamically shows different content options based on the selected option type (word or sentence).
+                Adjusts column width based on whether the option type selector is shown.
+              -->
               <c-col [md]="multipleChoiceForm.get('questionType')?.value !== 'audio' ? 6 : 9">
                 <label cLabel>Nội dung</label>
                 <select cSelect formControlName="contentId">
@@ -205,7 +273,11 @@
                 </div>
               </c-col>
 
-              <!-- Correct Answer Selection -->
+              <!-- 
+                Correct answer checkbox.
+                Allows marking this option as the correct answer.
+                Multiple options can be marked as correct for questions with multiple correct answers.
+              -->
               <c-col md="2">
                 <div class="form-check mt-4">
                   <input cFormCheck type="checkbox" formControlName="isCorrect" id="isCorrect{{i}}">
@@ -215,7 +287,11 @@
                 </div>
               </c-col>
 
-              <!-- Delete Button -->
+              <!-- 
+                Delete button for removing this option.
+                Disabled when there's only one option (minimum required).
+                Uses CoreUI trash icon and custom styling.
+              -->
               <c-col md="1" class="d-flex align-items-center justify-content-end">
                 <button cButton
                   [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
@@ -229,7 +305,11 @@
       </div>
     </div>
 
-    <!-- Submit Button -->
+    <!-- 
+      Submit button section aligned to the right side.
+      Button is disabled when the form is invalid.
+      Uses custom styling with CoreUI button component.
+    -->
     <div class="d-flex justify-content-end mt-4">
       <button cButton [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
         type="submit" [disabled]="multipleChoiceForm.invalid" class="fw-semibold">

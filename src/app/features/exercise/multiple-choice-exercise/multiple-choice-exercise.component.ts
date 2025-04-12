@@ -1,15 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   AlertComponent,
-  ButtonDirective, CardBodyComponent, CardComponent, ColComponent,
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  ColComponent,
   ContainerComponent,
-  FormLabelDirective, FormSelectDirective, RowComponent, SpinnerComponent,
+  FormLabelDirective,
+  FormSelectDirective,
+  RowComponent,
+  SpinnerComponent,
   TextColorDirective
 } from '@coreui/angular';
-import { IconDirective } from '@coreui/icons-angular';
-import { finalize } from 'rxjs';
+import {IconDirective} from '@coreui/icons-angular';
+import {finalize} from 'rxjs';
 import {
   LanguageType,
   MultipleChoiceExerciseDetail,
@@ -18,8 +24,19 @@ import {
   Sentence,
   Word
 } from './models/multiple-choice-exercise.model';
-import { MultipleChoiceExerciseService } from './services/multiple-choice-exercise.service';
+import {MultipleChoiceExerciseService} from './services/multiple-choice-exercise.service';
 
+/**
+ * @description
+ * The MultipleChoiceExerciseComponent manages the creation and editing of multiple choice exercises.
+ * It provides a form interface for configuring exercise questions, options, and answers.
+ *
+ * The component supports:
+ * - Different question types (word, sentence, audio)
+ * - Configurable language pairs (source and target)
+ * - Multiple options (up to 4) with correct/incorrect marking
+ * - Loading existing exercises for editing
+ */
 @Component({
   selector: 'gl-multiple-choice-exercise',
   standalone: true,
@@ -43,39 +60,58 @@ import { MultipleChoiceExerciseService } from './services/multiple-choice-exerci
   styleUrls: ['./multiple-choice-exercise.component.scss']
 })
 export class MultipleChoiceExerciseComponent implements OnInit {
+  /** The exercise object being edited or created */
   @Input() exercise: any;
+
+  /** Optional lesson ID to associate the exercise with */
   @Input() lessonId: number | null = null;
+
+  /** Event emitted when the exercise is successfully saved */
   @Output() exerciseSaved = new EventEmitter<void>();
 
-  // Form for the multiple choice exercise
+  /** Form group for managing multiple choice exercise data */
   multipleChoiceForm!: FormGroup;
 
-  // Loading state
+  /** Flag indicating whether an API operation is in progress */
   isLoading = false;
 
-  // Error message
+  /** Error message to display to the user */
   errorMessage: string | null = null;
 
-  // Exercise details
+  /** Stores detailed information about the exercise being edited */
   exerciseDetail: MultipleChoiceExerciseDetail | null = null;
 
-  // Available data for selection
+  /** Collection of words available for this exercise */
   words: Word[] = [];
+
+  /** Collection of sentences available for this exercise */
   sentences: Sentence[] = [];
 
-  // Enums for templates
+  /** Available question types for selection in the UI */
   questionTypes = Object.values(QuestionType);
+
+  /** Available language types for source and target selection */
   languageTypes = Object.values(LanguageType);
+
+  /** Available option types (word or sentence) */
   optionTypes = Object.values(OptionType);
 
+  /**
+   * Constructor initializes required services
+   * @param fb FormBuilder for creating reactive forms
+   * @param multipleChoiceService Service for multiple choice exercise API calls
+   */
   constructor(
     private fb: FormBuilder,
     private multipleChoiceService: MultipleChoiceExerciseService
   ) {
   }
 
+  /**
+   * Initializes the component, sets up the form, and loads necessary data
+   */
   ngOnInit(): void {
-    console.log('Exercise input:', this.exercise); // kiểm tra cấu trúc
+    console.log('Exercise input:', this.exercise); // Debug log to check structure
     this.initForm();
 
     // Load existing exercise details if editing an existing exercise
@@ -89,6 +125,10 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     this.loadSentences();
   }
 
+  /**
+   * Initializes the reactive form structure with default values
+   * Sets up form control listeners for dynamic validation
+   */
   initForm(): void {
     this.multipleChoiceForm = this.fb.group({
       questionType: [QuestionType.WORD, Validators.required],
@@ -107,12 +147,18 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     });
   }
 
-  // Get the options FormArray
+  /**
+   * Getter for the options FormArray to easily access in the template and methods
+   * @returns FormArray containing option form groups
+   */
   get optionsArray(): FormArray {
     return this.multipleChoiceForm.get('options') as FormArray;
   }
 
-  // Creates a new option form group
+  /**
+   * Creates a new form group structure for an option
+   * @returns FormGroup for representing a single answer option
+   */
   createOptionFormGroup(): FormGroup {
     return this.fb.group({
       id: [null],
@@ -122,21 +168,31 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     });
   }
 
-  // Add a new option to the form
+  /**
+   * Adds a new option to the form, limited to 4 options maximum
+   */
   addOption(): void {
     if (this.optionsArray.length < 4) {
       this.optionsArray.push(this.createOptionFormGroup());
     }
   }
 
-  // Remove an option from the form
+  /**
+   * Removes an option from the form, maintaining at least 1 option
+   * @param index Array index of the option to remove
+   */
   removeOption(index: number): void {
     if (this.optionsArray.length > 1) {
       this.optionsArray.removeAt(index);
     }
   }
 
-  // Handle question type change
+  /**
+   * Handles logic when question type changes
+   * - Resets question ID
+   * - Updates option types based on the selected question type
+   * @param questionType The newly selected question type
+   */
   onQuestionTypeChange(questionType: QuestionType): void {
     // Reset the question ID when type changes
     this.multipleChoiceForm.get('questionId')?.setValue(null);
@@ -150,7 +206,10 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     }
   }
 
-  // Load words for the dropdown
+  /**
+   * Loads word data from the API for use in the exercise
+   * Words can be used as questions or options depending on the exercise type
+   */
   loadWords(): void {
     if (!this.exercise?.id) {
       this.isLoading = false;
@@ -175,7 +234,10 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       });
   }
 
-  // Load sentences for the dropdown
+  /**
+   * Loads sentence data from the API for use in the exercise
+   * Sentences can be used as questions or options depending on the exercise type
+   */
   loadSentences(): void {
     if (!this.exercise?.id) {
       this.isLoading = false;
@@ -200,7 +262,10 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       });
   }
 
-  // Phương thức loadExerciseDetail
+  /**
+   * Loads exercise details from the API when editing an existing exercise
+   * Handles error states and sets loading indicators
+   */
   loadExerciseDetail(): void {
     if (!this.exercise?.id) {
       this.errorMessage = 'Không tìm thấy thông tin bài tập.';
@@ -212,7 +277,7 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
-          console.log('API response:', response); // kiểm tra response
+          console.log('API response:', response); // Debug log for API response
           if (response.code === 1000) {
             this.exerciseDetail = response.result;
             this.populateForm();
@@ -228,7 +293,10 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       });
   }
 
-  // Populate form with exercise details
+  /**
+   * Fills the form with data from an existing exercise
+   * Handles the complexity of different question types and option structures
+   */
   populateForm(): void {
     if (!this.exerciseDetail) return;
 
@@ -286,7 +354,11 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     }
   }
 
-  // Helper method to determine the question ID based on priority
+  /**
+   * Determines the appropriate question ID to use in the form
+   * Applies precedence rules based on exercise structure
+   * @returns The ID of the content to use as the question
+   */
   private getQuestionIdForForm(): number | null {
     if (!this.exerciseDetail) return null;
 
@@ -315,7 +387,11 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     return null;
   }
 
-  // Helper method to add an option to the form
+  /**
+   * Adds an option from the API response to the form
+   * Handles the mapping of different option types and properties
+   * @param option Option object from the API
+   */
   private addOptionToForm(option: any): void {
     const optionGroup = this.createOptionFormGroup();
     optionGroup.patchValue({
@@ -327,7 +403,11 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     this.optionsArray.push(optionGroup);
   }
 
-  // Save the multiple choice exercise
+  /**
+   * Saves the multiple choice exercise to the API
+   * Performs validation before submission
+   * Emits an event when successful
+   */
   saveMultipleChoice(): void {
     if (this.multipleChoiceForm.invalid) {
       this.markFormGroupTouched(this.multipleChoiceForm);
@@ -341,24 +421,24 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     // Prepare payload for API call
     const payload: any = {
       exerciseId: this.exercise?.id,
-      questionType: questionType.toLowerCase(), // Chuyển thành chữ thường
-      sourceLanguage: formValue.sourceLanguage.toLowerCase(), // Chuyển thành chữ thường
-      targetLanguage: formValue.targetLanguage.toLowerCase(), // Chuyển thành chữ thường
+      questionType: questionType.toLowerCase(), // Convert to lowercase for API
+      sourceLanguage: formValue.sourceLanguage.toLowerCase(), // Convert to lowercase for API
+      targetLanguage: formValue.targetLanguage.toLowerCase(), // Convert to lowercase for API
       wordId: null,
       sentenceId: null,
       options: formValue.options.map((option: any) => {
-        // Tạo đối tượng cơ bản
+        // Create basic option object
         const optionObj: any = {
-          optionType: option.optionType.toLowerCase(), // Chuyển thành chữ thường
+          optionType: option.optionType.toLowerCase(), // Convert to lowercase for API
           isCorrect: option.isCorrect
         };
 
-        // Thêm ID nếu có
+        // Add ID if it exists
         if (option.id) {
           optionObj.id = option.id;
         }
 
-        // Thêm wordId hoặc sentenceId tùy theo loại
+        // Add wordId or sentenceId based on type
         if (option.optionType === OptionType.WORD) {
           optionObj.wordId = option.contentId;
           optionObj.sentenceId = null;
@@ -376,12 +456,12 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       payload.wordId = questionId;
       payload.sentenceId = null;
     } else {
-      // Cả SENTENCE và AUDIO đều dùng sentenceId
+      // Both SENTENCE and AUDIO use sentenceId
       payload.sentenceId = questionId;
       payload.wordId = null;
     }
 
-    // Check if at least one option is marked as correct
+    // Validate that at least one option is marked as correct
     const hasCorrectOption = payload.options.some((option: any) => option.isCorrect);
     if (!hasCorrectOption) {
       this.errorMessage = 'Vui lòng chọn ít nhất một đáp án đúng.';
@@ -408,7 +488,11 @@ export class MultipleChoiceExerciseComponent implements OnInit {
       });
   }
 
-  // Utility function to mark all controls as touched
+  /**
+   * Recursively marks all controls in a form group as touched
+   * Used for displaying validation errors after a failed submission
+   * @param formGroup The form group to process
+   */
   markFormGroupTouched(formGroup: FormGroup): void {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();
@@ -427,7 +511,14 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     });
   }
 
-  // Get display content based on ID and type
+  /**
+   * Gets the text content for display based on ID, type, and language
+   * Used for showing proper content in the UI
+   * @param id Content ID (word or sentence)
+   * @param type Type of content (WORD or SENTENCE)
+   * @param language Language to display (ENGLISH or VIETNAMESE)
+   * @returns Text content in the specified language
+   */
   getContentText(id: number, type: OptionType, language: LanguageType): string {
     if (type === OptionType.WORD) {
       const word = this.words.find(w => w.wordId === id);
@@ -438,7 +529,11 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     }
   }
 
-  // Play audio if available
+  /**
+   * Plays audio from a URL
+   * Used for previewing audio questions or options
+   * @param audioUrl URL of the audio file to play
+   */
   playAudio(audioUrl: string): void {
     if (audioUrl) {
       const audio = new Audio(audioUrl);
@@ -446,7 +541,13 @@ export class MultipleChoiceExerciseComponent implements OnInit {
     }
   }
 
-  // Check if a content is already used in another exercise
+  /**
+   * Determines if a content is already used in another exercise
+   * Prevents duplicate use of content across exercises
+   * @param id Content ID
+   * @param type Content type (WORD or SENTENCE)
+   * @returns Boolean indicating if the content should be disabled
+   */
   isContentDisabled(id: number, type: OptionType): boolean {
     // If the item is related to this exercise, it should not be disabled
     if (this.exerciseDetail) {
