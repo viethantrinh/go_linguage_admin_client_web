@@ -74,6 +74,8 @@ export class MatchingExerciseService {
     // Real API call to fetch words for matching exercise
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
     
+    // Use the topic's word list endpoint if we don't have an exerciseId (for creating a new exercise)
+    // or use the matching exercise specific endpoint when editing
     if (exerciseId) {
       return this.http.get<ApiResponse<Word[]>>(
         `${this.baseUrl}/words/by-matching-exercise/${exerciseId}`,
@@ -82,6 +84,8 @@ export class MatchingExerciseService {
     }
     
     // For development/testing when no exerciseId is provided, return sample data
+    // In production, you would need to get words from the topic's word list instead
+    // This could be something like: return this.http.get<ApiResponse<Word[]>>(`${this.baseUrl}/words/by-topic/${topicId}`, { headers });
     return of({
       code: 1000,
       message: 'Success',
