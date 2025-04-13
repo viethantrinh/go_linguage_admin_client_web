@@ -35,6 +35,7 @@ import { CreateLessonRequest, UpdateLessonRequest } from '../../models/lesson.mo
 import { LessonService } from '../../services/lesson.service';
 import { MultipleChoiceExerciseComponent } from '../../../exercise/multiple-choice-exercise/components/multiple-choice-exercise.component';
 import { WordArrangementExerciseComponent } from "../../../exercise/word-arrangement-exercise/components/word-arrangement-exercise.component";
+import {MatchingExerciseComponent} from '../../../exercise/matching-exercise/components/matching-exercise.component';
 
 // Define an interface for exercises
 interface Exercise {
@@ -102,8 +103,9 @@ const EXERCISE_TYPE_COLORS: Record<number, string> = {
     ToastModule,
     TextColorDirective,
     MultipleChoiceExerciseComponent,
-    WordArrangementExerciseComponent
-],
+    WordArrangementExerciseComponent,
+    MatchingExerciseComponent
+  ],
   templateUrl: './lesson-edit.component.html',
   styleUrl: './lesson-edit.component.scss'
 })
