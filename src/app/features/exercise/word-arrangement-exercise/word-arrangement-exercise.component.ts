@@ -242,12 +242,14 @@ export class WordArrangementExerciseComponent implements OnInit {
    */
   loadSentences(): void {
     this.isLoading = true;
-    this.wordArrangementService.getSentences(this.lessonId ?? undefined)
+    // Use the exerciseId to get sentences for this exercise specifically
+    this.wordArrangementService.getSentences(this.exercise?.id || undefined)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
           if (response.code === 1000) {
             this.sentences = response.result;
+            console.log('Loaded sentences:', this.sentences);
           } else {
             this.errorMessage = `Lỗi: ${response.message}`;
           }
@@ -265,7 +267,6 @@ export class WordArrangementExerciseComponent implements OnInit {
    */
   loadExerciseDetail(): void {
     if (!this.exercise?.id) {
-      this.errorMessage = 'Không tìm thấy thông tin bài tập.';
       return;
     }
 
@@ -276,6 +277,7 @@ export class WordArrangementExerciseComponent implements OnInit {
         next: (response) => {
           if (response.code === 1000) {
             this.exerciseDetail = response.result;
+            console.log('Loaded exercise detail:', this.exerciseDetail);
             this.populateForm();
           } else {
             this.errorMessage = `Lỗi: ${response.message}`;
@@ -295,31 +297,37 @@ export class WordArrangementExerciseComponent implements OnInit {
   populateForm(): void {
     if (!this.exerciseDetail) return;
 
-    // Reset form with exercise details
     this.wordArrangementForm.patchValue({
       sentenceId: this.exerciseDetail.sentenceId,
       sourceLanguage: this.exerciseDetail.sourceLanguage,
-      targetLanguage: this.exerciseDetail.targetLanguage,
+      targetLanguage: this.exerciseDetail.targetLanguage
     });
 
-    // Clear existing options
-    while (this.optionsArray.length !== 0) {
+    while (this.optionsArray.length > 0) {
       this.optionsArray.removeAt(0);
     }
 
-    // Add options from exercise detail
     this.exerciseDetail.options.forEach(option => {
+      // For distractor words, the correctPosition is typically -1 in the API response
+      // Convert -1 to null for UI consistency
+      // Handle null, undefined, or negative values for correctPosition
+      const correctPosition = option.isDistractor || 
+        !option.correctPosition || 
+        (option.correctPosition !== undefined && option.correctPosition < 0) 
+          ? null 
+          : option.correctPosition;
+
       this.addOption(
         option.wordText,
         option.isDistractor,
-        option.correctPosition !== undefined ? option.correctPosition : null
+        correctPosition
       );
-    });
 
-    // If no options were added, add one empty option
-    if (this.optionsArray.length === 0) {
-      this.addOption();
-    }
+      // Get the last added control and set its id
+      const lastIndex = this.optionsArray.length - 1;
+      const lastControl = this.optionsArray.at(lastIndex) as FormGroup;
+      lastControl.get('id')?.setValue(option.id);
+    });
   }
 
   /**
@@ -468,13 +476,17 @@ export class WordArrangementExerciseComponent implements OnInit {
         id: control.get('id')?.value || null,
         wordText: control.get('wordText')?.value,
         isDistractor: control.get('isDistractor')?.value || false,
-        correctPosition: control.get('isDistractor')?.value ? null : control.get('correctPosition')?.value
+        // For distractor words, set correctPosition to -1 for API compatibility
+        correctPosition: control.get('isDistractor')?.value ? -1 : (control.get('correctPosition')?.value ?? null)
       }))
     };
 
-    this.isLoading = true;
-    const isUpdate = !!this.exercise?.id && !!this.exerciseDetail;
+    // Enhanced validation for update scenarios - making sure exerciseId matches between input and API
+    const isUpdate = !!this.exercise?.id && !!this.exerciseDetail && this.exerciseDetail.exerciseId === this.exercise.id;
 
+    this.isLoading = true;
+    console.log('Saving word arrangement exercise:', payload, 'isUpdate:', isUpdate);
+    
     this.wordArrangementService.saveWordArrangementExercise(payload, isUpdate)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
