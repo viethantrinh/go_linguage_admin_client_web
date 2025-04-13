@@ -180,21 +180,9 @@
           (exerciseSaved)="onExerciseContentSaved()">
         </gl-multiple-choice-exercise>
 
-        <gl-matching-exercise *ngSwitchCase="3" [exercise]="selectedExercise()" [lessonId]="lessonId()"
+        <gl-word-arrangement-exercise *ngSwitchCase="4" [exercise]="selectedExercise()" [lessonId]="lessonId()"
           (exerciseSaved)="onExerciseContentSaved()">
-        </gl-matching-exercise>
-
-        <!--        <gl-sentence-arrange-exercise *ngSwitchCase="4"-->
-        <!--                                      [exercise]="selectedExercise()"-->
-        <!--                                      [lessonId]="lessonId()"-->
-        <!--                                      (exerciseSaved)="onExerciseContentSaved()">-->
-        <!--        </gl-sentence-arrange-exercise>-->
-
-        <!--        <gl-pronunciation-exercise *ngSwitchCase="5"-->
-        <!--                                   [exercise]="selectedExercise()"-->
-        <!--                                   [lessonId]="lessonId()"-->
-        <!--                                   (exerciseSaved)="onExerciseContentSaved()">-->
-        <!--        </gl-pronunciation-exercise>-->
+        </gl-word-arrangement-exercise>
 
         <!--        <gl-conversation-exercise *ngSwitchCase="6"-->
         <!--                                  [exercise]="selectedExercise()"-->

@@ -1,0 +1,156 @@
+<c-container fluid>
+  <!-- Error alert -->
+  <c-alert *ngIf="errorMessage" color="danger">
+    {{ errorMessage }}
+  </c-alert>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-3">
+    <c-spinner color="primary" size="sm">
+      <span class="visually-hidden">Đang tải...</span>
+    </c-spinner>
+  </div>
+
+  <!-- Main form -->
+  <form [formGroup]="wordArrangementForm" (ngSubmit)="saveWordArrangement()" *ngIf="!isLoading">
+    <!-- Exercise header -->
+    <div class="mb-3">
+      <h5>{{ exercise?.exercise_name || 'Bài tập sắp xếp từ' }}</h5>
+      <p cTextColor="medium">{{ exercise?.instruction || 'Sắp xếp các từ để tạo thành câu hoàn chỉnh' }}</p>
+    </div>
+
+    <!-- Sentence selection -->
+    <div class="mb-3">
+      <label cLabel>Câu gốc</label>
+      <select cSelect formControlName="sentenceId">
+        <option [value]="null">-- Chọn câu --</option>
+        <option *ngFor="let sentence of sentences" [value]="sentence.sentenceId" [disabled]="isSentenceDisabled(sentence.sentenceId)">
+          {{ sentence.englishText }} - {{ sentence.vietnameseText }}
+        </option>
+      </select>
+      <div *ngIf="wordArrangementForm.get('sentenceId')?.invalid && wordArrangementForm.get('sentenceId')?.touched" cTextColor="danger">
+        Vui lòng chọn câu gốc
+      </div>
+    </div>
+
+    <!-- Language selection -->
+    <c-row class="mb-3">
+      <!-- Source language -->
+      <c-col md="6">
+        <div class="mb-3">
+          <label cLabel>Ngôn ngữ câu hỏi</label>
+          <select cSelect formControlName="sourceLanguage">
+            <option *ngFor="let lang of languageTypes" [value]="lang">
+              {{ lang === 'english' ? 'Tiếng Anh' : 'Tiếng Việt' }}
+            </option>
+          </select>
+        </div>
+      </c-col>
+
+      <!-- Target language -->
+      <c-col md="6">
+        <div class="mb-3">
+          <label cLabel>Ngôn ngữ đáp án</label>
+          <select cSelect formControlName="targetLanguage">
+            <option *ngFor="let lang of languageTypes" [value]="lang">
+              {{ lang === 'english' ? 'Tiếng Anh' : 'Tiếng Việt' }}
+            </option>
+          </select>
+        </div>
+      </c-col>
+    </c-row>
+
+    <!-- Selected sentence preview -->
+    <div *ngIf="wordArrangementForm.get('sentenceId')?.value" class="mb-4 p-3 border rounded bg-light">
+      <div>
+        <strong>Câu gốc:</strong>
+        <p>
+          {{ getSentenceText(wordArrangementForm.get('sentenceId')?.value, wordArrangementForm.get('sourceLanguage')?.value) }}
+        </p>
+      </div>
+      <div>
+        <strong>Câu cần sắp xếp:</strong>
+        <p>
+          {{ getSentenceText(wordArrangementForm.get('sentenceId')?.value, wordArrangementForm.get('targetLanguage')?.value) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Word options section -->
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label cLabel>Các từ để sắp xếp</label>
+        <button cButton
+          [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+          type="button" class="fw-semibold" (click)="addOption()">
+          <svg cIcon name="cilPlus" size="sm"></svg>
+          Thêm từ
+        </button>
+      </div>
+
+      <!-- No sentences available warning -->
+      <div *ngIf="sentences.length === 0" class="alert alert-info">
+        Chủ đề này chưa có câu. Hãy thêm câu cho chủ đề trước khi tạo bài tập.
+      </div>
+
+      <!-- Word options form array -->
+      <div formArrayName="options">
+        <c-card *ngFor="let option of optionsArray.controls; let i = index" class="mb-3">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <!-- Word text input -->
+              <c-col md="6">
+                <div [formGroupName]="i" class="d-flex flex-column">
+                  <label cLabel>Từ #{{i + 1}}</label>
+                  <input class="form-control" type="text" formControlName="wordText" placeholder="Nhập từ">
+                  <div *ngIf="option.get('wordText')?.invalid && option.get('wordText')?.touched" cTextColor="danger">
+                    Vui lòng nhập từ
+                  </div>
+                </div>
+              </c-col>
+
+              <!-- Distractor checkbox -->
+              <c-col md="3">
+                <div [formGroupName]="i" class="form-check">
+                  <input class="form-check-input" type="checkbox" [id]="'distractor-' + i" 
+                    [checked]="option.get('isDistractor')?.value"
+                    (change)="handleDistractorChange(i, $event)">
+                  <label class="form-check-label" [for]="'distractor-' + i">Từ nhiễu</label>
+                </div>
+              </c-col>
+
+              <!-- Position controls -->
+              <c-col md="2" *ngIf="!option.get('isDistractor')?.value" class="d-flex align-items-center justify-content-center gap-1">
+                <button cButton color="light" size="sm" type="button" (click)="moveWordUp(i)" 
+                  [disabled]="option.get('correctPosition')?.value === 0 || option.get('correctPosition')?.value === null">
+                  <svg cIcon name="cilArrowTop"></svg>
+                </button>
+                <div class="position-indicator">{{ option.get('correctPosition')?.value + 1 }}</div>
+                <button cButton color="light" size="sm" type="button" (click)="moveWordDown(i)">
+                  <svg cIcon name="cilArrowBottom"></svg>
+                </button>
+              </c-col>
+
+              <!-- Delete button -->
+              <c-col [md]="option.get('isDistractor')?.value ? 3 : 1" class="d-flex align-items-center justify-content-end">
+                <button cButton
+                  [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                  size="sm" type="button" (click)="removeOption(i)" [disabled]="optionsArray.length <= 1">
+                  <svg cIcon name="cilTrash"></svg>
+                </button>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </div>
+    </div>
+
+    <!-- Submit button -->
+    <div class="d-flex justify-content-end mt-4">
+      <button cButton [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+        type="submit" [disabled]="wordArrangementForm.invalid" class="fw-semibold">
+        Lưu bài tập
+      </button>
+    </div>
+  </form>
+</c-container>

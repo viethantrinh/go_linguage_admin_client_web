@@ -1,0 +1,15 @@
+.position-indicator {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: rgba(118, 120, 237, 0.3);
+  font-weight: bold;
+  color: #333;
+}
+
+.form-check {
+  padding-top: 1.5rem;
+}
