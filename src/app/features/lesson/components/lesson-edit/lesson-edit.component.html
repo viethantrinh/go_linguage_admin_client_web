@@ -180,11 +180,9 @@
           (exerciseSaved)="onExerciseContentSaved()">
         </gl-multiple-choice-exercise>
 
-        <!--        <gl-matching-exercise *ngSwitchCase="3"-->
-        <!--                              [exercise]="selectedExercise()"-->
-        <!--                              [lessonId]="lessonId()"-->
-        <!--                              (exerciseSaved)="onExerciseContentSaved()">-->
-        <!--        </gl-matching-exercise>-->
+        <gl-matching-exercise *ngSwitchCase="3" [exercise]="selectedExercise()" [lessonId]="lessonId()"
+          (exerciseSaved)="onExerciseContentSaved()">
+        </gl-matching-exercise>
 
         <!--        <gl-sentence-arrange-exercise *ngSwitchCase="4"-->
         <!--                                      [exercise]="selectedExercise()"-->

@@ -1,1 +1,104 @@
-<p>matching-exercise works!</p>
+<c-container fluid>
+  <!-- Error alert -->
+  <c-alert *ngIf="errorMessage" color="danger">
+    {{ errorMessage }}
+  </c-alert>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-3">
+    <c-spinner color="primary" size="sm">
+      <span class="visually-hidden">Đang tải...</span>
+    </c-spinner>
+  </div>
+
+  <!-- Main form -->
+  <form [formGroup]="matchingExerciseForm" (ngSubmit)="saveMatchingExercise()" *ngIf="!isLoading">
+    <!-- Exercise header -->
+    <div class="mb-3">
+      <h5>{{ exercise?.exercise_name || 'Bài tập nối từ' }}</h5>
+      <p cTextColor="medium">{{ exercise?.instruction || 'Nối các từ với nghĩa tương ứng' }}</p>
+    </div>
+
+    <!-- Matching pairs section -->
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label cLabel>Các cặp từ vựng (tối đa 3)</label>
+        <button cButton
+          [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+          type="button" class="fw-semibold" (click)="addMatchingPair()" [disabled]="matchingPairsArray.length >= 3">
+          <svg cIcon name="cilPlus" size="sm"></svg>
+          Thêm cặp từ
+        </button>
+      </div>
+
+      <!-- No words available warning -->
+      <div *ngIf="words.length === 0" class="alert alert-info">
+        Chủ đề này chưa có từ vựng. Hãy thêm từ vựng cho chủ đề trước khi tạo bài tập.
+      </div>
+
+      <!-- Matching pairs form array -->
+      <div formArrayName="matchingPairs">
+        <c-card *ngFor="let pair of matchingPairsArray.controls; let i = index" class="mb-3">
+          <c-card-body>
+            <c-row class="align-items-center">
+              <!-- Word selection dropdown -->
+              <c-col md="10">
+                <div [formGroupName]="i" class="d-flex flex-column">
+                  <label cLabel>Từ vựng #{{i + 1}}</label>
+                  <select cSelect formControlName="wordId">
+                    <option [value]="null">-- Chọn từ vựng --</option>
+                    <option *ngFor="let word of words" [value]="word.wordId" [disabled]="isWordDisabled(word.wordId)">
+                      {{ word.englishText }} - {{ word.vietnameseText }}
+                    </option>
+                  </select>
+                  <div *ngIf="pair.get('wordId')?.invalid && pair.get('wordId')?.touched" cTextColor="danger">
+                    Vui lòng chọn từ vựng
+                  </div>
+                </div>
+              </c-col>
+
+              <!-- Delete button -->
+              <c-col md="2" class="d-flex align-items-center justify-content-end">
+                <button cButton
+                  [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                  size="sm" type="button" (click)="removeMatchingPair(i)" [disabled]="matchingPairsArray.length <= 1">
+                  <svg cIcon name="cilTrash"></svg>
+                </button>
+              </c-col>
+            </c-row>
+
+            <!-- Word preview (only if a word is selected) -->
+            <div *ngIf="pair.get('wordId')?.value" class="mt-3 p-3 border rounded bg-light">
+              <c-row>
+                <c-col md="6">
+                  <div>
+                    <strong>Tiếng Anh:</strong> {{ getWord(pair.get('wordId')?.value)?.englishText }}
+                    <button *ngIf="getWord(pair.get('wordId')?.value)?.audioUrl" cButton size="sm" color="light"
+                      class="ms-2" (click)="playAudio(getWord(pair.get('wordId')?.value)?.audioUrl || '')">
+                      <svg cIcon name="cilVolumeHigh" size="sm"></svg>
+                    </button>
+                  </div>
+                </c-col>
+                <c-col md="6">
+                  <div><strong>Tiếng Việt:</strong> {{ getWord(pair.get('wordId')?.value)?.vietnameseText }}</div>
+                </c-col>
+              </c-row>
+              <div *ngIf="getWord(pair.get('wordId')?.value)?.imageUrl" class="mt-2">
+                <img [src]="getWord(pair.get('wordId')?.value)?.imageUrl" alt="Word image" class="img-thumbnail"
+                  style="max-height: 100px;">
+              </div>
+            </div>
+          </c-card-body>
+        </c-card>
+      </div>
+    </div>
+
+    <!-- Submit button -->
+    <div class="d-flex justify-content-end mt-4">
+      <button cButton [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': 'white', 'border': 'none'}"
+        type="submit" [disabled]="matchingExerciseForm.invalid" class="fw-semibold">
+        Lưu bài tập
+      </button>
+    </div>
+  </form>
+</c-container>
