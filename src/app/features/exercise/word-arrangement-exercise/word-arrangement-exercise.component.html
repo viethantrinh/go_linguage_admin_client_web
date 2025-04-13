@@ -21,15 +21,49 @@
 
     <!-- Sentence selection -->
     <div class="mb-3">
-      <label cLabel>Câu gốc</label>
-      <select cSelect formControlName="sentenceId">
-        <option [value]="null">-- Chọn câu --</option>
-        <option *ngFor="let sentence of sentences" [value]="sentence.sentenceId" [disabled]="isSentenceDisabled(sentence.sentenceId)">
-          {{ sentence.englishText }} - {{ sentence.vietnameseText }}
-        </option>
-      </select>
-      <div *ngIf="wordArrangementForm.get('sentenceId')?.invalid && wordArrangementForm.get('sentenceId')?.touched" cTextColor="danger">
-        Vui lòng chọn câu gốc
+      <div class="mb-3">
+        <label cLabel class="form-label fw-bold">Chọn câu gốc:</label>
+      </div>
+
+      <div *ngIf="sentences.length === 0" class="alert alert-info">
+        Chủ đề này chưa có câu. Hãy thêm câu cho chủ đề trước khi tạo bài tập.
+      </div>
+
+      <div *ngIf="sentences.length > 0" class="sentence-list">
+        <div *ngFor="let sentence of sentences" class="sentence-item card mb-2"
+             [class.selected]="wordArrangementForm.get('sentenceId')?.value === sentence.sentenceId"
+             [class.disabled]="isSentenceDisabled(sentence.sentenceId)">
+          <div class="card-body">
+            <div class="form-check d-flex align-items-center">
+              <div>
+                <input class="form-check-input"
+                       type="radio"
+                       [id]="'sentence-' + sentence.sentenceId"
+                       [value]="sentence.sentenceId"
+                       formControlName="sentenceId"
+                       [disabled]="isSentenceDisabled(sentence.sentenceId)">
+              </div>
+              <label class="form-check-label w-100" [for]="isSentenceDisabled(sentence.sentenceId) ? null : 'sentence-' + sentence.sentenceId"
+                     [class.text-muted]="isSentenceDisabled(sentence.sentenceId)">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex flex-column">
+                    <div class="fw-bold">{{ sentence.englishText }}</div>
+                    <div>{{ sentence.vietnameseText }}</div>
+                    <!-- Add explicit message for disabled items -->
+                    <div *ngIf="isSentenceDisabled(sentence.sentenceId)" class="small text-danger">
+                      Câu này đã được sử dụng trong bài tập khác
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="wordArrangementForm.get('sentenceId')?.invalid && wordArrangementForm.get('sentenceId')?.touched"
+           class="text-danger mt-2">
+        Vui lòng chọn một câu gốc
       </div>
     </div>
 

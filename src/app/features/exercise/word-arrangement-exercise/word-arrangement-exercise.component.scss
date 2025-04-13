@@ -10,6 +10,70 @@
   color: #333;
 }
 
+// Updated form-check style
 .form-check {
-  padding-top: 1.5rem;
+  padding-top: 0;
+}
+
+// Sentence list styles (similar to vocabulary-list)
+.sentence-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+  margin-bottom: 20px;
+}
+
+.sentence-item {
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled) {
+    border-color: #4ecdc4;
+  }
+
+  &.selected {
+    background-color: rgba(78, 205, 196, 0.1);
+    border-color: #4ecdc4;
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .form-check-label {
+    cursor: pointer;
+  }
+
+  .form-check-input:disabled + .form-check-label {
+    cursor: not-allowed;
+  }
+}
+
+// Word list styles similar to vocabulary-list
+.word-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.word-item {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: #4ecdc4;
+  }
+  
+  &.selected {
+    background-color: rgba(78, 205, 196, 0.1);
+    border-color: #4ecdc4;
+  }
+
+  .form-check-label {
+    cursor: pointer;
+  }
+
+  // Custom styles for word input
+  .form-control {
+    flex: 1;
+  }
 }
