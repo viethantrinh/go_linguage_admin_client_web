@@ -16,7 +16,7 @@ import {ApiResponse} from '../../../core/models/api-response.model';
   providedIn: 'root'
 })
 export class LessonService {
-  private readonly baseUrl = `${BASE_LOCAL_URL}/lessons/admin`;
+  private readonly baseUrl = `${BASE_REMOTE_URL}/lessons/admin`;
 
   constructor(private http: HttpClient) {
   }

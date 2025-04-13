@@ -14,7 +14,7 @@ import {
   providedIn: 'root'
 })
 export class MultipleChoiceExerciseService {
-  private readonly baseUrl = `${BASE_LOCAL_URL}`;
+  private readonly baseUrl = `${BASE_REMOTE_URL}`;
 
   constructor(private http: HttpClient) { }
 

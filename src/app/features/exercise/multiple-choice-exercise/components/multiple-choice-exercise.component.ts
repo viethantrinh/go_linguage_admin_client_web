@@ -23,8 +23,8 @@ import {
   QuestionType,
   Sentence,
   Word
-} from './models/multiple-choice-exercise.model';
-import {MultipleChoiceExerciseService} from './services/multiple-choice-exercise.service';
+} from '../models/multiple-choice-exercise.model';
+import {MultipleChoiceExerciseService} from '../services/multiple-choice-exercise.service';
 
 /**
  * @description

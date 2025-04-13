@@ -16,14 +16,14 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { finalize } from 'rxjs';
-import { LanguageType, Sentence, WordArrangementExerciseDetail, WordArrangementOption } from './models/word-arrangement-exercise.model';
-import { WordArrangementExerciseService } from './services/word-arrangement-exercise.service';
+import { LanguageType, Sentence, WordArrangementExerciseDetail, WordArrangementOption } from '../models/word-arrangement-exercise.model';
+import { WordArrangementExerciseService } from '../services/word-arrangement-exercise.service';
 
 /**
  * @description
  * The WordArrangementExerciseComponent manages the creation and editing of word arrangement exercises.
  * It provides a form interface for configuring sentence questions and word options for arrangement.
- * 
+ *
  * The component supports:
  * - Selecting a source sentence
  * - Configuring source and target languages
@@ -311,10 +311,10 @@ export class WordArrangementExerciseComponent implements OnInit {
       // For distractor words, the correctPosition is typically -1 in the API response
       // Convert -1 to null for UI consistency
       // Handle null, undefined, or negative values for correctPosition
-      const correctPosition = option.isDistractor || 
-        !option.correctPosition || 
-        (option.correctPosition !== undefined && option.correctPosition < 0) 
-          ? null 
+      const correctPosition = option.isDistractor ||
+        !option.correctPosition ||
+        (option.correctPosition !== undefined && option.correctPosition < 0)
+          ? null
           : option.correctPosition;
 
       this.addOption(
@@ -486,7 +486,7 @@ export class WordArrangementExerciseComponent implements OnInit {
 
     this.isLoading = true;
     console.log('Saving word arrangement exercise:', payload, 'isUpdate:', isUpdate);
-    
+
     this.wordArrangementService.saveWordArrangementExercise(payload, isUpdate)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({

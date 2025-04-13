@@ -2,50 +2,50 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { ApiResponse } from '../../../../core/models/api-response.model';
-import { BASE_LOCAL_URL, TOKEN_KEY } from '../../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 import { MatchingExerciseDetail, MatchingExerciseRequest, Word } from '../models/matching-exercise.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatchingExerciseService {
-  private readonly baseUrl = `${BASE_LOCAL_URL}`;
+  private readonly baseUrl = `${BASE_REMOTE_URL}`;
 
   // Sample data for development/testing
   private sampleWords: Word[] = [
-    { 
-      wordId: 1, 
-      englishText: 'Hello', 
+    {
+      wordId: 1,
+      englishText: 'Hello',
       vietnameseText: 'Xin chào',
       audioUrl: 'assets/audio/hello.mp3'
     },
-    { 
-      wordId: 2, 
-      englishText: 'Goodbye', 
+    {
+      wordId: 2,
+      englishText: 'Goodbye',
       vietnameseText: 'Tạm biệt',
       audioUrl: 'assets/audio/goodbye.mp3'
     },
-    { 
-      wordId: 3, 
-      englishText: 'Thank you', 
+    {
+      wordId: 3,
+      englishText: 'Thank you',
       vietnameseText: 'Cảm ơn',
       audioUrl: 'assets/audio/thankyou.mp3'
     },
-    { 
-      wordId: 4, 
-      englishText: 'Sorry', 
+    {
+      wordId: 4,
+      englishText: 'Sorry',
       vietnameseText: 'Xin lỗi',
       audioUrl: 'assets/audio/sorry.mp3'
     },
-    { 
-      wordId: 5, 
-      englishText: 'Yes', 
+    {
+      wordId: 5,
+      englishText: 'Yes',
       vietnameseText: 'Vâng',
       audioUrl: 'assets/audio/yes.mp3'
     },
-    { 
-      wordId: 6, 
-      englishText: 'No', 
+    {
+      wordId: 6,
+      englishText: 'No',
       vietnameseText: 'Không',
       audioUrl: 'assets/audio/no.mp3'
     }
@@ -73,7 +73,7 @@ export class MatchingExerciseService {
   getWords(exerciseId?: number): Observable<ApiResponse<Word[]>> {
     // Real API call to fetch words for matching exercise
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    
+
     // Use the topic's word list endpoint if we don't have an exerciseId (for creating a new exercise)
     // or use the matching exercise specific endpoint when editing
     if (exerciseId) {
@@ -82,7 +82,7 @@ export class MatchingExerciseService {
         { headers }
       );
     }
-    
+
     // For development/testing when no exerciseId is provided, return sample data
     // In production, you would need to get words from the topic's word list instead
     // This could be something like: return this.http.get<ApiResponse<Word[]>>(`${this.baseUrl}/words/by-topic/${topicId}`, { headers });
@@ -106,7 +106,7 @@ export class MatchingExerciseService {
       `${this.baseUrl}/exercises/matching/${exerciseId}`,
       { headers }
     );
-    
+
     // Keep the sample data return commented out for reference
     // return of({
     //   code: 1000,
@@ -125,7 +125,7 @@ export class MatchingExerciseService {
   saveMatchingExercise(matchingExercise: MatchingExerciseRequest, isUpdate: boolean): Observable<ApiResponse<any>> {
     // Real API calls to save matching exercise
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    
+
     if (isUpdate) {
       return this.http.put<ApiResponse<any>>(
         `${this.baseUrl}/exercises/matching`,
@@ -139,7 +139,7 @@ export class MatchingExerciseService {
         { headers }
       );
     }
-    
+
     // Keep the sample data return commented out for reference
     // return of({
     //   code: 1000,

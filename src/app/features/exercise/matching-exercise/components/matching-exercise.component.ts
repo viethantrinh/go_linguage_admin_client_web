@@ -16,14 +16,14 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { finalize } from 'rxjs';
-import { MatchingExerciseDetail, Word } from './models/matching-exercise.model';
-import { MatchingExerciseService } from './services/matching-exercise.service';
+import { MatchingExerciseDetail, Word } from '../models/matching-exercise.model';
+import { MatchingExerciseService } from '../services/matching-exercise.service';
 
 /**
  * @description
  * The MatchingExerciseComponent manages the creation and editing of matching exercises.
  * It provides a form interface for configuring matching pairs of vocabulary words.
- * 
+ *
  * The component supports:
  * - Creating a list of words to match
  * - Adding/removing word pairs
@@ -316,7 +316,7 @@ export class MatchingExerciseComponent implements OnInit {
    * Checks if a word is already assigned to another exercise
    * @param wordId ID of the word to check
    * @returns True if the word is used in another exercise and should be disabled
-   * 
+   *
    * Note: Based on new requirements, vocabulary words are not restricted by isSelectedByAnotherExercise
    * for matching exercises, so this method should always return false
    */

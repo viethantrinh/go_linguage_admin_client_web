@@ -33,8 +33,8 @@ import { LessonType } from '../../../topic/models/topic.model';
 import { TopicService } from '../../../topic/services/topic.service';
 import { CreateLessonRequest, UpdateLessonRequest } from '../../models/lesson.model';
 import { LessonService } from '../../services/lesson.service';
-import { MultipleChoiceExerciseComponent } from '../../../exercise/multiple-choice-exercise/multiple-choice-exercise.component';
-import { WordArrangementExerciseComponent } from "../../../exercise/word-arrangement-exercise/word-arrangement-exercise.component";
+import { MultipleChoiceExerciseComponent } from '../../../exercise/multiple-choice-exercise/components/multiple-choice-exercise.component';
+import { WordArrangementExerciseComponent } from "../../../exercise/word-arrangement-exercise/components/word-arrangement-exercise.component";
 
 // Define an interface for exercises
 interface Exercise {
