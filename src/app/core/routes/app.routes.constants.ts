@@ -13,4 +13,5 @@ export const enum APP_ROUTE_TOKEN {
   LEARN_MATERIAL_SENTENCE = 'learn-material/sentence',
   LEARN_MATERIAL_SONG = 'learn-material/song',
   LEARN_MATERIAL_CONVERSATION = 'learn-material/conversation',
+  LEARN_MATERIAL_DIALOGUE = 'learn-material/dialogue'
 }

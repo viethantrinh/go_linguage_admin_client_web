@@ -58,7 +58,11 @@ export const navItems: INavData[] = [
       {
         name: 'Bài hát',
         url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG}`
-      }
+      },
+      {
+        name: 'Hội thoại (cho bài tập)',
+        url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_DIALOGUE}`
+      },
     ]
   }
 ]

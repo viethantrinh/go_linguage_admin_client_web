@@ -42,7 +42,7 @@ export const routes: Routes = [
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_WORD,
-        loadComponent: () => import('./features/word/word.component').then(c => c.WordComponent)
+        loadComponent: () => import('./features/word/components/word.component').then(c => c.WordComponent)
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SENTENCE,
@@ -55,6 +55,10 @@ export const routes: Routes = [
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,
         loadComponent: () => import('./features/song/components/song.component').then(c => c.SongComponent)
+      },
+      {
+        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_DIALOGUE,
+        loadComponent: () => import('./features/dialogue/components/dialogue.component').then(c => c.DialogueComponent)
       },
       {
         path: '',
