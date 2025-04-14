@@ -1,1 +1,212 @@
-<p>sentence works!</p>
+<c-container fluid>
+  <!-- Header with title, button, and search control -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h1>Quản lý câu</h1>
+      <!-- Add new sentence button -->
+      <button cButton class="btn me-3 border-0" color="primary" style="background: rgba(78, 205, 196, 0.7)"
+              (click)="openAddModal()">
+        <svg cIcon name="cilPlus" class="me-1"></svg>
+        Thêm câu mới
+      </button>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <!-- Search input -->
+      <div class="input-group" style="width: 450px;">
+        <span class="input-group-text">
+          <svg cIcon name="cilSearch"></svg>
+        </span>
+        <input cFormControl placeholder="Tìm kiếm câu..." (input)="onSearch($event)"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sentence list card -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="text-center my-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Sentence table -->
+      <table cTable hover *ngIf="!loading">
+        <thead>
+        <tr>
+          <th scope="col">Mã ID</th>
+          <th scope="col">Tiếng Anh</th>
+          <th scope="col">Tiếng Việt</th>
+          <th scope="col">Thời gian tạo</th>
+          <th scope="col">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let sentence of filteredSentences | slice: (currentPage-1) * itemsPerPage : currentPage * itemsPerPage">
+          <th scope="row">{{ sentence.id }}</th>
+          <td>{{ sentence.englishText }}</td>
+          <td>{{ sentence.vietnameseText }}</td>
+          <td>{{ sentence.createdDate | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <div class="d-flex gap-2">
+              <!-- Edit button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openEditModal(sentence)">
+                <svg cIcon name="cilPencil"></svg>
+              </button>
+              <!-- Delete button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openDeleteModal(sentence)">
+                <svg cIcon name="cilTrash"></svg>
+              </button>
+              <!-- Audio button -->
+              <button *ngIf="sentence.audioUrl" class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="playAudio(sentence.audioUrl)">
+                <svg cIcon name="cilVolumeHigh"></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination controls -->
+      <div *ngIf="!loading && filteredSentences.length > 0" class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          <span>Hiển thị {{ (currentPage - 1) * itemsPerPage + 1 }}
+            đến {{ Math.min(currentPage * itemsPerPage, filteredSentences.length) }}
+            trên tổng số {{ filteredSentences.length }}
+            câu
+          </span>
+        </div>
+        <c-pagination aria-label="Page navigation">
+          <li cPageItem [disabled]="currentPage === 1">
+            <a cPageLink (click)="changePage(currentPage - 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === 1 ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === 1 ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Previous</a>
+          </li>
+          <li cPageItem *ngFor="let page of getPageNumbers()" [active]="page === currentPage">
+            <a cPageLink (click)="changePage(page)"
+               style="cursor: pointer"
+               [ngStyle]="{'background-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : 'transparent',
+                           'color': page === currentPage ? '#fff' : 'rgba(78, 205, 196, 0.9)',
+                           'border-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : '#dee2e6'}">{{ page }}</a>
+          </li>
+          <li cPageItem [disabled]="currentPage === totalPages">
+            <a cPageLink (click)="changePage(currentPage + 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === totalPages ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === totalPages ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Next</a>
+          </li>
+        </c-pagination>
+      </div>
+
+      <!-- No sentences found message -->
+      <div *ngIf="!loading && filteredSentences.length === 0" class="text-center my-3">
+        <p>No sentences found.</p>
+      </div>
+    </c-card-body>
+  </c-card>
+
+  <!-- Sentence Edit Modal -->
+  <c-modal [visible]="editModalVisible" (visibleChange)="editModalVisible = $event" size="lg">
+    <c-modal-header>
+      <h5 cModalTitle>{{ isEditing ? 'Chỉnh sửa câu' : 'Thêm câu mới' }}</h5>
+      <button cButtonClose (click)="editModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body>
+      <form [formGroup]="sentenceForm">
+        <div class="mb-3">
+          <label for="englishText" class="form-label">Câu tiếng Anh</label>
+          <textarea rows="3" cFormControl id="englishText" formControlName="englishText" class="form-control"></textarea>
+          <div *ngIf="sentenceForm.get('englishText')?.invalid && sentenceForm.get('englishText')?.touched" class="text-danger">
+            Câu tiếng Anh là bắt buộc
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="vietnameseText" class="form-label">Câu tiếng Việt</label>
+          <textarea rows="3" cFormControl id="vietnameseText" formControlName="vietnameseText" class="form-control"></textarea>
+          <div *ngIf="sentenceForm.get('vietnameseText')?.invalid && sentenceForm.get('vietnameseText')?.touched" class="text-danger">
+            Câu tiếng Việt là bắt buộc
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="topicIds" class="form-label">Chủ đề</label>
+          <div class="topic-select-wrapper">
+            <select class="form-select" id="topicIds" formControlName="topicIds" multiple>
+              <option *ngFor="let topic of topics" [value]="topic.id">{{ topic.name }}</option>
+            </select>
+          </div>
+          <small class="text-muted">Có thể chọn nhiều chủ đề bằng cách giữ Ctrl (hoặc Command trên Mac) và bấm chọn</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Từ vựng liên quan</label>
+          <div class="vocabulary-list">
+            <div *ngFor="let word of words" class="vocabulary-item card mb-2"
+                [class.selected]="word.isSelected">
+              <div class="card-body">
+                <div class="form-check d-flex align-items-center">
+                  <div>
+                    <input class="form-check-input"
+                          type="checkbox"
+                          [id]="'word-' + word.id"
+                          [checked]="word.isSelected"
+                          (change)="toggleWord(word)">
+                  </div>
+                  <label class="form-check-label w-100" [for]="'word-' + word.id">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex align-items-center">
+                        <div *ngIf="word.imageUrl" class="me-3" style="width: 50px; height: 50px;">
+                          <img [src]="word.imageUrl" class="img-fluid rounded" alt="Word image">
+                        </div>
+                        <div>
+                          <div class="fw-bold">{{ word.englishText }}</div>
+                          <div>{{ word.vietnameseText }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="editModalVisible = false">Hủy</button>
+      <button cButton color="primary" [disabled]="sentenceForm.invalid || formLoading" (click)="saveSentence()">
+        <span *ngIf="formLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        {{ isEditing ? 'Cập nhật' : 'Thêm mới' }}
+      </button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Delete Confirmation Modal -->
+  <c-modal [visible]="deleteModalVisible" (visibleChange)="deleteModalVisible = $event">
+    <c-modal-header>
+      <h5 cModalTitle>Xác nhận xóa</h5>
+      <button cButtonClose (click)="deleteModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body>
+      Bạn có chắc chắn muốn xóa câu <strong>{{ selectedSentence?.englishText }}</strong>?
+      Hành động này không thể hoàn tác.
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="deleteModalVisible = false">Hủy</button>
+      <button cButton color="danger" [disabled]="loading" (click)="deleteSentence()">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Xóa
+      </button>
+    </c-modal-footer>
+  </c-modal>
+</c-container>

@@ -1,0 +1,87 @@
+.vocabulary-list {
+  max-height: 300px;
+  overflow-y: auto;
+  
+  .vocabulary-item {
+    transition: all 0.2s ease;
+    
+    &.selected {
+      border-color: rgba(78, 205, 196, 0.7);
+      background-color: rgba(78, 205, 196, 0.1);
+    }
+    
+    &:hover {
+      border-color: rgba(78, 205, 196, 0.5);
+      background-color: rgba(78, 205, 196, 0.05);
+    }
+    
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Image preview styles
+.image-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  max-height: 200px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  border-radius: 4px;
+  
+  img {
+    max-height: 200px;
+    object-fit: contain;
+  }
+  
+  .btn-danger {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.image-upload-area {
+  min-height: 150px;
+  border: 2px dashed #ced4da;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: rgba(78, 205, 196, 0.7);
+    background-color: rgba(78, 205, 196, 0.05);
+  }
+}
+
+// Topic select styles
+.topic-select-wrapper {
+  .form-select {
+    min-height: 120px;
+  }
+  
+  select option {
+    padding: 8px;
+  }
+}
+
+// Color styles for different button types
+.btn-icon-0 {
+  background-color: rgba(78, 205, 196, 0.7);
+  color: white;
+}
+
+.btn-icon-1 {
+  background-color: rgba(118, 120, 237, 0.7);
+  color: white;
+}
+
+.btn-icon-2 {
+  background-color: rgba(255, 107, 107, 0.7);
+  color: white;
+}

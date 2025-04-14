@@ -1,0 +1,45 @@
+.vocabulary-list {
+  max-height: 300px;
+  overflow-y: auto;
+  
+  .vocabulary-item {
+    transition: all 0.2s ease;
+    
+    &.selected {
+      border-color: rgba(78, 205, 196, 0.7);
+      background-color: rgba(78, 205, 196, 0.1);
+    }
+    
+    &:hover {
+      border-color: rgba(78, 205, 196, 0.5);
+      background-color: rgba(78, 205, 196, 0.05);
+    }
+  }
+}
+
+// Topic select styles
+.topic-select-wrapper {
+  .form-select {
+    min-height: 120px;
+  }
+  
+  select option {
+    padding: 8px;
+  }
+}
+
+// Color styles for different button types
+.btn-icon-0 {
+  background-color: rgba(78, 205, 196, 0.7);
+  color: white;
+}
+
+.btn-icon-1 {
+  background-color: rgba(118, 120, 237, 0.7);
+  color: white;
+}
+
+.btn-icon-2 {
+  background-color: rgba(255, 107, 107, 0.7);
+  color: white;
+}
