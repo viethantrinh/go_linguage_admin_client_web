@@ -140,16 +140,16 @@
 
         <div class="mb-3">
           <label class="form-label">Hình ảnh</label>
-          <div *ngIf="previewImage || wordForm.get('imageUrl')?.value" class="mb-2">
+          <div *ngIf="previewImage" class="mb-2">
             <div class="image-preview">
-              <img [src]="previewImage || wordForm.get('imageUrl')?.value" class="img-fluid rounded" alt="Word image">
+              <img [src]="previewImage" alt="Word image" class="img-fluid rounded">
               <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" 
                       (click)="removeImage()">
                 <svg cIcon name="cilX"></svg>
               </button>
             </div>
           </div>
-          <div *ngIf="!previewImage && !wordForm.get('imageUrl')?.value">
+          <div *ngIf="!previewImage">
             <div class="image-upload-area p-4 border rounded d-flex flex-column align-items-center justify-content-center">
               <svg cIcon name="cilCloudUpload" width="48" height="48" class="text-muted mb-2"></svg>
               <p class="mb-2">Kéo thả hoặc bấm vào đây để tải ảnh lên</p>
@@ -159,7 +159,7 @@
               <input #fileInput type="file" accept="image/*" class="d-none" (change)="onFileSelected($event)">
             </div>
           </div>
-          <input type="hidden" formControlName="imageUrl">
+          <!-- Image is handled via selectedFile in the component -->
         </div>
 
         <div class="mb-3">

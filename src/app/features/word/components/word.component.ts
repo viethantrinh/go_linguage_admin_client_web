@@ -19,29 +19,26 @@ import {
 import {DatePipe, NgForOf, NgIf, NgStyle, SlicePipe} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-
-// Interface for mapping API response to component model
+import {finalize} from 'rxjs';
+import {WordService} from '../services/word.service';
+import {Topic, Sentence as ApiSentence, Word} from '../models/word.model';
+// Interface for internal component use
 interface WordDisplay {
   id: number;
   englishText: string;
   vietnameseText: string;
-  imageUrl?: string;
-  audioUrl?: string;
+  imageUrl?: string | null;
+  audioUrl?: string | null;
   createdDate: Date;
-  topicIds?: number[];
-  sentenceIds?: number[];
+  topicIds: number[];
+  sentenceIds: number[];
 }
 
-interface Topic {
-  id: number;
-  name: string;
-}
-
-interface Sentence {
-  id: number;
-  englishText: string;
-  vietnameseText: string;
+// Extended sentence interface for UI selection state
+interface Sentence extends Omit<ApiSentence, 'topicIds' | 'wordIds'> {
   isSelected: boolean;
+  topicIds?: number[];
+  wordIds?: number[];
 }
 
 @Component({
@@ -96,7 +93,9 @@ export class WordComponent implements OnInit {
   Math = Math; // To use Math in template
 
   readonly formBuilder = inject(FormBuilder);
+  readonly wordService = inject(WordService);
   previewImage: string | null = null;
+  selectedFile: File | null = null;
 
   constructor() {
     this.wordForm = this.formBuilder.group({
@@ -120,15 +119,11 @@ export class WordComponent implements OnInit {
         return;
       }
       
+      // Save the file for later upload
+      this.selectedFile = file;
+      
       // Create a preview URL
       this.previewImage = URL.createObjectURL(file);
-      
-      // In a real application, you would upload the file to a server here
-      // and get back the URL to store in the form
-      // For now, we'll simulate this by using the preview URL
-      this.wordForm.patchValue({
-        imageUrl: this.previewImage
-      });
     }
   }
   
@@ -139,10 +134,8 @@ export class WordComponent implements OnInit {
       this.previewImage = null;
     }
     
-    // Clear the form value
-    this.wordForm.patchValue({
-      imageUrl: ''
-    });
+    // Clear the selected file
+    this.selectedFile = null;
   }
 
   ngOnInit(): void {
@@ -151,94 +144,72 @@ export class WordComponent implements OnInit {
     this.loadSentences();
   }
 
-  // Mock data loading functions - replace with actual API calls later
+  // Load words from API
   loadWords(): void {
     this.loading = true;
-    // Mock data for now
-    setTimeout(() => {
-      this.words = [
-        { 
-          id: 1, 
-          englishText: 'Apple', 
-          vietnameseText: 'Quả táo', 
-          imageUrl: 'https://example.com/apple.jpg',
-          audioUrl: 'https://example.com/apple.mp3', 
-          createdDate: new Date(),
-          topicIds: [1],
-          sentenceIds: [1, 2]
+    this.wordService.getWords()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            // Map API response to component model
+            this.words = response.result.map(word => ({
+              id: word.id,
+              englishText: word.englishText,
+              vietnameseText: word.vietnameseText,
+              imageUrl: word.imageUrl,
+              audioUrl: word.audioUrl,
+              createdDate: new Date(word.createdAt),
+              topicIds: word.topicIds || [],
+              sentenceIds: word.sentenceIds || []
+            }));
+            
+            this.filteredWords = [...this.words];
+            this.updatePagination();
+          } else {
+            console.error('Error loading words:', response.message);
+          }
         },
-        { 
-          id: 2, 
-          englishText: 'Book', 
-          vietnameseText: 'Quyển sách', 
-          imageUrl: 'https://example.com/book.jpg',
-          audioUrl: 'https://example.com/book.mp3', 
-          createdDate: new Date(Date.now() - 86400000),
-          topicIds: [2],
-          sentenceIds: [3]
-        },
-        { 
-          id: 3, 
-          englishText: 'Cat', 
-          vietnameseText: 'Con mèo', 
-          imageUrl: 'https://example.com/cat.jpg',
-          audioUrl: 'https://example.com/cat.mp3', 
-          createdDate: new Date(Date.now() - 172800000),
-          topicIds: [3],
-          sentenceIds: [4, 5]
-        },
-        { 
-          id: 4, 
-          englishText: 'Dog', 
-          vietnameseText: 'Con chó', 
-          imageUrl: 'https://example.com/dog.jpg',
-          audioUrl: 'https://example.com/dog.mp3', 
-          createdDate: new Date(Date.now() - 259200000),
-          topicIds: [3],
-          sentenceIds: [6]
-        },
-        { 
-          id: 5, 
-          englishText: 'House', 
-          vietnameseText: 'Ngôi nhà', 
-          imageUrl: 'https://example.com/house.jpg',
-          audioUrl: 'https://example.com/house.mp3', 
-          createdDate: new Date(Date.now() - 345600000),
-          topicIds: [2],
-          sentenceIds: [7, 8]
+        error: (err) => {
+          console.error('Error fetching words:', err);
         }
-      ];
-      this.filteredWords = [...this.words];
-      this.updatePagination();
-      this.loading = false;
-    }, 500);
+      });
   }
 
   loadTopics(): void {
-    // Mock topics for now
-    this.topics = [
-      { id: 1, name: 'Food' },
-      { id: 2, name: 'Home' },
-      { id: 3, name: 'Animals' },
-      { id: 4, name: 'Animals' },
-      { id: 5, name: 'Animals' },
-      { id: 6, name: 'Animals' },
-      { id: 7, name: 'Animals' },
-    ];
+    this.wordService.getTopics()
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            this.topics = response.result;
+          } else {
+            console.error('Error loading topics:', response.message);
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching topics:', err);
+        }
+      });
   }
 
   loadSentences(): void {
-    // Mock sentences for now
-    this.sentences = [
-      { id: 1, englishText: 'I like apples.', vietnameseText: 'Tôi thích táo.', isSelected: false },
-      { id: 2, englishText: 'The apple is red.', vietnameseText: 'Quả táo màu đỏ.', isSelected: false },
-      { id: 3, englishText: 'I read a book.', vietnameseText: 'Tôi đọc một quyển sách.', isSelected: false },
-      { id: 4, englishText: 'The cat is sleeping.', vietnameseText: 'Con mèo đang ngủ.', isSelected: false },
-      { id: 5, englishText: 'I have a cat.', vietnameseText: 'Tôi có một con mèo.', isSelected: false },
-      { id: 6, englishText: 'The dog is barking.', vietnameseText: 'Con chó đang sủa.', isSelected: false },
-      { id: 7, englishText: 'This is my house.', vietnameseText: 'Đây là nhà của tôi.', isSelected: false },
-      { id: 8, englishText: 'The house is big.', vietnameseText: 'Ngôi nhà rất lớn.', isSelected: false }
-    ];
+    this.wordService.getSentences()
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            // Map API response to component model with isSelected property
+            this.sentences = response.result.map(sentence => ({
+              ...sentence,
+              isSelected: false
+            }));
+          } else {
+            console.error('Error loading sentences:', response.message);
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching sentences:', err);
+        }
+      });
   }
 
   onSearch(event: Event): void {
@@ -315,23 +286,44 @@ export class WordComponent implements OnInit {
     this.resetForm();
     this.sentences.forEach(sentence => sentence.isSelected = false);
     
-    // Populate form with selected word data
-    this.wordForm.patchValue({
-      id: word.id,
-      englishText: word.englishText,
-      vietnameseText: word.vietnameseText,
-      imageUrl: word.imageUrl || '',
-      topicIds: word.topicIds || []
-    });
-
-    // Mark selected sentences
-    if (word.sentenceIds) {
-      this.sentences.forEach(sentence => {
-        sentence.isSelected = word.sentenceIds?.includes(sentence.id) || false;
+    // Get detailed word information from API
+    this.loading = true;
+    this.wordService.getWordDetail(word.id)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            const wordDetail = response.result;
+            
+            // Populate form with word details
+            this.wordForm.patchValue({
+              id: wordDetail.id,
+              englishText: wordDetail.englishText,
+              vietnameseText: wordDetail.vietnameseText,
+              topicIds: wordDetail.topicIds || []
+            });
+            
+            // Set image URL for preview if available
+            if (wordDetail.imageUrl) {
+              this.previewImage = wordDetail.imageUrl;
+            }
+            
+            // Mark selected sentences
+            if (wordDetail.sentenceIds && wordDetail.sentenceIds.length > 0) {
+              this.sentences.forEach(sentence => {
+                sentence.isSelected = wordDetail.sentenceIds.includes(sentence.id);
+              });
+            }
+            
+            this.editModalVisible = true;
+          } else {
+            console.error('Error loading word details:', response.message);
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching word details:', err);
+        }
       });
-    }
-    
-    this.editModalVisible = true;
   }
 
   openDeleteModal(word: WordDisplay): void {
@@ -345,12 +337,18 @@ export class WordComponent implements OnInit {
       id: null,
       englishText: '',
       vietnameseText: '',
-      imageUrl: '',
       topicIds: []
     });
     
     // Reset sentences
     this.sentences.forEach(sentence => sentence.isSelected = false);
+    
+    // Reset image
+    if (this.previewImage) {
+      URL.revokeObjectURL(this.previewImage);
+      this.previewImage = null;
+    }
+    this.selectedFile = null;
   }
 
   toggleSentence(sentence: Sentence): void {
@@ -370,43 +368,80 @@ export class WordComponent implements OnInit {
     
     this.formLoading = true;
     
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      if (this.isEditing && this.selectedWord) {
-        // Update existing word
-        const index = this.words.findIndex(w => w.id === this.selectedWord!.id);
-        if (index !== -1) {
-          this.words[index] = {
-            ...this.words[index],
-            englishText: formValue.englishText,
-            vietnameseText: formValue.vietnameseText,
-            imageUrl: formValue.imageUrl,
-            topicIds: formValue.topicIds,
-            sentenceIds: selectedSentenceIds
-          };
+    // Prepare word data for API request
+    const wordData = {
+      englishText: formValue.englishText,
+      vietnameseText: formValue.vietnameseText,
+      topicIds: formValue.topicIds || [],
+      sentenceIds: selectedSentenceIds
+    };
+    
+    // Determine if it's an update or create operation
+    const apiCall = this.isEditing && this.selectedWord 
+      ? this.wordService.updateWord(this.selectedWord.id, wordData)
+      : this.wordService.createWord(wordData);
+      
+    apiCall
+      .pipe(finalize(() => this.formLoading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            const savedWord = response.result;
+            
+            // If we have a file to upload and the word was saved successfully
+            if (this.selectedFile && savedWord.id) {
+              this.uploadImage(savedWord.id, this.selectedFile);
+            } else {
+              // Reload words to get the updated list
+              this.loadWords();
+              // Close modal
+              this.editModalVisible = false;
+              this.resetForm();
+            }
+          } else {
+            console.error('Error saving word:', response.message);
+            alert(`Lỗi khi lưu từ vựng: ${response.message}`);
+          }
+        },
+        error: (err) => {
+          console.error('Error saving word:', err);
+          alert('Đã xảy ra lỗi khi lưu từ vựng. Vui lòng thử lại sau.');
         }
-      } else {
-        // Add new word
-        const newWord: WordDisplay = {
-          id: this.words.length > 0 ? Math.max(...this.words.map(w => w.id)) + 1 : 1,
-          englishText: formValue.englishText,
-          vietnameseText: formValue.vietnameseText,
-          imageUrl: formValue.imageUrl,
-          createdDate: new Date(),
-          topicIds: formValue.topicIds,
-          sentenceIds: selectedSentenceIds
-        };
-        this.words.unshift(newWord);
-      }
-      
-      // Update filtered words
-      this.applyFilters();
-      
-      // Close modal and reset form
-      this.editModalVisible = false;
-      this.formLoading = false;
-      this.resetForm();
-    }, 500);
+      });
+  }
+  
+  /**
+   * Upload image for a word
+   * @param wordId The ID of the word
+   * @param file The image file to upload
+   */
+  uploadImage(wordId: number, file: File): void {
+    this.formLoading = true;
+    
+    this.wordService.uploadImage(wordId, file)
+      .pipe(finalize(() => {
+        this.formLoading = false;
+        // Close modal
+        this.editModalVisible = false;
+        this.resetForm();
+      }))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            // Reload words to get the updated image URL
+            this.loadWords();
+          } else {
+            console.error('Error uploading image:', response.message);
+            alert(`Lỗi khi tải lên hình ảnh: ${response.message}`);
+          }
+        },
+        error: (err) => {
+          console.error('Error uploading image:', err);
+          alert('Đã xảy ra lỗi khi tải lên hình ảnh. Vui lòng thử lại sau.');
+          // Still reload the words since the word itself might have been saved
+          this.loadWords();
+        }
+      });
   }
 
   deleteWord(): void {
@@ -414,28 +449,35 @@ export class WordComponent implements OnInit {
     
     this.loading = true;
     
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      // Remove deleted word from array
-      this.words = this.words.filter(w => w.id !== this.selectedWord!.id);
-      
-      // Update filtered words
-      this.applyFilters();
-      
-      // Close modal
-      this.deleteModalVisible = false;
-      this.loading = false;
-    }, 500);
+    this.wordService.deleteWord(this.selectedWord.id)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000) {
+            // Reload words after successful deletion
+            this.loadWords();
+            // Close modal
+            this.deleteModalVisible = false;
+          } else {
+            console.error('Error deleting word:', response.message);
+            alert(`Lỗi khi xóa từ vựng: ${response.message}`);
+          }
+        },
+        error: (err) => {
+          console.error('Error deleting word:', err);
+          alert('Đã xảy ra lỗi khi xóa từ vựng. Vui lòng thử lại sau.');
+        }
+      });
   }
 
   playAudio(audioUrl?: string): void {
     if (!audioUrl) return;
     
-    // In a real app, you would play the audio here
-    console.log('Playing audio:', audioUrl);
-    // Example:
-    // const audio = new Audio(audioUrl);
-    // audio.play();
+    // Play the audio file
+    const audio = new Audio(audioUrl);
+    audio.play().catch(err => {
+      console.error('Error playing audio:', err);
+    });
   }
 
   getTopicName(topicId: number): string {
