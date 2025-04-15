@@ -39,6 +39,7 @@ import {
   cilChevronLeft,
   cilChevronRight,
   cilCloudDownload,
+  cilCloudUpload,
   cilCode,
   cilCommentSquare,
   cilContrast,
@@ -83,6 +84,7 @@ import {
   cilPuzzle,
   cilReportSlash,
   cilSave,
+  cilSearch,
   cilSettings,
   cilShare,
   cilShareAll,
@@ -207,7 +209,9 @@ export const iconSubset = {
   cilCheckCircle,
   cilPlus,
   cilX,
-  cilVolumeHigh
+  cilVolumeHigh,
+  cilSearch,
+  cilCloudUpload,
 };
 
 export enum IconSubset {

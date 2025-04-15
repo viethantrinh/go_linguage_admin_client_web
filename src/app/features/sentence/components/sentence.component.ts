@@ -19,6 +19,11 @@ import {
 import {DatePipe, NgForOf, NgIf, NgStyle, SlicePipe} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Topic, Word as ApiWord} from '../models/sentence.model';
+import {catchError, finalize} from 'rxjs/operators';
+import {of} from 'rxjs';
+import {HttpClientModule} from '@angular/common/http';
+import {SentenceService} from '../services/sentence.service';
 
 // Interface for mapping API response to component model
 interface SentenceDisplay {
@@ -31,16 +36,9 @@ interface SentenceDisplay {
   wordIds?: number[];
 }
 
-interface Topic {
-  id: number;
-  name: string;
-}
+// Using Topic interface from service
 
-interface Word {
-  id: number;
-  englishText: string;
-  vietnameseText: string;
-  imageUrl?: string;
+interface Word extends ApiWord {
   isSelected: boolean;
 }
 
@@ -69,7 +67,8 @@ interface Word {
     PaginationComponent,
     ReactiveFormsModule,
     SlicePipe,
-    TableDirective
+    TableDirective,
+    HttpClientModule
   ],
   templateUrl: './sentence.component.html',
   styleUrl: './sentence.component.scss'
@@ -80,12 +79,12 @@ export class SentenceComponent implements OnInit {
   topics: Topic[] = [];
   words: Word[] = [];
   sentenceForm: FormGroup;
-  
+
   editModalVisible = false;
   deleteModalVisible = false;
   selectedSentence: SentenceDisplay | null = null;
   isEditing = false;
-  
+
   loading = false;
   formLoading = false;
 
@@ -96,6 +95,7 @@ export class SentenceComponent implements OnInit {
   Math = Math; // To use Math in template
 
   readonly formBuilder = inject(FormBuilder);
+  readonly sentenceService = inject(SentenceService);
 
   constructor() {
     this.sentenceForm = this.formBuilder.group({
@@ -113,89 +113,61 @@ export class SentenceComponent implements OnInit {
     this.loadWords();
   }
 
-  // Mock data loading functions - replace with actual API calls later
+  // Load sentences from API
   loadSentences(): void {
     this.loading = true;
-    // Mock data for now
-    setTimeout(() => {
-      this.sentences = [
-        { 
-          id: 1, 
-          englishText: 'I like apples.', 
-          vietnameseText: 'Tôi thích táo.', 
-          audioUrl: 'https://example.com/sentence1.mp3', 
-          createdDate: new Date(),
-          topicIds: [1],
-          wordIds: [1, 2]
-        },
-        { 
-          id: 2, 
-          englishText: 'The apple is red.', 
-          vietnameseText: 'Quả táo màu đỏ.', 
-          audioUrl: 'https://example.com/sentence2.mp3', 
-          createdDate: new Date(Date.now() - 86400000),
-          topicIds: [1],
-          wordIds: [1]
-        },
-        { 
-          id: 3, 
-          englishText: 'I read a book.', 
-          vietnameseText: 'Tôi đọc một quyển sách.', 
-          audioUrl: 'https://example.com/sentence3.mp3', 
-          createdDate: new Date(Date.now() - 172800000),
-          topicIds: [2],
-          wordIds: [3]
-        },
-        { 
-          id: 4, 
-          englishText: 'The cat is sleeping.', 
-          vietnameseText: 'Con mèo đang ngủ.', 
-          audioUrl: 'https://example.com/sentence4.mp3', 
-          createdDate: new Date(Date.now() - 259200000),
-          topicIds: [3],
-          wordIds: [4]
-        },
-        { 
-          id: 5, 
-          englishText: 'I have a cat.', 
-          vietnameseText: 'Tôi có một con mèo.', 
-          audioUrl: 'https://example.com/sentence5.mp3', 
-          createdDate: new Date(Date.now() - 345600000),
-          topicIds: [3],
-          wordIds: [4, 5]
-        }
-      ];
-      this.filteredSentences = [...this.sentences];
-      this.updatePagination();
-      this.loading = false;
-    }, 500);
+    this.sentenceService.getAllSentences()
+      .pipe(
+        catchError(error => {
+          console.error('Error loading sentences:', error);
+          return of([]);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe(sentences => {
+        this.sentences = sentences.map(sentence => ({
+          id: sentence.id,
+          englishText: sentence.englishText,
+          vietnameseText: sentence.vietnameseText,
+          audioUrl: sentence.audioUrl,
+          createdDate: new Date(sentence.createdAt),
+          topicIds: sentence.topicIds,
+          wordIds: sentence.wordIds
+        }));
+        this.filteredSentences = [...this.sentences];
+        this.updatePagination();
+      });
   }
 
   loadTopics(): void {
-    // Mock topics for now
-    this.topics = [
-      { id: 1, name: 'Food' },
-      { id: 2, name: 'Home' },
-      { id: 3, name: 'Animals' },
-      { id: 4, name: 'Travel' },
-      { id: 5, name: 'School' },
-      { id: 6, name: 'Family' },
-      { id: 7, name: 'Work' },
-    ];
+    this.sentenceService.getAllTopics()
+      .pipe(
+        catchError(error => {
+          console.error('Error loading topics:', error);
+          return of([]);
+        })
+      )
+      .subscribe(topics => {
+        this.topics = topics;
+      });
   }
 
   loadWords(): void {
-    // Mock words for now
-    this.words = [
-      { id: 1, englishText: 'Apple', vietnameseText: 'Quả táo', imageUrl: 'https://example.com/apple.jpg', isSelected: false },
-      { id: 2, englishText: 'Like', vietnameseText: 'Thích', isSelected: false },
-      { id: 3, englishText: 'Book', vietnameseText: 'Quyển sách', imageUrl: 'https://example.com/book.jpg', isSelected: false },
-      { id: 4, englishText: 'Cat', vietnameseText: 'Con mèo', imageUrl: 'https://example.com/cat.jpg', isSelected: false },
-      { id: 5, englishText: 'Have', vietnameseText: 'Có', isSelected: false },
-      { id: 6, englishText: 'Dog', vietnameseText: 'Con chó', imageUrl: 'https://example.com/dog.jpg', isSelected: false },
-      { id: 7, englishText: 'House', vietnameseText: 'Ngôi nhà', imageUrl: 'https://example.com/house.jpg', isSelected: false },
-      { id: 8, englishText: 'Big', vietnameseText: 'Lớn', isSelected: false }
-    ];
+    this.sentenceService.getAllWords()
+      .pipe(
+        catchError(error => {
+          console.error('Error loading words:', error);
+          return of([]);
+        })
+      )
+      .subscribe(words => {
+        this.words = words.map(word => ({
+          ...word,
+          isSelected: false
+        }));
+      });
   }
 
   onSearch(event: Event): void {
@@ -266,28 +238,44 @@ export class SentenceComponent implements OnInit {
 
   openEditModal(sentence: SentenceDisplay): void {
     this.isEditing = true;
+    this.formLoading = true;
     this.selectedSentence = sentence;
-    
+
     // Reset form and words selection
     this.resetForm();
     this.words.forEach(word => word.isSelected = false);
-    
-    // Populate form with selected sentence data
-    this.sentenceForm.patchValue({
-      id: sentence.id,
-      englishText: sentence.englishText,
-      vietnameseText: sentence.vietnameseText,
-      topicIds: sentence.topicIds || []
-    });
 
-    // Mark selected words
-    if (sentence.wordIds) {
-      this.words.forEach(word => {
-        word.isSelected = sentence.wordIds?.includes(word.id) || false;
+    // Get complete sentence details from API
+    this.sentenceService.getSentenceById(sentence.id)
+      .pipe(
+        catchError(error => {
+          console.error('Error loading sentence details:', error);
+          return of(null);
+        }),
+        finalize(() => {
+          this.formLoading = false;
+        })
+      )
+      .subscribe(sentenceDetails => {
+        if (sentenceDetails) {
+          // Populate form with selected sentence data
+          this.sentenceForm.patchValue({
+            id: sentenceDetails.id,
+            englishText: sentenceDetails.englishText,
+            vietnameseText: sentenceDetails.vietnameseText,
+            topicIds: sentenceDetails.topicIds || []
+          });
+
+          // Mark selected words
+          if (sentenceDetails.wordIds) {
+            this.words.forEach(word => {
+              word.isSelected = sentenceDetails.wordIds.includes(word.id) || false;
+            });
+          }
+        }
+
+        this.editModalVisible = true;
       });
-    }
-    
-    this.editModalVisible = true;
   }
 
   openDeleteModal(sentence: SentenceDisplay): void {
@@ -303,7 +291,7 @@ export class SentenceComponent implements OnInit {
       vietnameseText: '',
       topicIds: []
     });
-    
+
     // Reset words
     this.words.forEach(word => word.isSelected = false);
   }
@@ -314,81 +302,133 @@ export class SentenceComponent implements OnInit {
 
   saveSentence(): void {
     if (this.sentenceForm.invalid) return;
-    
+
     // Get form values
     const formValue = this.sentenceForm.value;
-    
+
     // Get selected word IDs
     const selectedWordIds = this.words
       .filter(word => word.isSelected)
       .map(word => word.id);
-    
+
+    // Prepare the payload
+    const payload = {
+      englishText: formValue.englishText,
+      vietnameseText: formValue.vietnameseText,
+      topicIds: formValue.topicIds || [],
+      wordIds: selectedWordIds
+    };
+
     this.formLoading = true;
-    
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      if (this.isEditing && this.selectedSentence) {
-        // Update existing sentence
-        const index = this.sentences.findIndex(s => s.id === this.selectedSentence!.id);
-        if (index !== -1) {
-          this.sentences[index] = {
-            ...this.sentences[index],
-            englishText: formValue.englishText,
-            vietnameseText: formValue.vietnameseText,
-            topicIds: formValue.topicIds,
-            wordIds: selectedWordIds
-          };
-        }
-      } else {
-        // Add new sentence
-        const newSentence: SentenceDisplay = {
-          id: this.sentences.length > 0 ? Math.max(...this.sentences.map(s => s.id)) + 1 : 1,
-          englishText: formValue.englishText,
-          vietnameseText: formValue.vietnameseText,
-          createdDate: new Date(),
-          topicIds: formValue.topicIds,
-          wordIds: selectedWordIds
-        };
-        this.sentences.unshift(newSentence);
-      }
-      
-      // Update filtered sentences
-      this.applyFilters();
-      
-      // Close modal and reset form
-      this.editModalVisible = false;
-      this.formLoading = false;
-      this.resetForm();
-    }, 500);
+
+    if (this.isEditing && this.selectedSentence) {
+      // Update existing sentence
+      this.sentenceService.updateSentence(this.selectedSentence.id, payload)
+        .pipe(
+          catchError(error => {
+            console.error('Error updating sentence:', error);
+            return of(null);
+          }),
+          finalize(() => {
+            this.formLoading = false;
+          })
+        )
+        .subscribe(updatedSentence => {
+          if (updatedSentence) {
+            // Update local data
+            const index = this.sentences.findIndex(s => s.id === this.selectedSentence!.id);
+            if (index !== -1) {
+              this.sentences[index] = {
+                ...this.sentences[index],
+                englishText: updatedSentence.englishText,
+                vietnameseText: updatedSentence.vietnameseText,
+                audioUrl: updatedSentence.audioUrl,
+                topicIds: updatedSentence.topicIds,
+                wordIds: updatedSentence.wordIds
+              };
+            }
+
+            // Update filtered sentences
+            this.applyFilters();
+
+            // Close modal and reset form
+            this.editModalVisible = false;
+            this.resetForm();
+          }
+        });
+    } else {
+      // Add new sentence
+      this.sentenceService.createSentence(payload)
+        .pipe(
+          catchError(error => {
+            console.error('Error creating sentence:', error);
+            return of(null);
+          }),
+          finalize(() => {
+            this.formLoading = false;
+          })
+        )
+        .subscribe(newSentence => {
+          if (newSentence) {
+            // Add to local data
+            const sentenceDisplay: SentenceDisplay = {
+              id: newSentence.id,
+              englishText: newSentence.englishText,
+              vietnameseText: newSentence.vietnameseText,
+              audioUrl: newSentence.audioUrl,
+              createdDate: new Date(newSentence.createdAt),
+              topicIds: newSentence.topicIds,
+              wordIds: newSentence.wordIds
+            };
+            this.sentences.unshift(sentenceDisplay);
+
+            // Update filtered sentences
+            this.applyFilters();
+
+            // Close modal and reset form
+            this.editModalVisible = false;
+            this.resetForm();
+          }
+        });
+    }
   }
 
   deleteSentence(): void {
     if (!this.selectedSentence) return;
-    
+
     this.loading = true;
-    
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      // Remove deleted sentence from array
-      this.sentences = this.sentences.filter(s => s.id !== this.selectedSentence!.id);
-      
-      // Update filtered sentences
-      this.applyFilters();
-      
-      // Close modal
-      this.deleteModalVisible = false;
-      this.loading = false;
-    }, 500);
+
+    this.sentenceService.deleteSentence(this.selectedSentence.id)
+      .pipe(
+        catchError(error => {
+          console.error('Error deleting sentence:', error);
+          return of(null);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe(response => {
+        if (response && response.code === 1000) {
+          // Remove deleted sentence from array
+          this.sentences = this.sentences.filter(s => s.id !== this.selectedSentence!.id);
+
+          // Update filtered sentences
+          this.applyFilters();
+        }
+
+        // Close modal
+        this.deleteModalVisible = false;
+      });
   }
 
   playAudio(audioUrl?: string): void {
     if (!audioUrl) return;
-    
-    // In a real app, you would play the audio here
-    console.log('Playing audio:', audioUrl);
-    // Example:
-    // const audio = new Audio(audioUrl);
-    // audio.play();
+
+    const audio = new Audio(audioUrl);
+    audio.play().catch(error => {
+      console.error('Error playing audio:', error);
+    });
   }
 
   getTopicName(topicId: number): string {
