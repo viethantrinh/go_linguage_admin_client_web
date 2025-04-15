@@ -19,6 +19,11 @@ import {
 import {DatePipe, NgForOf, NgIf, NgStyle, SlicePipe} from '@angular/common';
 import {IconDirective} from '@coreui/icons-angular';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Sentence} from '../models/sentence.model';
+import {SentenceService} from '../services/sentence.service';
+import {Word as WordModel} from '../../word/models/word.model';
+import {WordService} from '../../word/services/word.service';
+import {finalize} from 'rxjs';
 
 // Interface for mapping API response to component model
 interface SentenceDisplay {
@@ -31,12 +36,15 @@ interface SentenceDisplay {
   wordIds?: number[];
 }
 
+// Import token constants
+import { BASE_LOCAL_URL, TOKEN_KEY } from '../../../shared/utils/app.constants';
+
 interface Topic {
   id: number;
   name: string;
 }
 
-interface Word {
+interface WordDisplay {
   id: number;
   englishText: string;
   vietnameseText: string;
@@ -78,7 +86,7 @@ export class SentenceComponent implements OnInit {
   sentences: SentenceDisplay[] = [];
   filteredSentences: SentenceDisplay[] = [];
   topics: Topic[] = [];
-  words: Word[] = [];
+  words: WordDisplay[] = [];
   sentenceForm: FormGroup;
   
   editModalVisible = false;
@@ -96,6 +104,8 @@ export class SentenceComponent implements OnInit {
   Math = Math; // To use Math in template
 
   readonly formBuilder = inject(FormBuilder);
+  readonly sentenceService = inject(SentenceService);
+  readonly wordService = inject(WordService);
 
   constructor() {
     this.sentenceForm = this.formBuilder.group({
@@ -113,89 +123,78 @@ export class SentenceComponent implements OnInit {
     this.loadWords();
   }
 
-  // Mock data loading functions - replace with actual API calls later
+  // Load sentences from API
   loadSentences(): void {
     this.loading = true;
-    // Mock data for now
-    setTimeout(() => {
-      this.sentences = [
-        { 
-          id: 1, 
-          englishText: 'I like apples.', 
-          vietnameseText: 'Tôi thích táo.', 
-          audioUrl: 'https://example.com/sentence1.mp3', 
-          createdDate: new Date(),
-          topicIds: [1],
-          wordIds: [1, 2]
+    this.sentenceService.getSentences()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            this.sentences = response.result.map(sentence => ({
+              id: sentence.id,
+              englishText: sentence.englishText,
+              vietnameseText: sentence.vietnameseText,
+              audioUrl: sentence.audioUrl || undefined,
+              createdDate: new Date(sentence.createdAt),
+              topicIds: sentence.topicIds,
+              wordIds: sentence.wordIds
+            }));
+            this.filteredSentences = [...this.sentences];
+            this.updatePagination();
+          } else {
+            console.error('Failed to load sentences:', response.message);
+          }
         },
-        { 
-          id: 2, 
-          englishText: 'The apple is red.', 
-          vietnameseText: 'Quả táo màu đỏ.', 
-          audioUrl: 'https://example.com/sentence2.mp3', 
-          createdDate: new Date(Date.now() - 86400000),
-          topicIds: [1],
-          wordIds: [1]
-        },
-        { 
-          id: 3, 
-          englishText: 'I read a book.', 
-          vietnameseText: 'Tôi đọc một quyển sách.', 
-          audioUrl: 'https://example.com/sentence3.mp3', 
-          createdDate: new Date(Date.now() - 172800000),
-          topicIds: [2],
-          wordIds: [3]
-        },
-        { 
-          id: 4, 
-          englishText: 'The cat is sleeping.', 
-          vietnameseText: 'Con mèo đang ngủ.', 
-          audioUrl: 'https://example.com/sentence4.mp3', 
-          createdDate: new Date(Date.now() - 259200000),
-          topicIds: [3],
-          wordIds: [4]
-        },
-        { 
-          id: 5, 
-          englishText: 'I have a cat.', 
-          vietnameseText: 'Tôi có một con mèo.', 
-          audioUrl: 'https://example.com/sentence5.mp3', 
-          createdDate: new Date(Date.now() - 345600000),
-          topicIds: [3],
-          wordIds: [4, 5]
+        error: (error) => {
+          console.error('Error loading sentences:', error);
         }
-      ];
-      this.filteredSentences = [...this.sentences];
-      this.updatePagination();
-      this.loading = false;
-    }, 500);
+      });
   }
 
   loadTopics(): void {
-    // Mock topics for now
-    this.topics = [
-      { id: 1, name: 'Food' },
-      { id: 2, name: 'Home' },
-      { id: 3, name: 'Animals' },
-      { id: 4, name: 'Travel' },
-      { id: 5, name: 'School' },
-      { id: 6, name: 'Family' },
-      { id: 7, name: 'Work' },
-    ];
+    // Use HttpClient to fetch topics from API
+    fetch(`${BASE_LOCAL_URL}/topics`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem(TOKEN_KEY)}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.code === 1000 && data.result) {
+          this.topics = data.result.map((topic: any) => ({
+            id: topic.id,
+            name: topic.name
+          }));
+        } else {
+          console.error('Failed to load topics:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading topics:', error);
+      });
   }
 
   loadWords(): void {
-    // Mock words for now
-    this.words = [
-      { id: 1, englishText: 'Apple', vietnameseText: 'Quả táo', imageUrl: 'https://example.com/apple.jpg', isSelected: false },
-      { id: 2, englishText: 'Like', vietnameseText: 'Thích', isSelected: false },
-      { id: 3, englishText: 'Book', vietnameseText: 'Quyển sách', imageUrl: 'https://example.com/book.jpg', isSelected: false },
-      { id: 4, englishText: 'Cat', vietnameseText: 'Con mèo', imageUrl: 'https://example.com/cat.jpg', isSelected: false },
-      { id: 5, englishText: 'Have', vietnameseText: 'Có', isSelected: false },
-      { id: 6, englishText: 'Dog', vietnameseText: 'Con chó', imageUrl: 'https://example.com/dog.jpg', isSelected: false },
-      { id: 7, englishText: 'House', vietnameseText: 'Ngôi nhà', imageUrl: 'https://example.com/house.jpg', isSelected: false },
-      { id: 8, englishText: 'Big', vietnameseText: 'Lớn', isSelected: false }
-    ];
+    this.wordService.getWords()
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            this.words = response.result.map(word => ({
+              id: word.id,
+              englishText: word.englishText,
+              vietnameseText: word.vietnameseText,
+              imageUrl: word.imageUrl,
+              isSelected: false
+            }));
+          } else {
+            console.error('Failed to load words:', response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading words:', error);
+        }
+      });
   }
 
   onSearch(event: Event): void {
@@ -267,27 +266,41 @@ export class SentenceComponent implements OnInit {
   openEditModal(sentence: SentenceDisplay): void {
     this.isEditing = true;
     this.selectedSentence = sentence;
+    this.formLoading = true;
     
     // Reset form and words selection
     this.resetForm();
-    this.words.forEach(word => word.isSelected = false);
     
-    // Populate form with selected sentence data
-    this.sentenceForm.patchValue({
-      id: sentence.id,
-      englishText: sentence.englishText,
-      vietnameseText: sentence.vietnameseText,
-      topicIds: sentence.topicIds || []
-    });
-
-    // Mark selected words
-    if (sentence.wordIds) {
-      this.words.forEach(word => {
-        word.isSelected = sentence.wordIds?.includes(word.id) || false;
+    // Get the detailed information about the sentence
+    this.sentenceService.getSentenceById(sentence.id)
+      .pipe(finalize(() => this.formLoading = false))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000 && response.result) {
+            const sentenceDetail = response.result;
+            
+            // Populate form with selected sentence data
+            this.sentenceForm.patchValue({
+              id: sentenceDetail.id,
+              englishText: sentenceDetail.englishText,
+              vietnameseText: sentenceDetail.vietnameseText,
+              topicIds: sentenceDetail.topicIds || []
+            });
+            
+            // Mark selected words
+            this.words.forEach(word => {
+              word.isSelected = sentenceDetail.wordIds?.includes(word.id) || false;
+            });
+            
+            this.editModalVisible = true;
+          } else {
+            console.error('Failed to fetch sentence details:', response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching sentence details:', error);
+        }
       });
-    }
-    
-    this.editModalVisible = true;
   }
 
   openDeleteModal(sentence: SentenceDisplay): void {
@@ -308,7 +321,7 @@ export class SentenceComponent implements OnInit {
     this.words.forEach(word => word.isSelected = false);
   }
 
-  toggleWord(word: Word): void {
+  toggleWord(word: WordDisplay): void {
     word.isSelected = !word.isSelected;
   }
 
@@ -325,41 +338,54 @@ export class SentenceComponent implements OnInit {
     
     this.formLoading = true;
     
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      if (this.isEditing && this.selectedSentence) {
-        // Update existing sentence
-        const index = this.sentences.findIndex(s => s.id === this.selectedSentence!.id);
-        if (index !== -1) {
-          this.sentences[index] = {
-            ...this.sentences[index],
-            englishText: formValue.englishText,
-            vietnameseText: formValue.vietnameseText,
-            topicIds: formValue.topicIds,
-            wordIds: selectedWordIds
-          };
-        }
-      } else {
-        // Add new sentence
-        const newSentence: SentenceDisplay = {
-          id: this.sentences.length > 0 ? Math.max(...this.sentences.map(s => s.id)) + 1 : 1,
-          englishText: formValue.englishText,
-          vietnameseText: formValue.vietnameseText,
-          createdDate: new Date(),
-          topicIds: formValue.topicIds,
-          wordIds: selectedWordIds
-        };
-        this.sentences.unshift(newSentence);
-      }
-      
-      // Update filtered sentences
-      this.applyFilters();
-      
-      // Close modal and reset form
-      this.editModalVisible = false;
-      this.formLoading = false;
-      this.resetForm();
-    }, 500);
+    const sentenceData = {
+      englishText: formValue.englishText,
+      vietnameseText: formValue.vietnameseText,
+      topicIds: formValue.topicIds || [],
+      wordIds: selectedWordIds
+    };
+    
+    if (this.isEditing && this.selectedSentence) {
+      // Update existing sentence
+      this.sentenceService.updateSentence(this.selectedSentence.id, sentenceData)
+        .pipe(finalize(() => {
+          this.formLoading = false;
+          this.editModalVisible = false;
+        }))
+        .subscribe({
+          next: (response) => {
+            if (response.code === 1000) {
+              this.loadSentences(); // Reload sentences after update
+              this.resetForm();
+            } else {
+              console.error('Failed to update sentence:', response.message);
+            }
+          },
+          error: (error) => {
+            console.error('Error updating sentence:', error);
+          }
+        });
+    } else {
+      // Add new sentence
+      this.sentenceService.createSentence(sentenceData)
+        .pipe(finalize(() => {
+          this.formLoading = false;
+          this.editModalVisible = false;
+        }))
+        .subscribe({
+          next: (response) => {
+            if (response.code === 1000) {
+              this.loadSentences(); // Reload sentences after creation
+              this.resetForm();
+            } else {
+              console.error('Failed to create sentence:', response.message);
+            }
+          },
+          error: (error) => {
+            console.error('Error creating sentence:', error);
+          }
+        });
+    }
   }
 
   deleteSentence(): void {
@@ -367,18 +393,24 @@ export class SentenceComponent implements OnInit {
     
     this.loading = true;
     
-    // In a real app, you would call an API here
-    setTimeout(() => {
-      // Remove deleted sentence from array
-      this.sentences = this.sentences.filter(s => s.id !== this.selectedSentence!.id);
-      
-      // Update filtered sentences
-      this.applyFilters();
-      
-      // Close modal
-      this.deleteModalVisible = false;
-      this.loading = false;
-    }, 500);
+    this.sentenceService.deleteSentence(this.selectedSentence.id)
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.deleteModalVisible = false;
+      }))
+      .subscribe({
+        next: (response) => {
+          if (response.code === 1000) {
+            // Reload sentences after deletion
+            this.loadSentences();
+          } else {
+            console.error('Failed to delete sentence:', response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting sentence:', error);
+        }
+      });
   }
 
   playAudio(audioUrl?: string): void {
