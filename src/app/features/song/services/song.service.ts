@@ -92,6 +92,24 @@ export class SongService {
       );
   }
 
+  // Upload song to Cloudinary
+  uploadToCloudinary(songId: number): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.post<ApiResponse<Song>>(`${this.apiUrl}/${songId}/upload-cloudinary`, {}, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error uploading to Cloudinary:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
   // Get all songs (paginated) - keeping this for compatibility
   getSongs(page: number = 1, limit: number = 10): Observable<{ items: Song[], totalCount: number }> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);

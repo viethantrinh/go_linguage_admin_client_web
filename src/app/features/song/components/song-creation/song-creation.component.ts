@@ -38,7 +38,7 @@ import {Song} from '../../models/song.model';
 export class SongCreationComponent implements OnInit, OnDestroy {
   // Current step tracking
   currentStep: number = 1;
-  totalSteps: number = 4;
+  totalSteps: number = 5;
 
   // Forms
   songForm: FormGroup;
@@ -48,10 +48,12 @@ export class SongCreationComponent implements OnInit, OnDestroy {
   lyricsLoading: boolean = false;
   audioLoading: boolean = false;
   alignmentLoading: boolean = false;
+  cloudinaryLoading: boolean = false;
 
   // Generated content
   currentSong: Song | null = null;
   audioUrl: string = '';
+  cloudinaryUrl: string = '';
 
   // Status polling subscription
   statusSubscription: Subscription | null = null;
@@ -258,6 +260,30 @@ export class SongCreationComponent implements OnInit, OnDestroy {
       });
   }
 
+  uploadToCloudinary(): void {
+    if (!this.currentSong || !this.currentSong.id) {
+      this.error = 'No song available for upload';
+      return;
+    }
+
+    this.cloudinaryLoading = true;
+    this.error = '';
+
+    this.songService.uploadToCloudinary(this.currentSong.id)
+      .pipe(
+        finalize(() => this.cloudinaryLoading = false),
+        catchError(err => {
+          this.error = `Error uploading to Cloudinary: ${err.message || 'Unknown error'}`;
+          throw err;
+        })
+      )
+      .subscribe((song: Song) => {
+        this.currentSong = song;
+        this.cloudinaryUrl = song.audioUrl || '';
+        this.nextStep();
+      });
+  }
+
   setupAudioEvents(): void {
     if (!this.audioPlayer || !this.currentSong?.timestamps) return;
 
@@ -325,6 +351,7 @@ export class SongCreationComponent implements OnInit, OnDestroy {
 
     this.currentSong = null;
     this.audioUrl = '';
+    this.cloudinaryUrl = '';
     this.error = '';
     this.currentHighlightedWordIndex = -1;
 
