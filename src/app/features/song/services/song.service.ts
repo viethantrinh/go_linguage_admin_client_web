@@ -1,47 +1,184 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {delay, map} from 'rxjs/operators';
-import {Song, SongCreateDto, SongResponse, SongUpdateDto} from '../models/song.model';
-
-export interface SongGenres {
-  pop: boolean;
-  rock: boolean;
-  ballad: boolean;
-  rap: boolean;
-  electronic: boolean;
-  folk: boolean;
-  rnb: boolean;
-  jazz: boolean;
-}
-
-export interface SongFormData {
-  songTitle: string;
-  genres: SongGenres;
-  keywords: string;
-}
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable, of, throwError} from 'rxjs';
+import {catchError, delay, map} from 'rxjs/operators';
+import {Song, SongCreateDto, SongStatusResponse, SongUpdateDto, WordTimestamp} from '../models/song.model';
+import {TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {ApiResponse} from '../../../core/models/api-response.model';
 
 export interface LyricsData {
   english: string;
   vietnamese: string;
 }
 
-export interface WordTiming {
-  word: string;
-  start: number;
-  end: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class SongService {
-  private apiUrl = 'api/songs'; // Replace with your actual API endpoint
+  private apiUrl = 'http://192.168.1.22:8080/api/songs';
 
   constructor(private http: HttpClient) { }
 
+  // Create a new song with lyrics using Groq AI
+  createSongWithLyrics(songData: SongCreateDto): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+
+    return this.http.post<ApiResponse<Song>>(`${this.apiUrl}`, songData, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error creating song:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Generate audio for an existing song using Suno AI
+  generateSongAudio(songId: number): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.post<ApiResponse<Song>>(`${this.apiUrl}/${songId}/audio`, {}, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error generating audio:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Check the status of audio generation
+  checkSongStatus(songId: number): Observable<SongStatusResponse> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.post<ApiResponse<SongStatusResponse>>(`${this.apiUrl}/${songId}/status`, {}, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error checking song status:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Force alignment for song lyrics
+  forceAlignmentLyrics(songId: number): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.post<ApiResponse<Song>>(`${this.apiUrl}/${songId}/force-alignment`, {}, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error during force alignment:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Get all songs (paginated) - keeping this for compatibility
+  getSongs(page: number = 1, limit: number = 10): Observable<{ items: Song[], totalCount: number }> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.get<ApiResponse<{ items: Song[], totalCount: number }>>(`${this.apiUrl}?page=${page}&limit=${limit}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          return { items: [], totalCount: 0 };
+        }),
+        catchError(error => {
+          console.error('Error fetching songs:', error);
+          return of({ items: [], totalCount: 0 });
+        })
+      );
+  }
+
+  // Get a single song by ID
+  getSongById(id: number): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.get<ApiResponse<Song>>(`${this.apiUrl}/${id}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error('Song not found');
+        }),
+        catchError(error => {
+          console.error(`Error fetching song with ID ${id}:`, error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Update an existing song
+  updateSong(song: SongUpdateDto): Observable<Song> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.put<ApiResponse<Song>>(`${this.apiUrl}/${song.id}`, song, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          throw new Error(response.message);
+        }),
+        catchError(error => {
+          console.error('Error updating song:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Delete a song
+  deleteSong(id: number): Observable<boolean> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${id}`, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return true;
+          }
+          return false;
+        }),
+        catchError(error => {
+          console.error(`Error deleting song with ID ${id}:`, error);
+          return of(false);
+        })
+      );
+  }
+
   // Simulate generating lyrics based on song data
-  generateLyrics(formData: SongFormData): Observable<LyricsData> {
+  generateLyrics(formData: {
+    songTitle: string;
+    genres: {
+      pop: boolean;
+      rock: boolean;
+      ballad: boolean;
+      rap: boolean;
+      electronic: boolean;
+      folk: boolean;
+      rnb: boolean;
+      jazz: boolean;
+    };
+    keywords: string;
+  }): Observable<LyricsData> {
     console.log('Generating lyrics with data:', formData);
 
     // For demo - replace with actual API call
@@ -61,34 +198,34 @@ export class SongService {
   }
 
   // Simulate alignment process
-  processAlignment(audioUrl: string): Observable<WordTiming[]> {
+  processAlignment(audioUrl: string): Observable<WordTimestamp[]> {
     console.log('Processing alignment for:', audioUrl);
 
     // For demo - replace with actual API call
     return of([
-      {word: "In", start: 0.5, end: 0.7},
-      {word: "the", start: 0.7, end: 0.9},
-      {word: "shadows", start: 0.9, end: 1.5},
-      {word: "of", start: 1.5, end: 1.7},
-      {word: "the", start: 1.7, end: 1.9},
-      {word: "night", start: 1.9, end: 2.5},
-      {word: "I", start: 3.0, end: 3.2},
-      {word: "search", start: 3.2, end: 3.5},
-      {word: "for", start: 3.5, end: 3.7},
-      {word: "a", start: 3.7, end: 3.8},
-      {word: "guiding", start: 3.8, end: 4.3},
-      {word: "light", start: 4.3, end: 5.0}
+      { word: "In", startTime: 0.5, endTime: 0.7 },
+      { word: "the", startTime: 0.7, endTime: 0.9 },
+      { word: "shadows", startTime: 0.9, endTime: 1.5 },
+      { word: "of", startTime: 1.5, endTime: 1.7 },
+      { word: "the", startTime: 1.7, endTime: 1.9 },
+      { word: "night", startTime: 1.9, endTime: 2.5 },
+      { word: "I", startTime: 3.0, endTime: 3.2 },
+      { word: "search", startTime: 3.2, endTime: 3.5 },
+      { word: "for", startTime: 3.5, endTime: 3.7 },
+      { word: "a", startTime: 3.7, endTime: 3.8 },
+      { word: "guiding", startTime: 3.8, endTime: 4.3 },
+      { word: "light", startTime: 4.3, endTime: 5.0 }
     ]).pipe(delay(2500));
   }
 
   // Simulate saving to database
   saveSong(data: {
-    title: string,
-    genres: string[],
-    lyrics: LyricsData,
-    audioUrl: string,
-    wordTimings: WordTiming[]
-  }): Observable<{success: boolean, cloudinaryUrl: string}> {
+    title: string;
+    genres: string[];
+    lyrics: LyricsData;
+    audioUrl: string;
+    wordTimings: WordTimestamp[];
+  }): Observable<{ success: boolean, cloudinaryUrl: string }> {
     console.log('Saving song data:', data);
 
     // For demo - replace with actual API call
@@ -98,127 +235,37 @@ export class SongService {
     }).pipe(delay(2000));
   }
 
-  // Get all songs (paginated)
-  getSongs(page: number = 1, limit: number = 10): Observable<SongResponse> {
-    // For demo - replace with actual API call
-    return of(this.getMockSongs()).pipe(
-      delay(500),
-      map(songs => ({
-        items: songs.slice((page - 1) * limit, page * limit),
-        totalCount: songs.length
-      }))
-    );
-  }
-
-  // Get a single song by ID
-  getSongById(id: number): Observable<Song> {
-    // For demo - replace with actual API call
-    const songs = this.getMockSongs();
-    const song = songs.find(s => s.id === id);
-
-    if (song) {
-      return of(song).pipe(delay(300));
-    }
-
-    return of({
-      id: 0,
-      title: '',
-      englishLyrics: '',
-      vietnameseLyrics: '',
-      audioUrl: '',
-      genres: [],
-      createdDate: new Date()
-    }).pipe(delay(300));
-  }
-
-  // Create a new song
-  createSong(song: SongCreateDto): Observable<Song> {
-    console.log('Creating song:', song);
-    // For demo - replace with actual API call
-    const mockSongs = this.getMockSongs();
-    const newSong: Song = {
-      ...song,
-      id: Math.max(...mockSongs.map(s => s.id), 0) + 1,
-      createdDate: new Date()
-    };
-
-    return of(newSong).pipe(delay(800));
-  }
-
-  // Update an existing song
-  updateSong(song: SongUpdateDto): Observable<Song> {
-    console.log('Updating song:', song);
-    // For demo - replace with actual API call
-    return of({
-      ...song,
-      createdDate: new Date()
-    } as Song).pipe(delay(800));
-  }
-
-  // Delete a song
-  deleteSong(id: number): Observable<boolean> {
-    console.log('Deleting song with ID:', id);
-    // For demo - replace with actual API call
-    return of(true).pipe(delay(800));
-  }
-
   // Mock data for demo purposes
   private getMockSongs(): Song[] {
     return [
       {
         id: 1,
-        title: 'Memories of Home',
-        englishLyrics: 'In the shadows of the night\nI search for a guiding light',
-        vietnameseLyrics: 'Trong bóng tối của đêm\nTôi tìm kiếm ánh sáng dẫn đường',
+        name: 'Memories of Home',
+        englishLyric: 'In the shadows of the night\nI search for a guiding light',
+        vietnameseLyric: 'Trong bóng tối của đêm\nTôi tìm kiếm ánh sáng dẫn đường',
         audioUrl: 'https://example.com/songs/memories.mp3',
-        genres: ['pop', 'ballad'],
-        createdDate: new Date('2025-01-15'),
-        cloudinaryUrl: 'https://res.cloudinary.com/demo/audio/upload/v1234567890/memories.mp3',
-        wordTimings: [
-          {word: "In", start: 0.5, end: 0.7},
-          {word: "the", start: 0.7, end: 0.9},
-          {word: "shadows", start: 0.9, end: 1.5}
+        creationStatus: 'lyric_created',
+        timestamps: [
+          { word: "In", startTime: 0.5, endTime: 0.7 },
+          { word: "the", startTime: 0.7, endTime: 0.9 },
+          { word: "shadows", startTime: 0.9, endTime: 1.5 }
         ]
       },
       {
         id: 2,
-        title: 'Summer Breeze',
-        englishLyrics: 'Summer breeze makes me feel fine\nBlowing through the jasmine in my mind',
-        vietnameseLyrics: 'Làn gió mùa hè khiến tôi cảm thấy tuyệt vời\nThổi qua hoa nhài trong tâm trí tôi',
+        name: 'Summer Breeze',
+        englishLyric: 'Summer breeze makes me feel fine\nBlowing through the jasmine in my mind',
+        vietnameseLyric: 'Làn gió mùa hè khiến tôi cảm thấy tuyệt vời\nThổi qua hoa nhài trong tâm trí tôi',
         audioUrl: 'https://example.com/songs/summer.mp3',
-        genres: ['pop', 'folk'],
-        createdDate: new Date('2025-02-20'),
-        cloudinaryUrl: 'https://res.cloudinary.com/demo/audio/upload/v1234567890/summer.mp3'
+        creationStatus: 'lyric_created'
       },
       {
         id: 3,
-        title: 'Neon Lights',
-        englishLyrics: 'Neon lights are flashing bright\nPulsing through the city tonight',
-        vietnameseLyrics: 'Đèn neon lấp lánh sáng rực\nRộn ràng khắp thành phố đêm nay',
+        name: 'Neon Lights',
+        englishLyric: 'Neon lights are flashing bright\nPulsing through the city tonight',
+        vietnameseLyric: 'Đèn neon lấp lánh sáng rực\nRộn ràng khắp thành phố đêm nay',
         audioUrl: 'https://example.com/songs/neon.mp3',
-        genres: ['electronic', 'pop'],
-        createdDate: new Date('2025-03-05'),
-        cloudinaryUrl: 'https://res.cloudinary.com/demo/audio/upload/v1234567890/neon.mp3'
-      },
-      {
-        id: 4,
-        title: 'Mountain Echo',
-        englishLyrics: 'Standing tall on mountain peaks\nAn echo of my voice speaks',
-        vietnameseLyrics: 'Đứng vững trên đỉnh núi cao\nTiếng vọng của giọng tôi cất lên',
-        audioUrl: 'https://example.com/songs/mountain.mp3',
-        genres: ['folk', 'acoustic'],
-        createdDate: new Date('2025-03-18'),
-        cloudinaryUrl: 'https://res.cloudinary.com/demo/audio/upload/v1234567890/mountain.mp3'
-      },
-      {
-        id: 5,
-        title: 'Ocean Dreams',
-        englishLyrics: 'Waves crashing on the shore\nDreams floating evermore',
-        vietnameseLyrics: 'Sóng vỗ bờ cát\nGiấc mơ trôi mãi',
-        audioUrl: 'https://example.com/songs/ocean.mp3',
-        genres: ['ballad', 'ambient'],
-        createdDate: new Date('2025-04-10'),
-        cloudinaryUrl: 'https://res.cloudinary.com/demo/audio/upload/v1234567890/ocean.mp3'
+        creationStatus: 'lyric_created'
       }
     ];
   }

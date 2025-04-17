@@ -19,7 +19,7 @@ import {
 } from '@coreui/angular';
 import {IconDirective} from '@coreui/icons-angular';
 import {SongService} from '../../services/song.service';
-import {Song} from '../../models/song.model';
+import {Song, SongTable} from '../../models/song.model';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {finalize} from 'rxjs';
 import {SongCreationComponent} from '../song-creation/song-creation.component';
@@ -57,9 +57,9 @@ import {SongCreationComponent} from '../song-creation/song-creation.component';
   styleUrl: './song.component.scss'
 })
 export class SongComponent implements OnInit {
-  songs: Song[] = [];
-  filteredSongs: Song[] = [];
-  selectedSong: Song | null = null;
+  songs: SongTable[] = [];
+  filteredSongs: SongTable[] = [];
+  selectedSong: SongTable | null = null;
 
   // Modal visibility states
   createModalVisible = false;
@@ -103,7 +103,7 @@ export class SongComponent implements OnInit {
     this.songService.getSongs(this.currentPage, this.itemsPerPage)
       .pipe(finalize(() => this.loading = false))
       .subscribe(response => {
-        this.songs = response.items;
+        // this.songs = response.items;
         this.filteredSongs = [...this.songs];
         this.totalItems = response.totalCount;
         this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
@@ -145,23 +145,23 @@ export class SongComponent implements OnInit {
   }
 
   openEditModal(song: Song): void {
-    this.selectedSong = song;
-    this.songForm.patchValue({
-      title: song.title,
-      englishLyrics: song.englishLyrics,
-      vietnameseLyrics: song.vietnameseLyrics,
-      genres: song.genres
-    });
-    this.editModalVisible = true;
+    // this.selectedSong = song;
+    // this.songForm.patchValue({
+    //   title: song.title,
+    //   englishLyrics: song.englishLyrics,
+    //   vietnameseLyrics: song.vietnameseLyrics,
+    //   genres: song.genres
+    // });
+    // this.editModalVisible = true;
   }
 
   openDeleteModal(song: Song): void {
-    this.selectedSong = song;
+    // this.selectedSong = song;
     this.deleteModalVisible = true;
   }
 
   openViewDetailsModal(song: Song): void {
-    this.selectedSong = song;
+    // this.selectedSong = song;
     this.viewDetailsModalVisible = true;
   }
 

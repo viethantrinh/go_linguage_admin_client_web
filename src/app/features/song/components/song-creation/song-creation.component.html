@@ -4,6 +4,11 @@
     <p class="text-medium-emphasis">Tạo bài hát bằng công nghệ AI</p>
   </div>
 
+  <!-- Display error messages if any -->
+  <div *ngIf="error" class="alert alert-danger mb-4">
+    {{ error }}
+  </div>
+
   <!-- Steps Progress -->
   <div class="row mb-5 justify-content-center">
     <div class="col-12 px-4">
@@ -16,7 +21,7 @@
             1
           </div>
           <div class="position-absolute start-50 translate-middle-x" style="white-space: nowrap; bottom: -24px; font-size: 0.875rem;">
-            Tên bài hát
+            Nhập thông tin
           </div>
         </div>
         <div class="flex-grow-1 mx-2" 
@@ -61,22 +66,7 @@
             4
           </div>
           <div class="position-absolute start-50 translate-middle-x" style="white-space: nowrap; bottom: -24px; font-size: 0.875rem;">
-            Alignment
-          </div>
-        </div>
-        <div class="flex-grow-1 mx-2" 
-             [ngClass]="currentStep > 4 ? 'bg-success' : 'bg-light'" 
-             style="height: 2px;"></div>
-
-        <!-- Step 5 -->
-        <div class="position-relative">
-          <div [ngClass]="currentStep > 5 ? 'bg-success text-white' : (currentStep === 5 ? 'bg-primary text-white' : 'bg-light text-medium-emphasis')"
-               class="d-flex align-items-center justify-content-center rounded-circle" 
-               style="width: 40px; height: 40px; font-weight: 600;">
-            5
-          </div>
-          <div class="position-absolute start-50 translate-middle-x" style="white-space: nowrap; bottom: -24px; font-size: 0.875rem;">
-            Lưu trữ
+            Phát bài hát
           </div>
         </div>
       </div>
@@ -86,240 +76,195 @@
   <!-- Main Content Area -->
   <c-card class="mt-5" style="min-height: 460px;">
     <c-card-body>
-      <!-- Step 1: Song Name Input -->
+      <!-- Step 1: Song Name and Words Input -->
       <div *ngIf="currentStep === 1">
-        <h2 class="h5 mb-4">Bước 1: Nhập tên bài hát</h2>
-        <form [formGroup]="songForm">
+        <h2 class="h5 mb-4">Bước 1: Nhập tên bài hát và từ vựng</h2>
+        <form [formGroup]="songForm" class="mb-4">
           <div class="mb-3">
-            <label for="songTitle" cLabel>Tên bài hát</label>
-            <input cFormControl id="songTitle" formControlName="songTitle" placeholder="Nhập tên bài hát...">
-          </div>
-          
-          <div class="mb-3" formGroupName="genres">
-            <label cLabel>Thể loại</label>
-            <div class="row g-3">
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="pop" formControlName="pop">
-                  <label class="form-check-label" for="pop">Pop</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="rock" formControlName="rock">
-                  <label class="form-check-label" for="rock">Rock</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="ballad" formControlName="ballad">
-                  <label class="form-check-label" for="ballad">Ballad</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="rap" formControlName="rap">
-                  <label class="form-check-label" for="rap">Rap</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="electronic" formControlName="electronic">
-                  <label class="form-check-label" for="electronic">Electronic</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="folk" formControlName="folk">
-                  <label class="form-check-label" for="folk">Folk</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="rnb" formControlName="rnb">
-                  <label class="form-check-label" for="rnb">R&B</label>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="jazz" formControlName="jazz">
-                  <label class="form-check-label" for="jazz">Jazz</label>
-                </div>
-              </div>
+            <label for="songName" cLabel>Tên bài hát</label>
+            <input cFormControl id="songName" formControlName="songName" placeholder="Nhập tên bài hát...">
+            <div *ngIf="songForm.get('songName')?.invalid && songForm.get('songName')?.touched" class="text-danger mt-1">
+              Vui lòng nhập tên bài hát
             </div>
           </div>
-          
-          <div class="mb-3">
-            <label for="keywords" cLabel>Từ khóa liên quan</label>
-            <textarea cFormControl id="keywords" formControlName="keywords" rows="3" 
-                     placeholder="Nhập các từ khóa phù hợp với chủ đề bài hát, cách nhau bởi dấu phẩy..."></textarea>
-            <small class="text-medium-emphasis">Các từ khóa giúp AI tạo lời bài hát chính xác hơn</small>
+        </form>
+        
+        <h5 class="mb-2">Các từ vựng</h5>
+        <form [formGroup]="wordsForm">
+          <div formArrayName="words">
+            <div *ngFor="let wordControl of wordsArray.controls; let i = index" class="mb-2 d-flex align-items-center">
+              <div [formGroupName]="i" class="flex-grow-1 me-2">
+                <input cFormControl formControlName="word" placeholder="Nhập từ vựng...">
+                <div *ngIf="wordControl.get('word')?.invalid && wordControl.get('word')?.touched" class="text-danger mt-1">
+                  Vui lòng nhập từ vựng
+                </div>
+              </div>
+              <button cButton color="danger" variant="outline" type="button" (click)="removeWordField(i)" 
+                      *ngIf="wordsArray.length > 1" class="btn-sm">
+                <svg cIcon name="cilTrash"></svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button cButton color="secondary" variant="outline" type="button" (click)="addWordField()" class="btn-sm">
+              <svg cIcon name="cilPlus" class="me-1"></svg> Thêm từ vựng
+            </button>
           </div>
         </form>
-      </div>
-
-      <!-- Step 2: Lyrics Generation -->
-      <div *ngIf="currentStep === 2">
-        <h2 class="h5 mb-4">Bước 2: Tạo lời bài hát</h2>
-        <div *ngIf="lyricsLoading" class="py-4 text-center">
-          <c-spinner color="primary" style="width: 3rem; height: 3rem;"></c-spinner>
-          <p class="mt-3">Đang tạo lời bài hát bằng Groq AI...</p>
-          <p class="text-medium-emphasis small">Quá trình này có thể mất vài giây đến một phút</p>
+        
+        <div class="mt-4">
+          <p class="text-medium-emphasis">Mô tả: Nhập tên bài hát và các từ vựng liên quan để AI tạo lời bài hát.</p>
         </div>
         
-        <div *ngIf="!lyricsLoading" class="lyrics-content">
+        <div class="d-flex justify-content-end mt-4">
+          <button cButton color="primary" (click)="createSongWithLyrics()" [disabled]="lyricsLoading">
+            <span *ngIf="!lyricsLoading">Tạo lời bài hát</span>
+            <c-spinner *ngIf="lyricsLoading" size="sm" color="light"></c-spinner>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Lyrics Display -->
+      <div *ngIf="currentStep === 2">
+        <h2 class="h5 mb-4">Bước 2: Xem lời bài hát đã tạo</h2>
+        
+        <div class="lyrics-content">
           <div class="row g-4 mb-4">
             <div class="col-md-6">
               <h5>Lời tiếng Anh</h5>
-              <div class="border rounded p-3 bg-light" style="height: 220px; overflow-y: auto; white-space: pre-line;">
-                {{ englishLyrics }}
+              <div class="border rounded p-3 bg-light" style="height: 300px; overflow-y: auto; white-space: pre-line;">
+                {{ currentSong?.englishLyric }}
               </div>
             </div>
             <div class="col-md-6">
               <h5>Lời tiếng Việt</h5>
-              <div class="border rounded p-3 bg-light" style="height: 220px; overflow-y: auto; white-space: pre-line;">
-                {{ vietnameseLyrics }}
+              <div class="border rounded p-3 bg-light" style="height: 300px; overflow-y: auto; white-space: pre-line;">
+                {{ currentSong?.vietnameseLyric }}
               </div>
             </div>
           </div>
-          <div class="d-flex justify-content-between">
-            <button cButton color="light" variant="outline" (click)="regenerateLyrics()">
-              <svg cIcon name="cilReload" class="me-2"></svg> Tạo lại
-            </button>
-            <button cButton color="primary" variant="outline">
-              <svg cIcon name="cilPencil" class="me-2"></svg> Chỉnh sửa
+          
+          <div class="mt-4">
+            <p class="text-medium-emphasis">Bước tiếp theo: Tạo file âm thanh từ lời bài hát đã tạo bằng SUNO AI</p>
+          </div>
+          
+          <div class="d-flex justify-content-end mt-4">
+            <button cButton color="primary" (click)="generateSongAudio()" [disabled]="audioLoading">
+              <span *ngIf="!audioLoading">Tạo file âm thanh</span>
+              <c-spinner *ngIf="audioLoading" size="sm" color="light"></c-spinner>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Audio Generation -->
+      <!-- Step 3: Audio Generation and Status Check -->
       <div *ngIf="currentStep === 3">
         <h2 class="h5 mb-4">Bước 3: Tạo file audio</h2>
         <div *ngIf="audioLoading" class="py-4 text-center">
           <c-spinner color="primary" style="width: 3rem; height: 3rem;"></c-spinner>
           <p class="mt-3">Đang tạo file audio bằng Suno AI...</p>
-          <p class="text-medium-emphasis small">Quá trình này có thể mất 1-3 phút</p>
-          
-          <div class="mt-4 w-100 mx-auto" style="max-width: 500px;">
-            <c-progress class="mb-3">
-              <c-progress-bar [value]="audioProgress"></c-progress-bar>
-            </c-progress>
-            <small>{{ audioProgress }}%</small>
-          </div>
+          <p class="text-medium-emphasis small">Quá trình này có thể mất 1-2 phút, hệ thống sẽ kiểm tra trạng thái mỗi 15 giây</p>
         </div>
         
-        <div *ngIf="!audioLoading" class="text-center py-4">
-          <h5 class="mb-4">Bài hát đã được tạo thành công</h5>
-          <div class="mb-4 mx-auto" style="max-width: 500px;">
-            <audio controls class="w-100">
+        <div *ngIf="!audioLoading && audioUrl">
+          <div class="alert alert-success mb-4">
+            <svg cIcon name="cilCheckAlt" class="me-2"></svg>
+            File âm thanh đã được tạo thành công!
+          </div>
+          
+          <div class="mb-4">
+            <h5>Nghe thử:</h5>
+            <audio controls class="w-100 mt-2">
               <source [src]="audioUrl" type="audio/mpeg">
               Trình duyệt của bạn không hỗ trợ phát audio.
             </audio>
-          </div>
-          <button cButton color="light" variant="outline" (click)="regenerateAudio()">
-            <svg cIcon name="cilReload" class="me-2"></svg> Tạo lại
-          </button>
-        </div>
-      </div>
-
-      <!-- Step 4: Alignment Process -->
-      <div *ngIf="currentStep === 4">
-        <h2 class="h5 mb-4">Bước 4: Xử lý alignment</h2>
-        <div *ngIf="alignmentLoading" class="py-4 text-center">
-          <c-spinner color="primary" style="width: 3rem; height: 3rem;"></c-spinner>
-          <p class="mt-3">Đang xử lý force alignment...</p>
-          <p class="text-medium-emphasis small">Trích xuất word-level timestamp</p>
-        </div>
-        
-        <div *ngIf="!alignmentLoading">
-          <h5 class="mb-3">Word-level alignment</h5>
-          <div class="border rounded p-4 bg-light mb-4">
-            <div class="p-2 text-center">
-              <ng-container *ngFor="let item of wordTimings">
-                <span class="word-timing" [attr.data-start]="item.start" [attr.data-end]="item.end" (click)="playWordAudio(item.start)">
-                  {{ item.word }}
-                </span>
-              </ng-container>
-            </div>
           </div>
           
           <div class="mt-4">
-            <audio id="aligned-audio" controls class="w-100">
-              <source [src]="audioUrl" type="audio/mpeg">
-              Trình duyệt của bạn không hỗ trợ phát audio.
-            </audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 5: Save to Database -->
-      <div *ngIf="currentStep === 5">
-        <h2 class="h5 mb-4">Bước 5: Lưu trữ bài hát</h2>
-        <div *ngIf="saveLoading" class="py-4 text-center">
-          <c-spinner color="primary" style="width: 3rem; height: 3rem;"></c-spinner>
-          <p class="mt-3">Đang tải lên Cloudinary và lưu trữ...</p>
-        </div>
-        
-        <div *ngIf="!saveLoading">
-          <c-alert color="success" class="mb-4">
-            <svg cIcon name="cilCheckCircle" class="me-2"></svg>
-            <strong>Lưu trữ thành công</strong>
-            <div class="mt-2">Bài hát đã được lưu vào cơ sở dữ liệu và sẵn sàng sử dụng.</div>
-          </c-alert>
-
-          <div class="bg-light p-4 rounded mb-4">
-            <h5 class="mb-3">Thông tin bài hát</h5>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <p class="mb-1 text-medium-emphasis small">Tên bài hát</p>
-                <p class="mb-0">{{ songForm.get('songTitle')?.value || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <p class="mb-1 text-medium-emphasis small">Thể loại</p>
-                <p class="mb-0">{{ getSelectedGenres().join(', ') || 'Không xác định' }}</p>
-              </div>
-              <div class="col-12">
-                <p class="mb-1 text-medium-emphasis small">URL Cloudinary</p>
-                <p class="mb-0 text-break">{{ audioUrl || 'https://res.cloudinary.com/demo/video/upload/v1234567890/example_song.mp3' }}</p>
-              </div>
-              <div class="col-12">
-                <p class="mb-1 text-medium-emphasis small">Lời bài hát</p>
-                <p class="mb-0">{{ englishLyrics.split('\n')[0] }}...</p>
-              </div>
-            </div>
+            <p class="text-medium-emphasis">Bước tiếp theo: Thực hiện force alignment để đồng bộ từng từ với audio</p>
           </div>
           
-          <div class="text-center">
-            <button cButton color="primary" (click)="resetForm()">
-              Tạo bài hát mới
+          <div class="d-flex justify-content-end mt-4">
+            <button cButton color="primary" (click)="processAlignment()" [disabled]="alignmentLoading">
+              <span *ngIf="!alignmentLoading">Thực hiện Force Alignment</span>
+              <c-spinner *ngIf="alignmentLoading" size="sm" color="light"></c-spinner>
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Step 4: Force Alignment and Word-Level Playback -->
+      <div *ngIf="currentStep === 4">
+        <h2 class="h5 mb-4">Bước 4: Phát bài hát với lời được đồng bộ</h2>
+        
+        <div class="mb-4">
+          <div class="d-flex justify-content-center mb-3">
+            <button cButton color="primary" class="me-2" (click)="playAudio()">
+              <svg cIcon name="cilMediaPlay" class="me-1"></svg> Phát
+            </button>
+            <button cButton color="secondary" (click)="pauseAudio()">
+              <svg cIcon name="cilMediaPause" class="me-1"></svg> Tạm dừng
+            </button>
+          </div>
+        </div>
+        
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h5>Lời tiếng Anh</h5>
+            <div class="border rounded p-3 bg-light lyrics-container" style="height: 300px; overflow-y: auto;">
+              <div *ngFor="let line of getEnglishLyricsLines(); let lineIndex = index" class="mb-2">
+                <span *ngFor="let word of line.split(' '); let wordIndex = index"
+                      class="word-highlight english-word-{{lineIndex * 20 + wordIndex}}"
+                      [ngClass]="{'active': currentHighlightedWordIndex === (lineIndex * 20 + wordIndex)}">
+                  {{word}}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h5>Lời tiếng Việt</h5>
+            <div class="border rounded p-3 bg-light lyrics-container" style="height: 300px; overflow-y: auto;">
+              <div *ngFor="let line of getVietnameseLyricsLines(); let lineIndex = index" class="mb-2">
+                <span *ngFor="let word of line.split(' '); let wordIndex = index"
+                      class="word-highlight vietnamese-word-{{lineIndex * 20 + wordIndex}}"
+                      [ngClass]="{'active': currentHighlightedWordIndex === (lineIndex * 20 + wordIndex)}">
+                  {{word}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-center mt-5">
+          <button cButton color="primary" (click)="resetForm()">
+            <svg cIcon name="cilReload" class="me-2"></svg> Tạo bài hát mới
+          </button>
+        </div>
+      </div>
+
     </c-card-body>
   </c-card>
 
   <!-- Navigation Buttons -->
-  <div class="d-flex justify-content-between mt-4">
+  <div class="d-flex justify-content-between mt-4" *ngIf="currentStep > 1 && currentStep < 4">
     <button 
       cButton 
       color="light" 
-      variant="outline" 
-      *ngIf="currentStep > 1" 
-      (click)="prevStep()">
+      variant="outline"
+      (click)="prevStep()"
+      [disabled]="lyricsLoading || audioLoading || alignmentLoading">
       <svg cIcon name="cilArrowLeft" class="me-2"></svg> Quay lại
     </button>
+    
     <button 
+      *ngIf="currentStep < 4 && 
+             !((currentStep === 2 && !currentSong) || 
+              (currentStep === 3 && !audioUrl))"
       cButton 
       color="primary" 
-      *ngIf="currentStep < totalSteps" 
-      (click)="nextStep()">
-      <ng-container *ngIf="currentStep === 1">Tạo lời bài hát</ng-container>
-      <ng-container *ngIf="currentStep === 2">Tạo file audio</ng-container>
-      <ng-container *ngIf="currentStep === 3">Xử lý alignment</ng-container>
-      <ng-container *ngIf="currentStep === 4">Lưu trữ</ng-container>
-      <svg cIcon name="cilArrowRight" class="ms-2"></svg>
+      (click)="nextStep()"
+      [disabled]="lyricsLoading || audioLoading || alignmentLoading">
+      Tiếp tục <svg cIcon name="cilArrowRight" class="ms-2"></svg>
     </button>
   </div>
 </div>

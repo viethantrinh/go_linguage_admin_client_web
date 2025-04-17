@@ -1,19 +1,18 @@
 export interface Song {
   id: number;
-  title: string;
-  englishLyrics: string;
-  vietnameseLyrics: string;
-  audioUrl: string;
-  cloudinaryUrl?: string;
-  genres: string[];
-  createdDate: Date;
-  wordTimings?: WordTiming[];
+  name: string;
+  englishLyric: string;
+  vietnameseLyric: string;
+  audioUrl?: string;
+  sunoTaskId?: string;
+  creationStatus?: string;
+  timestamps?: WordTimestamp[];
 }
 
-export interface WordTiming {
+export interface WordTimestamp {
   word: string;
-  start: number;
-  end: number;
+  startTime: number;
+  endTime: number;
 }
 
 export interface SongResponse {
@@ -22,14 +21,30 @@ export interface SongResponse {
 }
 
 export interface SongCreateDto {
+  name: string;
+  words: string[];
+}
+
+export interface SongUpdateDto {
+  id: number;
+  name: string;
+}
+
+export interface SongStatusResponse {
+  status: boolean;
+  name: string;
+  audioUrl: string | null;
+}
+
+
+export interface SongTable {
+  id: number;
   title: string;
   englishLyrics: string;
   vietnameseLyrics: string;
   audioUrl: string;
+  cloudinaryUrl?: string;
   genres: string[];
-  wordTimings?: WordTiming[];
-}
-
-export interface SongUpdateDto extends SongCreateDto {
-  id: number;
+  createdDate: Date;
+  wordTimings?: [];
 }

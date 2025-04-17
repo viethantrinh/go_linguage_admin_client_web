@@ -52,23 +52,23 @@
           <td>
             <div class="d-flex gap-2">
               <!-- Edit button -->
-              <button class="btn btn-sm"
-                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"
-                      (click)="openEditModal(song)">
-                <svg cIcon name="cilPencil"></svg>
-              </button>
-              <!-- Delete button -->
-              <button class="btn btn-sm"
-                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
-                      (click)="openDeleteModal(song)">
-                <svg cIcon name="cilTrash"></svg>
-              </button>
-              <!-- View details button -->
-              <button class="btn btn-sm"
-                      [ngStyle]="{'background-color': 'rgba(86, 86, 198, 0.7)', 'color': '#fff', 'border': 'none'}"
-                      (click)="openViewDetailsModal(song)">
-                <svg cIcon name="cilInfo"></svg>
-              </button>
+<!--              <button class="btn btn-sm"-->
+<!--                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"-->
+<!--                      (click)="openEditModal(song)">-->
+<!--                <svg cIcon name="cilPencil"></svg>-->
+<!--              </button>-->
+<!--              &lt;!&ndash; Delete button &ndash;&gt;-->
+<!--              <button class="btn btn-sm"-->
+<!--                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"-->
+<!--                      (click)="openDeleteModal(song)">-->
+<!--                <svg cIcon name="cilTrash"></svg>-->
+<!--              </button>-->
+<!--              &lt;!&ndash; View details button &ndash;&gt;-->
+<!--              <button class="btn btn-sm"-->
+<!--                      [ngStyle]="{'background-color': 'rgba(86, 86, 198, 0.7)', 'color': '#fff', 'border': 'none'}"-->
+<!--                      (click)="openViewDetailsModal(song)">-->
+<!--                <svg cIcon name="cilInfo"></svg>-->
+<!--              </button>-->
               <!-- Audio button -->
               <button *ngIf="song.audioUrl" class="btn btn-sm"
                       [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': '#fff', 'border': 'none'}"
@@ -229,7 +229,7 @@
           <p class="mb-1 text-medium-emphasis small">Ngày tạo</p>
           <p class="mb-3">{{ selectedSong.createdDate | date:'dd/MM/yyyy HH:mm' }}</p>
         </div>
-        
+
         <div class="col-md-6">
           <p class="mb-1 text-medium-emphasis small">Lời tiếng Anh</p>
           <div class="border rounded p-3 bg-light" style="height: 150px; overflow-y: auto; white-space: pre-line;">
@@ -242,7 +242,7 @@
             {{ selectedSong.vietnameseLyrics }}
           </div>
         </div>
-        
+
         <div class="col-12 mt-3" *ngIf="selectedSong.audioUrl">
           <p class="mb-1 text-medium-emphasis small">Audio</p>
           <audio controls class="w-100">
@@ -250,16 +250,16 @@
             Trình duyệt của bạn không hỗ trợ phát audio.
           </audio>
         </div>
-        
-        <div class="col-12 mt-3" *ngIf="selectedSong.wordTimings && selectedSong.wordTimings.length > 0">
-          <p class="mb-1 text-medium-emphasis small">Word Timing</p>
-          <div class="border rounded p-3 bg-light word-timing-container">
-            <span *ngFor="let timing of selectedSong.wordTimings" class="word-timing"
-                  [attr.data-start]="timing.start" [attr.data-end]="timing.end">
-              {{ timing.word }}
-            </span>
-          </div>
-        </div>
+
+<!--        <div class="col-12 mt-3" *ngIf="selectedSong.wordTimings && selectedSong.wordTimings.length > 0">-->
+<!--          <p class="mb-1 text-medium-emphasis small">Word Timing</p>-->
+<!--          <div class="border rounded p-3 bg-light word-timing-container">-->
+<!--            <span *ngFor="let timing of selectedSong.wordTimings" class="word-timing"-->
+<!--                  [attr.data-start]="timing.start" [attr.data-end]="timing.end">-->
+<!--              {{ timing.word }}-->
+<!--            </span>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </c-modal-body>
     <c-modal-footer>
