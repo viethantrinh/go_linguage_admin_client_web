@@ -36,15 +36,14 @@ export interface SongStatusResponse {
   audioUrl: string | null;
 }
 
-
-export interface SongTable {
+export interface SongList {
   id: number;
-  title: string;
-  englishLyrics: string;
-  vietnameseLyrics: string;
+  name: string;
+  displayOrder: number;
+  englishLyric: string;
+  vietnameseLyric: string;
   audioUrl: string;
-  cloudinaryUrl?: string;
-  genres: string[];
-  createdDate: Date;
-  wordTimings?: [];
+  sunoTaskId: string | null;
+  creationStatus: string | null;
+  createdAt: string;
 }

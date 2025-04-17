@@ -38,37 +38,38 @@
         <tr>
           <th scope="col">Mã ID</th>
           <th scope="col">Tên bài hát</th>
-          <th scope="col">Thể loại</th>
-          <th scope="col">Thời gian tạo</th>
+          <th scope="col">Thứ tự hiển thị</th>
+          <th scope="col">Ngày tạo</th>
+          <th scope="col">Trạng thái</th>
           <th scope="col">Hành động</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let song of filteredSongs | slice: (currentPage-1) * itemsPerPage : currentPage * itemsPerPage">
           <th scope="row">{{ song.id }}</th>
-          <td>{{ song.title }}</td>
-          <td>{{ formatGenres(song.genres) }}</td>
-          <td>{{ song.createdDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ song.name }}</td>
+          <td>{{ song.displayOrder }}</td>
+          <td>{{ song.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <span class="badge rounded-pill" 
+                  [ngClass]="{'bg-success': song.audioUrl, 'bg-warning': !song.audioUrl}">
+              {{ song.audioUrl ? 'Hoàn thành' : 'Đang xử lý' }}
+            </span>
+          </td>
           <td>
             <div class="d-flex gap-2">
-              <!-- Edit button -->
-<!--              <button class="btn btn-sm"-->
-<!--                      [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff', 'border': 'none'}"-->
-<!--                      (click)="openEditModal(song)">-->
-<!--                <svg cIcon name="cilPencil"></svg>-->
-<!--              </button>-->
-<!--              &lt;!&ndash; Delete button &ndash;&gt;-->
-<!--              <button class="btn btn-sm"-->
-<!--                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"-->
-<!--                      (click)="openDeleteModal(song)">-->
-<!--                <svg cIcon name="cilTrash"></svg>-->
-<!--              </button>-->
-<!--              &lt;!&ndash; View details button &ndash;&gt;-->
-<!--              <button class="btn btn-sm"-->
-<!--                      [ngStyle]="{'background-color': 'rgba(86, 86, 198, 0.7)', 'color': '#fff', 'border': 'none'}"-->
-<!--                      (click)="openViewDetailsModal(song)">-->
-<!--                <svg cIcon name="cilInfo"></svg>-->
-<!--              </button>-->
+              <!-- Delete button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openDeleteModal(song)">
+                <svg cIcon name="cilTrash"></svg>
+              </button>
+              <!-- View details button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(86, 86, 198, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openViewDetailsModal(song)">
+                <svg cIcon name="cilInfo"></svg>
+              </button>
               <!-- Audio button -->
               <button *ngIf="song.audioUrl" class="btn btn-sm"
                       [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': '#fff', 'border': 'none'}"
@@ -84,7 +85,7 @@
       <!-- Pagination controls -->
       <div *ngIf="!loading && filteredSongs.length > 0" class="d-flex justify-content-between align-items-center mt-3">
         <div>
-          <span>Hiển thị {{ (currentPage - 1) * itemsPerPage + 1 }}
+          <span>Hiển thị {{ Math.min((currentPage - 1) * itemsPerPage + 1, filteredSongs.length) }}
             đến {{ Math.min(currentPage * itemsPerPage, filteredSongs.length) }}
             trên tổng số {{ filteredSongs.length }}
             bài hát
@@ -130,63 +131,7 @@
       <gl-song-creation></gl-song-creation>
     </c-modal-body>
     <c-modal-footer>
-      <button cButton color="secondary" (click)="createModalVisible = false">Đóng</button>
-    </c-modal-footer>
-  </c-modal>
-
-  <!-- Song Edit Modal -->
-  <c-modal [visible]="editModalVisible" (visibleChange)="editModalVisible = $event" size="lg">
-    <c-modal-header>
-      <h5 cModalTitle>Chỉnh sửa bài hát</h5>
-      <button cButtonClose (click)="editModalVisible = false"></button>
-    </c-modal-header>
-    <c-modal-body>
-      <form [formGroup]="songForm">
-        <div class="mb-3">
-          <label for="title" class="form-label">Tên bài hát</label>
-          <input type="text" cFormControl id="title" formControlName="title">
-          <div *ngIf="songForm.get('title')?.invalid && songForm.get('title')?.touched" class="text-danger">
-            Tên bài hát là bắt buộc
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="englishLyrics" class="form-label">Lời tiếng Anh</label>
-          <textarea cFormControl id="englishLyrics" formControlName="englishLyrics" rows="3"></textarea>
-          <div *ngIf="songForm.get('englishLyrics')?.invalid && songForm.get('englishLyrics')?.touched" class="text-danger">
-            Lời tiếng Anh là bắt buộc
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="vietnameseLyrics" class="form-label">Lời tiếng Việt</label>
-          <textarea cFormControl id="vietnameseLyrics" formControlName="vietnameseLyrics" rows="3"></textarea>
-          <div *ngIf="songForm.get('vietnameseLyrics')?.invalid && songForm.get('vietnameseLyrics')?.touched" class="text-danger">
-            Lời tiếng Việt là bắt buộc
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Thể loại</label>
-          <div class="row">
-            <div class="col-md-3" *ngFor="let genre of ['pop', 'rock', 'ballad', 'rap', 'electronic', 'folk', 'rnb', 'jazz']">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" [id]="genre"
-                       [checked]="selectedSong?.genres?.includes(genre) || false"
-                       (change)="toggleGenre(genre)">
-                <label class="form-check-label" [for]="genre">{{ genre | titlecase }}</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </c-modal-body>
-    <c-modal-footer>
-      <button cButton color="secondary" (click)="editModalVisible = false">Hủy</button>
-      <button cButton color="primary" [disabled]="songForm.invalid || formLoading" (click)="updateSong()">
-        <span *ngIf="formLoading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-        Cập nhật
-      </button>
+      <button cButton color="secondary" (click)="handleCreateModalClosed()">Đóng</button>
     </c-modal-footer>
   </c-modal>
 
@@ -197,69 +142,82 @@
       <button cButtonClose (click)="deleteModalVisible = false"></button>
     </c-modal-header>
     <c-modal-body>
-      Bạn có chắc chắn muốn xóa bài hát <strong>{{ selectedSong?.title }}</strong>?
+      Bạn có chắc chắn muốn xóa bài hát <strong>{{ selectedSong?.name }}</strong>?
       Hành động này không thể hoàn tác.
     </c-modal-body>
     <c-modal-footer>
       <button cButton color="secondary" (click)="deleteModalVisible = false">Hủy</button>
-      <button cButton color="danger" [disabled]="loading" (click)="deleteSong()">
+      <button cButton color="danger" (click)="deleteSong()">
         <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
         Xóa
       </button>
     </c-modal-footer>
   </c-modal>
 
-  <!-- View Song Details Modal -->
+  <!-- View Details Modal -->
   <c-modal [visible]="viewDetailsModalVisible" (visibleChange)="viewDetailsModalVisible = $event" size="lg">
     <c-modal-header>
       <h5 cModalTitle>Chi tiết bài hát</h5>
       <button cButtonClose (click)="viewDetailsModalVisible = false"></button>
     </c-modal-header>
     <c-modal-body *ngIf="selectedSong">
-      <div class="row">
-        <div class="col-md-6">
-          <p class="mb-1 text-medium-emphasis small">Tên bài hát</p>
-          <p class="mb-3">{{ selectedSong.title }}</p>
+      <div class="mb-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>{{ selectedSong.name }}</strong>
+            <span class="badge rounded-pill" 
+                  [ngClass]="{'bg-success': selectedSong.audioUrl, 'bg-warning': !selectedSong.audioUrl}">
+              {{ selectedSong.audioUrl ? 'Hoàn thành' : 'Đang xử lý' }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">ID:</div>
+              <div class="col-md-9">{{ selectedSong.id }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">Thứ tự hiển thị:</div>
+              <div class="col-md-9">{{ selectedSong.displayOrder }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">Ngày tạo:</div>
+              <div class="col-md-9">{{ selectedSong.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+            <div class="row mb-3" *ngIf="selectedSong.sunoTaskId">
+              <div class="col-md-3 text-muted">Suno Task ID:</div>
+              <div class="col-md-9">{{ selectedSong.sunoTaskId }}</div>
+            </div>
+            <div class="row mb-3" *ngIf="selectedSong.creationStatus">
+              <div class="col-md-3 text-muted">Trạng thái tạo:</div>
+              <div class="col-md-9">{{ selectedSong.creationStatus }}</div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <p class="mb-1 text-medium-emphasis small">Thể loại</p>
-          <p class="mb-3">{{ formatGenres(selectedSong.genres) || 'Không có thể loại' }}</p>
-        </div>
-        <div class="col-12">
-          <p class="mb-1 text-medium-emphasis small">Ngày tạo</p>
-          <p class="mb-3">{{ selectedSong.createdDate | date:'dd/MM/yyyy HH:mm' }}</p>
-        </div>
+      </div>
 
+      <!-- Audio player -->
+      <div class="mb-4" *ngIf="selectedSong.audioUrl">
+        <h5>Nghe bài hát</h5>
+        <audio controls class="w-100 mt-2">
+          <source [src]="selectedSong.audioUrl" type="audio/mpeg">
+          Trình duyệt của bạn không hỗ trợ phát audio.
+        </audio>
+      </div>
+
+      <!-- Lyrics section -->
+      <div class="row g-4">
         <div class="col-md-6">
-          <p class="mb-1 text-medium-emphasis small">Lời tiếng Anh</p>
-          <div class="border rounded p-3 bg-light" style="height: 150px; overflow-y: auto; white-space: pre-line;">
-            {{ selectedSong.englishLyrics }}
+          <h5>Lời tiếng Anh</h5>
+          <div class="border rounded p-3 bg-light" style="height: 220px; overflow-y: auto; white-space: pre-line;">
+            {{ selectedSong.englishLyric }}
           </div>
         </div>
         <div class="col-md-6">
-          <p class="mb-1 text-medium-emphasis small">Lời tiếng Việt</p>
-          <div class="border rounded p-3 bg-light" style="height: 150px; overflow-y: auto; white-space: pre-line;">
-            {{ selectedSong.vietnameseLyrics }}
+          <h5>Lời tiếng Việt</h5>
+          <div class="border rounded p-3 bg-light" style="height: 220px; overflow-y: auto; white-space: pre-line;">
+            {{ selectedSong.vietnameseLyric }}
           </div>
         </div>
-
-        <div class="col-12 mt-3" *ngIf="selectedSong.audioUrl">
-          <p class="mb-1 text-medium-emphasis small">Audio</p>
-          <audio controls class="w-100">
-            <source [src]="selectedSong.audioUrl" type="audio/mpeg">
-            Trình duyệt của bạn không hỗ trợ phát audio.
-          </audio>
-        </div>
-
-<!--        <div class="col-12 mt-3" *ngIf="selectedSong.wordTimings && selectedSong.wordTimings.length > 0">-->
-<!--          <p class="mb-1 text-medium-emphasis small">Word Timing</p>-->
-<!--          <div class="border rounded p-3 bg-light word-timing-container">-->
-<!--            <span *ngFor="let timing of selectedSong.wordTimings" class="word-timing"-->
-<!--                  [attr.data-start]="timing.start" [attr.data-end]="timing.end">-->
-<!--              {{ timing.word }}-->
-<!--            </span>-->
-<!--          </div>-->
-<!--        </div>-->
       </div>
     </c-modal-body>
     <c-modal-footer>

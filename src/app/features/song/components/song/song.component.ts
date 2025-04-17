@@ -19,8 +19,7 @@ import {
 } from '@coreui/angular';
 import {IconDirective} from '@coreui/icons-angular';
 import {SongService} from '../../services/song.service';
-import {Song, SongTable} from '../../models/song.model';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {SongList} from '../../models/song.model';
 import {finalize} from 'rxjs';
 import {SongCreationComponent} from '../song-creation/song-creation.component';
 
@@ -48,7 +47,6 @@ import {SongCreationComponent} from '../song-creation/song-creation.component';
     PageItemDirective,
     PageLinkDirective,
     PaginationComponent,
-    ReactiveFormsModule,
     SlicePipe,
     TableDirective,
     SongCreationComponent
@@ -57,55 +55,45 @@ import {SongCreationComponent} from '../song-creation/song-creation.component';
   styleUrl: './song.component.scss'
 })
 export class SongComponent implements OnInit {
-  songs: SongTable[] = [];
-  filteredSongs: SongTable[] = [];
-  selectedSong: SongTable | null = null;
+  songs: SongList[] = [];
+  filteredSongs: SongList[] = [];
+  selectedSong: SongList | null = null;
 
   // Modal visibility states
   createModalVisible = false;
-  editModalVisible = false;
-  deleteModalVisible = false;
   viewDetailsModalVisible = false;
+  deleteModalVisible = false;
+  audioPlayer: HTMLAudioElement | null = null;
 
   // Loading states
   loading = false;
-  formLoading = false;
 
   // Pagination
   currentPage = 1;
-  itemsPerPage = 5;
+  itemsPerPage = 10;
   totalItems = 0;
   totalPages = 1;
   Math = Math; // To use Math in the template
 
   private songService = inject(SongService);
-  private formBuilder = inject(FormBuilder);
-
-  // Form for song editing (simple fields, not full creation)
-  songForm: FormGroup;
 
   constructor() {
-    this.songForm = this.formBuilder.group({
-      title: ['', Validators.required],
-      englishLyrics: ['', Validators.required],
-      vietnameseLyrics: ['', Validators.required],
-      genres: [[]]
-    });
+    this.audioPlayer = new Audio();
   }
 
   ngOnInit(): void {
     this.loadSongs();
   }
 
-  // Load songs with pagination
+  // Load songs with the new API
   loadSongs(): void {
     this.loading = true;
-    this.songService.getSongs(this.currentPage, this.itemsPerPage)
+    this.songService.getAllSongs()
       .pipe(finalize(() => this.loading = false))
-      .subscribe(response => {
-        // this.songs = response.items;
+      .subscribe(songs => {
+        this.songs = songs;
         this.filteredSongs = [...this.songs];
-        this.totalItems = response.totalCount;
+        this.totalItems = this.songs.length;
         this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
       });
   }
@@ -115,12 +103,23 @@ export class SongComponent implements OnInit {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
     if (searchTerm) {
       this.filteredSongs = this.songs.filter(song =>
-        song.title.toLowerCase().includes(searchTerm) ||
-        song.englishLyrics.toLowerCase().includes(searchTerm) ||
-        song.vietnameseLyrics.toLowerCase().includes(searchTerm)
+        song.name.toLowerCase().includes(searchTerm) ||
+        song.englishLyric.toLowerCase().includes(searchTerm) ||
+        song.vietnameseLyric.toLowerCase().includes(searchTerm)
       );
     } else {
       this.filteredSongs = [...this.songs];
+    }
+    this.updatePagination();
+  }
+
+  // Update pagination after filtering
+  private updatePagination(): void {
+    this.totalItems = this.filteredSongs.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    // Reset to first page if current page is now invalid
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
     }
   }
 
@@ -128,7 +127,6 @@ export class SongComponent implements OnInit {
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
-    this.loadSongs();
   }
 
   getPageNumbers(): number[] {
@@ -144,49 +142,29 @@ export class SongComponent implements OnInit {
     this.createModalVisible = true;
   }
 
-  openEditModal(song: Song): void {
-    // this.selectedSong = song;
-    // this.songForm.patchValue({
-    //   title: song.title,
-    //   englishLyrics: song.englishLyrics,
-    //   vietnameseLyrics: song.vietnameseLyrics,
-    //   genres: song.genres
-    // });
-    // this.editModalVisible = true;
-  }
-
-  openDeleteModal(song: Song): void {
-    // this.selectedSong = song;
+  openDeleteModal(song: SongList): void {
+    this.selectedSong = song;
     this.deleteModalVisible = true;
   }
 
-  openViewDetailsModal(song: Song): void {
-    // this.selectedSong = song;
+  openViewDetailsModal(song: SongList): void {
+    this.selectedSong = song;
     this.viewDetailsModalVisible = true;
   }
 
-  // Song operations
-  updateSong(): void {
-    if (this.songForm.invalid || !this.selectedSong) return;
-
-    this.formLoading = true;
-    const updatedSong = {
-      ...this.songForm.value,
-      id: this.selectedSong.id,
-      audioUrl: this.selectedSong.audioUrl,
-      wordTimings: this.selectedSong.wordTimings
-    };
-
-    this.songService.updateSong(updatedSong)
-      .pipe(finalize(() => {
-        this.formLoading = false;
-        this.editModalVisible = false;
-      }))
-      .subscribe(() => {
-        this.loadSongs();
-      });
+  // Play audio
+  playAudio(audioUrl: string): void {
+    if (this.audioPlayer) {
+      if (this.audioPlayer.src === audioUrl && !this.audioPlayer.paused) {
+        this.audioPlayer.pause();
+      } else {
+        this.audioPlayer.src = audioUrl;
+        this.audioPlayer.play();
+      }
+    }
   }
 
+  // Delete song
   deleteSong(): void {
     if (!this.selectedSong) return;
 
@@ -201,36 +179,9 @@ export class SongComponent implements OnInit {
       });
   }
 
-  // Audio playback
-  playAudio(audioUrl: string): void {
-    const audio = new Audio(audioUrl);
-    audio.play();
-  }
-
-  // Format genres for display
-  formatGenres(genres: string[]): string {
-    return genres.map(genre => genre.charAt(0).toUpperCase() + genre.slice(1)).join(', ');
-  }
-
-  // Handle the result of song creation
-  handleSongCreated(): void {
+  // Handle modal closing
+  handleCreateModalClosed(): void {
     this.createModalVisible = false;
-    this.loadSongs();
-  }
-
-  // Toggle genre selection
-  toggleGenre(genre: string): void {
-    if (!this.selectedSong) return;
-
-    const genresList = [...(this.songForm.get('genres')?.value as string[] || [])];
-
-    const index = genresList.indexOf(genre);
-    if (index === -1) {
-      genresList.push(genre);
-    } else {
-      genresList.splice(index, 1);
-    }
-
-    this.songForm.get('genres')?.setValue(genresList);
+    this.loadSongs(); // Reload songs after creating
   }
 }

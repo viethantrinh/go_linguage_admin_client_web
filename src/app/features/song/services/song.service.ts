@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of, throwError} from 'rxjs';
 import {catchError, delay, map} from 'rxjs/operators';
-import {Song, SongCreateDto, SongStatusResponse, SongUpdateDto, WordTimestamp} from '../models/song.model';
+import {Song, SongCreateDto, SongList, SongStatusResponse, SongUpdateDto, WordTimestamp} from '../models/song.model';
 import {TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {ApiResponse} from '../../../core/models/api-response.model';
 
@@ -251,6 +251,24 @@ export class SongService {
       success: true,
       cloudinaryUrl: 'https://res.cloudinary.com/demo/video/upload/v1234567890/example_song.mp3'
     }).pipe(delay(2000));
+  }
+
+  // Get all songs
+  getAllSongs(): Observable<SongList[]> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+    return this.http.get<ApiResponse<SongList[]>>(`${this.apiUrl}/all`, { headers })
+      .pipe(
+        map(response => {
+          if (response.code === 1000) {
+            return response.result;
+          }
+          return [];
+        }),
+        catchError(error => {
+          console.error('Error fetching all songs:', error);
+          return of([]);
+        })
+      );
   }
 
   // Mock data for demo purposes
