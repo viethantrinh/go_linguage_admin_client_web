@@ -36,6 +36,7 @@ import {
   cilChart,
   cilChartPie,
   cilCheck,
+  cilCheckAlt,
   cilCheckCircle,
   cilChevronLeft,
   cilChevronRight,
@@ -70,6 +71,7 @@ import {
   cilLockLocked,
   cilMagnifyingGlass,
   cilMap,
+  cilMediaPause,
   cilMediaPlay,
   cilMediaRecord,
   cilMenu,
@@ -217,7 +219,9 @@ export const iconSubset = {
   cilCloudUpload,
   cilInfo,
   cilReload,
-  cilArrowLeft
+  cilArrowLeft,
+  cilCheckAlt,
+  cilMediaPause
 };
 
 export enum IconSubset {
