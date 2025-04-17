@@ -3,7 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of, throwError} from 'rxjs';
 import {catchError, delay, map} from 'rxjs/operators';
 import {Song, SongCreateDto, SongList, SongStatusResponse, SongUpdateDto, WordTimestamp} from '../models/song.model';
-import {TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {ApiResponse} from '../../../core/models/api-response.model';
 
 export interface LyricsData {
@@ -15,7 +15,7 @@ export interface LyricsData {
   providedIn: 'root'
 })
 export class SongService {
-  private apiUrl = 'http://192.168.1.22:8080/api/songs';
+  private apiUrl = BASE_LOCAL_URL + '/songs';
 
   constructor(private http: HttpClient) { }
 
@@ -269,40 +269,5 @@ export class SongService {
           return of([]);
         })
       );
-  }
-
-  // Mock data for demo purposes
-  private getMockSongs(): Song[] {
-    return [
-      {
-        id: 1,
-        name: 'Memories of Home',
-        englishLyric: 'In the shadows of the night\nI search for a guiding light',
-        vietnameseLyric: 'Trong bóng tối của đêm\nTôi tìm kiếm ánh sáng dẫn đường',
-        audioUrl: 'https://example.com/songs/memories.mp3',
-        creationStatus: 'lyric_created',
-        timestamps: [
-          { word: "In", startTime: 0.5, endTime: 0.7 },
-          { word: "the", startTime: 0.7, endTime: 0.9 },
-          { word: "shadows", startTime: 0.9, endTime: 1.5 }
-        ]
-      },
-      {
-        id: 2,
-        name: 'Summer Breeze',
-        englishLyric: 'Summer breeze makes me feel fine\nBlowing through the jasmine in my mind',
-        vietnameseLyric: 'Làn gió mùa hè khiến tôi cảm thấy tuyệt vời\nThổi qua hoa nhài trong tâm trí tôi',
-        audioUrl: 'https://example.com/songs/summer.mp3',
-        creationStatus: 'lyric_created'
-      },
-      {
-        id: 3,
-        name: 'Neon Lights',
-        englishLyric: 'Neon lights are flashing bright\nPulsing through the city tonight',
-        vietnameseLyric: 'Đèn neon lấp lánh sáng rực\nRộn ràng khắp thành phố đêm nay',
-        audioUrl: 'https://example.com/songs/neon.mp3',
-        creationStatus: 'lyric_created'
-      }
-    ];
   }
 }
