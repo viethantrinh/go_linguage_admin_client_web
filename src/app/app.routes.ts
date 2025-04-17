@@ -54,7 +54,7 @@ export const routes: Routes = [
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,
-        loadComponent: () => import('./features/song/components/song.component').then(c => c.SongComponent)
+        loadComponent: () => import('./features/song/components/song/song.component').then(c => c.SongComponent)
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_DIALOGUE,

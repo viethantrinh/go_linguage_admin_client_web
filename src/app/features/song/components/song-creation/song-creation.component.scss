@@ -1,0 +1,43 @@
+// Custom styles for the song creation page
+
+// Word timing styling
+.word-timing {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #e9ecef;
+  }
+  
+  &.active {
+    background-color: var(--cui-primary);
+    color: white;
+  }
+}
+
+// Transition effects
+.step-content {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+// Custom height for lyrics container
+.lyrics-container {
+  height: 220px;
+  overflow-y: auto;
+}
+
+// Progress indicator styling
+.progress-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+// Larger shadow for main card
+c-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

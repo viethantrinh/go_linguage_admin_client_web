@@ -22,6 +22,7 @@ import {
   cilAlignRight,
   cilApplicationsSettings,
   cilArrowBottom,
+  cilArrowLeft,
   cilArrowRight,
   cilArrowTop,
   cilBan,
@@ -58,6 +59,7 @@ import {
   cilInbox,
   cilIndentDecrease,
   cilIndentIncrease,
+  cilInfo,
   cilItalic,
   cilJustifyCenter,
   cilLanguage,
@@ -82,6 +84,7 @@ import {
   cilPlus,
   cilPrint,
   cilPuzzle,
+  cilReload,
   cilReportSlash,
   cilSave,
   cilSearch,
@@ -212,6 +215,9 @@ export const iconSubset = {
   cilVolumeHigh,
   cilSearch,
   cilCloudUpload,
+  cilInfo,
+  cilReload,
+  cilArrowLeft
 };
 
 export enum IconSubset {
