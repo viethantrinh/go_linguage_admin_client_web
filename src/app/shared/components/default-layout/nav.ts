@@ -52,12 +52,12 @@ export const navItems: INavData[] = [
         url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_SENTENCE}`
       },
       {
-        name: 'Hội thoại',
-        url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION}`
-      },
-      {
         name: 'Bài hát',
         url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG}`
+      },
+      {
+        name: 'Hội thoại',
+        url: `/${APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION}`
       },
       {
         name: 'Hội thoại (cho bài tập)',
