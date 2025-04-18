@@ -40,6 +40,7 @@ import {
   WordArrangementExerciseComponent
 } from "../../../exercise/word-arrangement-exercise/components/word-arrangement-exercise.component";
 import {MatchingExerciseComponent} from '../../../exercise/matching-exercise/components/matching-exercise.component';
+import {DialogueExerciseComponent} from '../../../exercise/dialogue-exercise/components/dialogue-exercise.component';
 
 // Define an interface for exercises
 interface Exercise {
@@ -108,7 +109,8 @@ const EXERCISE_TYPE_COLORS: Record<number, string> = {
     TextColorDirective,
     MultipleChoiceExerciseComponent,
     WordArrangementExerciseComponent,
-    MatchingExerciseComponent
+    MatchingExerciseComponent,
+    DialogueExerciseComponent
   ],
   templateUrl: './lesson-edit.component.html',
   styleUrl: './lesson-edit.component.scss'

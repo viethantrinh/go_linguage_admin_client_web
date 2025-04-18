@@ -57,10 +57,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/song/components/song/song.component').then(c => c.SongComponent)
       },
       {
-        path: APP_ROUTE_TOKEN.LEARN_MATERIAL_DIALOGUE,
-        loadComponent: () => import('./features/dialogue/components/dialogue.component').then(c => c.DialogueComponent)
-      },
-      {
         path: '',
         redirectTo: APP_ROUTE_TOKEN.DASHBOARD,
         pathMatch: 'full'

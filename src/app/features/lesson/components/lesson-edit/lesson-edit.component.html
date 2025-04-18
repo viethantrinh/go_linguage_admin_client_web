@@ -189,6 +189,10 @@
                                       (exerciseSaved)="onExerciseContentSaved()">
         </gl-word-arrangement-exercise>
 
+        <gl-dialogue-exercise *ngSwitchCase="6" [exercise]="selectedExercise()" [lessonId]="lessonId()"
+                              (exerciseSaved)="onExerciseContentSaved()">
+        </gl-dialogue-exercise>
+
         <!--        <gl-conversation-exercise *ngSwitchCase="6"-->
         <!--                                  [exercise]="selectedExercise()"-->
         <!--                                  [lessonId]="lessonId()"-->
