@@ -36,7 +36,6 @@ export interface ConversationResponse {
 
 export interface ConversationCreateDto {
   name: string;
-  displayOrder: number;
   lines: ConversationLineCreateDto[];
 }
 
@@ -55,7 +54,6 @@ export interface ConversationOptionCreateDto {
 export interface ConversationUpdateDto {
   id: number;
   name: string;
-  displayOrder: number;
 }
 
 export interface ConversationList {

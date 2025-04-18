@@ -35,7 +35,6 @@ export class ConversationCreationComponent implements OnInit {
   private initForm(): void {
     this.conversationForm = this.fb.group({
       name: ['', Validators.required],
-      displayOrder: [1, [Validators.required, Validators.min(1)]],
       imageUrl: [''],
       lines: this.fb.array([])
     });

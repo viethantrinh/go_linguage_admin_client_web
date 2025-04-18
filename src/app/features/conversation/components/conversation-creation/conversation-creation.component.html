@@ -5,12 +5,6 @@
       <div *ngIf="conversationForm.get('name')?.invalid && conversationForm.get('name')?.touched"
          class="text-danger small">Tên bắt buộc.</div>
    </div>
-   <div class="mb-3">
-      <label for="displayOrder" class="form-label">Thứ tự hiển thị</label>
-      <input type="number" id="displayOrder" cFormControl formControlName="displayOrder" class="form-control" min="1" />
-      <div *ngIf="conversationForm.get('displayOrder')?.invalid && conversationForm.get('displayOrder')?.touched"
-         class="text-danger small">Cần là số >= 1.</div>
-   </div>
    <hr />
    <div class="d-flex justify-content-between align-items-center mb-2">
       <h5>Dòng hội thoại</h5>
