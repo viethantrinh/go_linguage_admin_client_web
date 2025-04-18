@@ -77,10 +77,68 @@ export class ConversationCreationComponent implements OnInit {
     this.getOptions(lineIndex).removeAt(optionIndex);
   }
 
+  // Handle type change between System and User
+  onTypeChange(lineIndex: number): void {
+    const line = this.lines.at(lineIndex) as FormGroup;
+    const type = line.get('type')?.value;
+    
+    if (type === LineType.user) {
+      // If changing to user type, clear englishText and vietnameseText
+      line.get('englishText')?.setValue(null);
+      line.get('vietnameseText')?.setValue(null);
+      
+      // Make sure there's at least one option for user line
+      if (this.getOptions(lineIndex).length === 0) {
+        this.addOption(lineIndex);
+      }
+      
+      // Remove validators for englishText and vietnameseText
+      line.get('englishText')?.clearValidators();
+      line.get('vietnameseText')?.clearValidators();
+    } else {
+      // If changing to system type, add validators back
+      line.get('englishText')?.setValidators(Validators.required);
+      line.get('vietnameseText')?.setValidators(Validators.required);
+    }
+    
+    // Update the validation status
+    line.get('englishText')?.updateValueAndValidity();
+    line.get('vietnameseText')?.updateValueAndValidity();
+  }
+
   onSubmit(): void {
     if (this.conversationForm.invalid) return;
     this.submitting = true;
-    const dto: ConversationCreateDto = this.conversationForm.value;
+    
+    // Create a copy of the form value to modify before submission
+    const formValue = this.conversationForm.value;
+    
+    // Prepare the lines data for API submission
+    const lines = formValue.lines.map((line: any) => {
+      if (line.type === LineType.user) {
+        // Ensure user lines have null for text fields
+        return {
+          type: line.type,
+          englishText: null,
+          vietnameseText: null,
+          options: line.options || []
+        };
+      } else {
+        // System lines maintain their values
+        return {
+          type: line.type,
+          englishText: line.englishText,
+          vietnameseText: line.vietnameseText,
+          options: []
+        };
+      }
+    });
+    
+    const dto: ConversationCreateDto = {
+      ...formValue,
+      lines: lines
+    };
+    
     this.conversationService.createConversation(dto)
       .pipe(finalize(() => this.submitting = false))
       .subscribe(() => {
