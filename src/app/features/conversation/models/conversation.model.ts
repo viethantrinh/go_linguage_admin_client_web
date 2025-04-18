@@ -29,9 +29,13 @@ export interface ConversationOption {
   gender?: string;
 }
 
+export interface ConversationResponse {
+  items: Conversation[];
+  totalCount: number;
+}
+
 export interface ConversationCreateDto {
   name: string;
-  displayOrder?: number;
   lines: ConversationLineCreateDto[];
 }
 

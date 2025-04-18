@@ -1,7 +1,5 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {CommonModule, DatePipe, NgForOf, NgIf, NgStyle, SlicePipe} from '@angular/common';
-
-// CoreUI imports
 import {
   ButtonCloseDirective,
   ButtonDirective,
@@ -20,14 +18,10 @@ import {
   TableDirective
 } from '@coreui/angular';
 import {IconDirective} from '@coreui/icons-angular';
-
-// Feature imports
 import {ConversationService} from '../../services/conversation.service';
 import {ConversationList} from '../../models/conversation.model';
-import {ConversationCreationComponent} from '../conversation-creation/conversation-creation.component';
-
-// RxJS imports
 import {finalize} from 'rxjs';
+import {ConversationCreationComponent} from '../conversation-creation/conversation-creation.component';
 
 @Component({
   selector: 'gl-conversation',
@@ -134,7 +128,11 @@ export class ConversationComponent implements OnInit {
   }
 
   getPageNumbers(): number[] {
-    return Array.from({length: this.totalPages}, (_, i) => i + 1);
+    const pages: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   // Modal controls
