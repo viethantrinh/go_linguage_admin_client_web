@@ -5,6 +5,7 @@ import {ButtonDirective, FormControlDirective} from '@coreui/angular';
 import {ConversationService} from '../../services/conversation.service';
 import {ConversationCreateDto, LineType} from '../../models/conversation.model';
 import {finalize} from 'rxjs';
+import {IconDirective} from '@coreui/icons-angular';
 
 @Component({
   selector: 'gl-conversation-creation',
@@ -16,7 +17,8 @@ import {finalize} from 'rxjs';
     FormsModule,
     ReactiveFormsModule,
     FormControlDirective,
-    ButtonDirective
+    ButtonDirective,
+    IconDirective
   ],
   templateUrl: './conversation-creation.component.html',
   styleUrls: ['./conversation-creation.component.scss']

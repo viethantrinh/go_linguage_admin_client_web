@@ -14,12 +14,12 @@
       </button>
    </div>
    <div formArrayName="lines">
-      <div *ngFor="let line of lines.controls; let i = index" [formGroupName]="i" 
+      <div *ngFor="let line of lines.controls; let i = index" [formGroupName]="i"
            class="border rounded p-3 mb-3 shadow-sm"
            [ngClass]="{'system-line': line.get('type')?.value === LineType.system, 'user-line': line.get('type')?.value === LineType.user}">
          <div class="d-flex justify-content-between mb-2">
             <div class="d-flex align-items-center">
-               <span class="line-type-badge" 
+               <span class="line-type-badge"
                      [ngClass]="{'system-badge': line.get('type')?.value === LineType.system, 'user-badge': line.get('type')?.value === LineType.user}">
                   <svg *ngIf="line.get('type')?.value === LineType.system" cIcon name="cilSettings" width="14" height="14"></svg>
                   <svg *ngIf="line.get('type')?.value === LineType.user" cIcon name="cilUser" width="14" height="14"></svg>
@@ -34,7 +34,7 @@
          </div>
          <div class="mb-2">
             <label class="form-label">Loại</label>
-            <select cFormControl formControlName="type" class="form-select">
+            <select formControlName="type" class="form-select">
                <option [ngValue]="LineType.system">Hệ thống</option>
                <option [ngValue]="LineType.user">Người dùng</option>
             </select>
