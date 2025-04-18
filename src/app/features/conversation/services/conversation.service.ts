@@ -19,6 +19,11 @@ export class ConversationService {
 
   constructor(private http: HttpClient) { }
 
+  // Helper method to get authorization headers
+  private getAuthHeaders(): HttpHeaders {
+    return new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
+  }
+
   // Get all conversations (paginated)
   getConversations(page: number = 1, limit: number = 10): Observable<{ items: ConversationList[], totalCount: number }> {
     // This endpoint doesn't have pagination yet, so we'll handle it client-side
@@ -36,8 +41,7 @@ export class ConversationService {
 
   // Get all conversations without pagination (for admin displays)
   getAllConversations(): Observable<ConversationList[]> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.get<ApiResponse<ConversationList[]>>(`${this.apiUrl}/all`, { headers })
+    return this.http.get<ApiResponse<ConversationList[]>>(`${this.apiUrl}/all`, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.result)
       );
@@ -45,8 +49,7 @@ export class ConversationService {
 
   // Get a single conversation by ID
   getConversationById(id: number): Observable<Conversation> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.get<ApiResponse<Conversation>>(`${this.apiUrl}/${id}`, { headers })
+    return this.http.get<ApiResponse<Conversation>>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.result)
       );
@@ -54,8 +57,7 @@ export class ConversationService {
 
   // Create a new conversation
   createConversation(conversationData: ConversationCreateDto): Observable<Conversation> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.post<ApiResponse<Conversation>>(this.apiUrl, conversationData, { headers })
+    return this.http.post<ApiResponse<Conversation>>(this.apiUrl, conversationData, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.result)
       );
@@ -63,8 +65,7 @@ export class ConversationService {
 
   // Update an existing conversation
   updateConversation(conversation: ConversationUpdateDto): Observable<Conversation> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.put<ApiResponse<Conversation>>(`${this.apiUrl}/${conversation.id}`, conversation, { headers })
+    return this.http.put<ApiResponse<Conversation>>(`${this.apiUrl}/${conversation.id}`, conversation, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.result)
       );
@@ -72,8 +73,7 @@ export class ConversationService {
 
   // Delete a conversation
   deleteConversation(id: number): Observable<boolean> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, { headers })
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.code === 1000)
       );
@@ -81,11 +81,10 @@ export class ConversationService {
 
   // Upload audio file
   uploadAudio(file: File): Observable<string> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/upload-audio`, formData, { headers })
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/upload-audio`, formData, { headers: this.getAuthHeaders() })
       .pipe(
         map(response => response.result)
       );

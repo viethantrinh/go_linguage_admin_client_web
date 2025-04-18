@@ -1,3 +1,4 @@
+// Form control focus styles
 .form-control:focus, .form-select:focus {
   border-color: rgba(78, 205, 196, 0.5);
   box-shadow: 0 0 0 0.25rem rgba(78, 205, 196, 0.25);
@@ -7,28 +8,30 @@
   border-radius: 0.375rem;
 }
 
-// System line styling
+// Line type styling - System and User
+.system-line, .user-line {
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent !important;
+}
+
 .system-line {
   background-color: rgba(232, 245, 243, 0.5);
-  border-left: 4px solid rgba(78, 205, 196, 0.8) !important;
-  transition: all 0.3s ease;
+  border-left-color: rgba(78, 205, 196, 0.8) !important;
+  
+  &:hover {
+    background-color: rgba(232, 245, 243, 0.8);
+    box-shadow: 0 3px 8px rgba(78, 205, 196, 0.2);
+  }
 }
 
-.system-line:hover {
-  background-color: rgba(232, 245, 243, 0.8);
-  box-shadow: 0 3px 8px rgba(78, 205, 196, 0.2);
-}
-
-// User line styling
 .user-line {
   background-color: rgba(237, 231, 246, 0.5);
-  border-left: 4px solid rgba(149, 117, 205, 0.8) !important;
-  transition: all 0.3s ease;
-}
-
-.user-line:hover {
-  background-color: rgba(237, 231, 246, 0.8);
-  box-shadow: 0 3px 8px rgba(149, 117, 205, 0.2);
+  border-left-color: rgba(149, 117, 205, 0.8) !important;
+  
+  &:hover {
+    background-color: rgba(237, 231, 246, 0.8);
+    box-shadow: 0 3px 8px rgba(149, 117, 205, 0.2);
+  }
 }
 
 // Badge styling
@@ -39,29 +42,31 @@
   border-radius: 16px;
   font-size: 0.8rem;
   font-weight: 500;
+  
+  svg {
+    margin-right: 4px;
+  }
 }
 
 .system-badge {
   background-color: rgba(78, 205, 196, 0.2);
   color: rgba(30, 108, 103, 0.9);
-}
-
-.system-badge svg {
-  margin-right: 4px;
-  color: rgba(30, 108, 103, 0.9);
+  
+  svg {
+    color: rgba(30, 108, 103, 0.9);
+  }
 }
 
 .user-badge {
   background-color: rgba(149, 117, 205, 0.2);
   color: rgba(90, 63, 138, 0.9);
+  
+  svg {
+    color: rgba(90, 63, 138, 0.9);
+  }
 }
 
-.user-badge svg {
-  margin-right: 4px;
-  color: rgba(90, 63, 138, 0.9);
-}
-
-// Options container
+// Options styling
 .options-container {
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 0.375rem;
@@ -72,11 +77,46 @@
   background-color: rgba(249, 245, 255, 0.7);
   border-left: 3px solid rgba(187, 168, 223, 0.7) !important;
   transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(249, 245, 255, 0.9);
+    box-shadow: 0 2px 5px rgba(149, 117, 205, 0.15);
+  }
 }
 
-.option-item:hover {
-  background-color: rgba(249, 245, 255, 0.9);
-  box-shadow: 0 2px 5px rgba(149, 117, 205, 0.15);
+// Button styling
+.btn-primary, .btn-danger, .btn-secondary {
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: rgba(78, 205, 196, 0.7);
+  border-color: rgba(78, 205, 196, 0.7);
+  
+  &:hover, &:focus {
+    background-color: rgba(78, 205, 196, 0.9);
+    border-color: rgba(78, 205, 196, 0.9);
+  }
+}
+
+.btn-danger {
+  background-color: rgba(255, 107, 107, 0.7);
+  border-color: rgba(255, 107, 107, 0.7);
+  
+  &:hover, &:focus {
+    background-color: rgba(255, 107, 107, 0.9);
+    border-color: rgba(255, 107, 107, 0.9);
+  }
+}
+
+.btn-secondary {
+  background-color: rgba(128, 139, 150, 0.7);
+  border-color: rgba(128, 139, 150, 0.7);
+  
+  &:hover, &:focus {
+    background-color: rgba(128, 139, 150, 0.9);
+    border-color: rgba(128, 139, 150, 0.9);
+  }
 }
 
 .custom-line-container {
@@ -91,34 +131,4 @@
 
 .option-container {
   background-color: rgba(245, 245, 245, 0.7);
-}
-
-.btn-primary {
-  background-color: rgba(78, 205, 196, 0.7);
-  border-color: rgba(78, 205, 196, 0.7);
-}
-
-.btn-primary:hover, .btn-primary:focus {
-  background-color: rgba(78, 205, 196, 0.9);
-  border-color: rgba(78, 205, 196, 0.9);
-}
-
-.btn-danger {
-  background-color: rgba(255, 107, 107, 0.7);
-  border-color: rgba(255, 107, 107, 0.7);
-}
-
-.btn-danger:hover, .btn-danger:focus {
-  background-color: rgba(255, 107, 107, 0.9);
-  border-color: rgba(255, 107, 107, 0.9);
-}
-
-.btn-secondary {
-  background-color: rgba(128, 139, 150, 0.7);
-  border-color: rgba(128, 139, 150, 0.7);
-}
-
-.btn-secondary:hover, .btn-secondary:focus {
-  background-color: rgba(128, 139, 150, 0.9);
-  border-color: rgba(128, 139, 150, 0.9);
 }
