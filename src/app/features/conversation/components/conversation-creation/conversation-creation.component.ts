@@ -24,8 +24,6 @@ import {finalize} from 'rxjs';
 export class ConversationCreationComponent implements OnInit {
   conversationForm!: FormGroup;
   LineType = LineType;
-  uploadingAudio: boolean[] = [];
-  uploadingOptionAudio: boolean[][] = [];
   submitting = false;
 
   constructor(private fb: FormBuilder, private conversationService: ConversationService) {}
@@ -49,21 +47,16 @@ export class ConversationCreationComponent implements OnInit {
 
   addLine(): void {
     const lineGroup = this.fb.group({
-      type: [LineType.SYSTEM, Validators.required],
+      type: [LineType.system, Validators.required],
       englishText: ['', Validators.required],
       vietnameseText: ['', Validators.required],
-      audioUrl: [''],
       options: this.fb.array([])
     });
     this.lines.push(lineGroup);
-    this.uploadingAudio.push(false);
-    this.uploadingOptionAudio.push([]);
   }
 
   removeLine(index: number): void {
     this.lines.removeAt(index);
-    this.uploadingAudio.splice(index, 1);
-    this.uploadingOptionAudio.splice(index, 1);
   }
 
   getOptions(lineIndex: number): FormArray {
@@ -74,40 +67,13 @@ export class ConversationCreationComponent implements OnInit {
     this.getOptions(lineIndex).push(
       this.fb.group({
         englishText: ['', Validators.required],
-        vietnameseText: ['', Validators.required],
-        audioUrl: ['']
+        vietnameseText: ['', Validators.required]
       })
     );
-    this.uploadingOptionAudio[lineIndex].push(false);
   }
 
   removeOption(lineIndex: number, optionIndex: number): void {
     this.getOptions(lineIndex).removeAt(optionIndex);
-    this.uploadingOptionAudio[lineIndex].splice(optionIndex, 1);
-  }
-
-  onLineAudioSelected(event: Event, lineIndex: number): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.uploadingAudio[lineIndex] = true;
-      this.conversationService.uploadAudio(file)
-        .pipe(finalize(() => this.uploadingAudio[lineIndex] = false))
-        .subscribe(url => {
-          this.lines.at(lineIndex).get('audioUrl')?.setValue(url);
-        });
-    }
-  }
-
-  onOptionAudioSelected(event: Event, lineIndex: number, optionIndex: number): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      this.uploadingOptionAudio[lineIndex][optionIndex] = true;
-      this.conversationService.uploadAudio(file)
-        .pipe(finalize(() => this.uploadingOptionAudio[lineIndex][optionIndex] = false))
-        .subscribe(url => {
-          this.getOptions(lineIndex).at(optionIndex).get('audioUrl')?.setValue(url);
-        });
-    }
   }
 
   onSubmit(): void {

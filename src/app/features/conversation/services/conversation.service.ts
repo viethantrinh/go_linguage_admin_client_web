@@ -60,44 +60,39 @@ export class ConversationService {
       lines: [
         {
           id: 1,
-          conversationId: 1,
-          lineNumber: 1,
-          type: LineType.SYSTEM,
-          englishText: 'Hello! How are you today?',
-          vietnameseText: 'Xin chào! Hôm nay bạn thế nào?',
-          audioUrl: 'https://example.com/audio/hello.mp3',
+          displayOrder: 1,
+          type: LineType.system,
+          systemEnglishText: 'Hello! How are you today?',
+          systemVietnameseText: 'Xin chào! Hôm nay bạn thế nào?',
+          systemAudioUrl: 'https://example.com/audio/hello.mp3',
           options: []
         },
         {
           id: 2,
-          conversationId: 1,
-          lineNumber: 2,
-          type: LineType.USER,
+          displayOrder: 2,
+          type: LineType.user,
           options: [
             {
-              id: 1,
-              lineId: 2,
               englishText: 'I\'m fine, thank you!',
               vietnameseText: 'Tôi khỏe, cảm ơn bạn!',
-              audioUrl: 'https://example.com/audio/im-fine.mp3'
+              audioUrl: 'https://example.com/audio/im-fine.mp3',
+              gender: 'nam'
             },
             {
-              id: 2,
-              lineId: 2,
               englishText: 'Not so good today.',
               vietnameseText: 'Hôm nay không được khỏe lắm.',
-              audioUrl: 'https://example.com/audio/not-good.mp3'
+              audioUrl: 'https://example.com/audio/not-good.mp3',
+              gender: 'nam'
             }
           ]
         },
         {
           id: 3,
-          conversationId: 1,
-          lineNumber: 3,
-          type: LineType.SYSTEM,
-          englishText: 'What\'s your name?',
-          vietnameseText: 'Tên bạn là gì?',
-          audioUrl: 'https://example.com/audio/whats-your-name.mp3',
+          displayOrder: 3,
+          type: LineType.system,
+          systemEnglishText: 'What\'s your name?',
+          systemVietnameseText: 'Tên bạn là gì?',
+          systemAudioUrl: 'https://example.com/audio/whats-your-name.mp3',
           options: []
         }
       ]
@@ -146,7 +141,7 @@ export class ConversationService {
       id: newId,
       name: conversationData.name,
       displayOrder: conversationData.displayOrder,
-      imageUrl: conversationData.imageUrl || undefined,
+      imageUrl: undefined,
       createdAt: new Date().toISOString(),
       lineCount: conversationData.lines.length
     };
@@ -158,27 +153,31 @@ export class ConversationService {
       id: newId,
       name: conversationData.name,
       displayOrder: conversationData.displayOrder,
-      imageUrl: conversationData.imageUrl,
+      imageUrl: undefined,
       createdAt: new Date().toISOString(),
       lines: conversationData.lines.map((line, index) => {
-        return {
+        const conversationLine: any = {
           id: index + 1,
-          conversationId: newId,
-          lineNumber: index + 1,
-          type: line.type,
-          englishText: line.englishText,
-          vietnameseText: line.vietnameseText,
-          audioUrl: line.audioUrl,
-          options: line.options?.map((option, optIndex) => {
-            return {
-              id: optIndex + 1,
-              lineId: index + 1,
-              englishText: option.englishText,
-              vietnameseText: option.vietnameseText,
-              audioUrl: option.audioUrl
-            };
-          }) || []
+          displayOrder: index + 1,
+          type: line.type
         };
+        
+        // Add systemEnglishText and systemVietnameseText only for system lines
+        if (line.type === 'system') {
+          conversationLine.systemEnglishText = line.englishText;
+          conversationLine.systemVietnameseText = line.vietnameseText;
+        }
+        
+        // Add options for user lines
+        conversationLine.options = line.options?.map((option) => {
+          return {
+            englishText: option.englishText,
+            vietnameseText: option.vietnameseText,
+            gender: 'nam'
+          };
+        }) || [];
+        
+        return conversationLine;
       })
     };
 
@@ -195,8 +194,7 @@ export class ConversationService {
       this.mockConversations[listIndex] = {
         ...this.mockConversations[listIndex],
         name: conversation.name,
-        displayOrder: conversation.displayOrder,
-        imageUrl: conversation.imageUrl
+        displayOrder: conversation.displayOrder
       };
     }
 
@@ -205,8 +203,7 @@ export class ConversationService {
       this.mockDetailedConversations[detailedIndex] = {
         ...this.mockDetailedConversations[detailedIndex],
         name: conversation.name,
-        displayOrder: conversation.displayOrder,
-        imageUrl: conversation.imageUrl
+        displayOrder: conversation.displayOrder
       };
 
       return of(this.mockDetailedConversations[detailedIndex]).pipe(delay(300));

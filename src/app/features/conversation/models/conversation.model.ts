@@ -8,27 +8,25 @@ export interface Conversation {
 }
 
 export enum LineType {
-  SYSTEM = 'SYSTEM',
-  USER = 'USER'
+  system = 'system',
+  user = 'user'
 }
 
 export interface ConversationLine {
   id: number;
-  conversationId: number;
-  lineNumber: number;
-  type: LineType;
-  englishText?: string;
-  vietnameseText?: string;
-  audioUrl?: string;
+  systemEnglishText?: string;
+  systemVietnameseText?: string;
+  systemAudioUrl?: string;
+  displayOrder: number;
+  type: string;
   options?: ConversationOption[];
 }
 
 export interface ConversationOption {
-  id: number;
-  lineId: number;
   englishText: string;
   vietnameseText: string;
   audioUrl?: string;
+  gender?: string;
 }
 
 export interface ConversationResponse {
@@ -39,29 +37,25 @@ export interface ConversationResponse {
 export interface ConversationCreateDto {
   name: string;
   displayOrder: number;
-  imageUrl?: string;
   lines: ConversationLineCreateDto[];
 }
 
 export interface ConversationLineCreateDto {
-  type: LineType;
+  type: string;
   englishText?: string;
   vietnameseText?: string;
-  audioUrl?: string;
   options?: ConversationOptionCreateDto[];
 }
 
 export interface ConversationOptionCreateDto {
   englishText: string;
   vietnameseText: string;
-  audioUrl?: string;
 }
 
 export interface ConversationUpdateDto {
   id: number;
   name: string;
   displayOrder: number;
-  imageUrl?: string;
 }
 
 export interface ConversationList {
