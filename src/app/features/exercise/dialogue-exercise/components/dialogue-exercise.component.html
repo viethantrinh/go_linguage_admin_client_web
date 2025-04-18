@@ -1,7 +1,8 @@
 <form [formGroup]="dialogueForm" (ngSubmit)="onSubmit()" class="p-4">
    <div class="mb-3">
       <label for="context" class="form-label">Bối cảnh hội thoại</label>
-      <input id="context" cFormControl formControlName="context" class="form-control" placeholder="Nhập bối cảnh hội thoại" />
+      <input id="context" cFormControl formControlName="context" class="form-control"
+         placeholder="Nhập bối cảnh hội thoại" />
       <div *ngIf="dialogueForm.get('context')?.invalid && dialogueForm.get('context')?.touched"
          class="text-danger small">Bối cảnh bắt buộc.</div>
    </div>
@@ -14,33 +15,34 @@
       </button>
    </div>
    <div formArrayName="dialogueLines">
-      <div *ngFor="let line of dialogueLines.controls; let i = index" [formGroupName]="i" 
-           class="dialogue-line border rounded p-3 mb-3 shadow-sm">
+      <div *ngFor="let line of dialogueLines.controls; let i = index" [formGroupName]="i"
+         class="dialogue-line border rounded p-3 mb-3 shadow-sm">
          <div class="d-flex justify-content-between mb-2">
             <div class="d-flex align-items-center">
-               <span class="line-speaker-badge" 
-                     [ngClass]="{'speaker-a': line.get('speaker')?.value === 'A', 'speaker-b': line.get('speaker')?.value === 'B'}">
+               <span class="line-speaker-badge"
+                  [ngClass]="{'speaker-a': line.get('speaker')?.value === 'A', 'speaker-b': line.get('speaker')?.value === 'B'}">
                   <svg cIcon name="cilUser" width="14" height="14"></svg>
                   Người nói {{ line.get('speaker')?.value }}
                </span>
                <strong class="ms-2">Dòng {{ line.get('displayOrder')?.value }}</strong>
             </div>
             <div class="d-flex gap-2">
-               <button cButton color="light" size="sm" type="button" (click)="moveLine(i, 'up')" 
-                      [disabled]="i === 0" class="d-flex align-items-center">
+               <button cButton color="light" size="sm" type="button" (click)="moveLine(i, 'up')" [disabled]="i === 0"
+                  class="d-flex align-items-center">
                   <svg cIcon name="cilArrowTop" width="14" height="14"></svg>
                </button>
-               <button cButton color="light" size="sm" type="button" (click)="moveLine(i, 'down')" 
-                      [disabled]="i === dialogueLines.length - 1" class="d-flex align-items-center">
+               <button cButton color="light" size="sm" type="button" (click)="moveLine(i, 'down')"
+                  [disabled]="i === dialogueLines.length - 1" class="d-flex align-items-center">
                   <svg cIcon name="cilArrowBottom" width="14" height="14"></svg>
                </button>
-               <button cButton color="danger" size="sm" type="button" (click)="removeLine(i)" class="d-flex align-items-center">
+               <button cButton color="danger" size="sm" type="button" (click)="removeLine(i)"
+                  class="d-flex align-items-center">
                   <svg cIcon name="cilTrash" width="14" height="14" class="me-1"></svg>
                   Xóa
                </button>
             </div>
          </div>
-         
+
          <div class="mb-2">
             <label class="form-label">Người nói</label>
             <select cFormControl formControlName="speaker" class="form-select">
@@ -48,43 +50,45 @@
                <option value="B">Người nói B</option>
             </select>
          </div>
-         
+
          <div class="mb-2">
             <label class="form-label">Tiếng Anh</label>
-            <input cFormControl formControlName="englishText" class="form-control" placeholder="Nhập nội dung tiếng Anh" />
-            <div *ngIf="line.get('englishText')?.invalid && line.get('englishText')?.touched"
-                class="text-danger small">Nội dung tiếng Anh bắt buộc.</div>
+            <input cFormControl formControlName="englishText" class="form-control"
+               placeholder="Nhập nội dung tiếng Anh" />
+            <div *ngIf="line.get('englishText')?.invalid && line.get('englishText')?.touched" class="text-danger small">
+               Nội dung tiếng Anh bắt buộc.</div>
          </div>
-         
+
          <div class="mb-2">
             <label class="form-label">Tiếng Việt</label>
-            <input cFormControl formControlName="vietnameseText" class="form-control" placeholder="Nhập nội dung tiếng Việt" />
+            <input cFormControl formControlName="vietnameseText" class="form-control"
+               placeholder="Nhập nội dung tiếng Việt" />
             <div *ngIf="line.get('vietnameseText')?.invalid && line.get('vietnameseText')?.touched"
-                class="text-danger small">Nội dung tiếng Việt bắt buộc.</div>
+               class="text-danger small">Nội dung tiếng Việt bắt buộc.</div>
          </div>
-         
+
          <div class="mb-2 d-flex align-items-center gap-2">
             <div class="form-check">
-               <input class="form-check-input" type="checkbox" [id]="'hasBlank_' + i" 
-                    [checked]="line.get('hasBlank')?.value" (change)="toggleBlank(i)">
+               <input class="form-check-input" type="checkbox" [id]="'hasBlank_' + i"
+                  [checked]="line.get('hasBlank')?.value" (change)="toggleBlank(i)">
                <label class="form-check-label" [for]="'hasBlank_' + i">
                   Tạo chỗ trống (blank)
                </label>
             </div>
-            
+
             <div *ngIf="line.get('hasBlank')?.value" class="flex-grow-1">
                <input cFormControl formControlName="blankWord" class="form-control" placeholder="Nhập từ để ẩn" />
-               <div *ngIf="line.get('blankWord')?.invalid && line.get('blankWord')?.touched"
-                  class="text-danger small">Vui lòng nhập từ để ẩn.</div>
+               <div *ngIf="line.get('blankWord')?.invalid && line.get('blankWord')?.touched" class="text-danger small">
+                  Vui lòng nhập từ để ẩn.</div>
             </div>
          </div>
       </div>
-      
+
       <div *ngIf="dialogueLines.length === 0" class="alert alert-info">
          Chưa có dòng hội thoại nào. Hãy thêm dòng đầu tiên.
       </div>
    </div>
-   
+
    <hr />
    <div class="d-flex gap-2">
       <button cButton color="primary" type="submit" [disabled]="dialogueForm.invalid || submitting">
