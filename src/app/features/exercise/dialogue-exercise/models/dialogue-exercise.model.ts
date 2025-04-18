@@ -14,7 +14,7 @@ export interface DialogueExerciseLine {
   audioUrl?: string;
   displayOrder: number;
   hasBlank: boolean;
-  blankWord?: string;
+  blankWord: string | null;
 }
 
 export interface DialogueExerciseCreateDto {
@@ -25,5 +25,6 @@ export interface DialogueExerciseCreateDto {
 
 export interface DialogueExerciseUpdateDto {
   context: string;
+  exerciseId: number;
   dialogueLines: DialogueExerciseLine[];
 }

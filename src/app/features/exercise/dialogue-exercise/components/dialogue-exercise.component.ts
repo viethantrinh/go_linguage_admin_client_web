@@ -45,7 +45,8 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         vietnameseText: 'Chào buổi tối! Chào mừng đến nhà hàng của chúng tôi. Bạn có đặt bàn trước không?',
         displayOrder: 1,
         hasBlank: true,
-        blankWord: 'reservation'
+        blankWord: 'reservation',
+        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138948/485df7a4-b664-4136-8a3d-b8ecac9150d4.ogg'
       },
       {
         id: 2,
@@ -54,7 +55,9 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         englishText: 'Yes, I reserved a table for two under the name Johnson.',
         vietnameseText: 'Vâng, tôi đã đặt bàn cho hai người với tên Johnson.',
         displayOrder: 2,
-        hasBlank: false
+        hasBlank: false,
+        blankWord: null,
+        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138950/7918b7a6-42c4-425d-8dbd-93e0edbc9ffb.ogg'
       },
       {
         id: 3,
@@ -63,7 +66,9 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         englishText: 'Let me check... Ah, yes, here it is. Please follow me to your table.',
         vietnameseText: 'Để tôi kiểm tra... À, vâng, đây rồi. Xin mời theo tôi đến bàn của bạn.',
         displayOrder: 3,
-        hasBlank: false
+        hasBlank: false,
+        blankWord: null,
+        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138954/7b262b96-c1ee-45c5-8c68-20a0e0fc236f.ogg'
       },
       {
         id: 4,
@@ -73,7 +78,8 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         vietnameseText: 'Cảm ơn bạn. Chúng tôi có thể có bàn gần cửa sổ không?',
         displayOrder: 4,
         hasBlank: true,
-        blankWord: 'window'
+        blankWord: 'window',
+        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138958/56200d35-37ac-4ecf-9bca-ee91bdc2d0fb.ogg'
       }
     ]
   };
@@ -120,7 +126,8 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
       vietnameseText: ['', Validators.required],
       displayOrder: [this.dialogueLines.length + 1],
       hasBlank: [false],
-      blankWord: ['']
+      blankWord: [''],
+      audioUrl: ['']
     });
     this.dialogueLines.push(lineGroup);
   }
@@ -190,7 +197,8 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         vietnameseText: [line.vietnameseText, Validators.required],
         displayOrder: [line.displayOrder],
         hasBlank: [line.hasBlank],
-        blankWord: [line.blankWord]
+        blankWord: [line.blankWord],
+        audioUrl: [line.audioUrl]
       }));
     });
     
@@ -213,7 +221,7 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
           }
         },
         error: (error) => {
-          console.error('Error loading dialogue exercise', error);
+          console.error('Lỗi khi tải bài tập hội thoại:', error);
           this.existingDialogueExercise = null;
           this.initForm();
         }
@@ -243,7 +251,8 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
             vietnameseText: [line.vietnameseText, Validators.required],
             displayOrder: [line.displayOrder],
             hasBlank: [line.hasBlank],
-            blankWord: [line.blankWord ?? '']
+            blankWord: [line.blankWord ?? ''],
+            audioUrl: [line.audioUrl]
           });
           
           // Add validators for blankWord if hasBlank is true
@@ -284,52 +293,41 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
       });
     }
     
-    // Giả lập quá trình lưu
-    setTimeout(() => {
-      this.submitting = false;
-      this.exerciseSaved.emit();
-      console.log('Dữ liệu form đã xử lý:', formValue);
-    }, 1000);
+    // Tạo payload theo cấu trúc API mới
+    const payload = {
+      context: formValue.context,
+      exerciseId: this.exercise?.id,
+      dialogueLines: formValue.dialogueLines
+    };
     
-    // Code gọi API trong trường hợp thực
-    /*
+    // Gọi API từ service
     if (this.existingDialogueExercise?.id) {
-      // Update existing dialogue exercise
-      const updateDto = {
-        context: formValue.context,
-        dialogueLines: formValue.dialogueLines
-      };
-      
-      this.dialogueExerciseService.updateDialogueExercise(this.existingDialogueExercise.id, updateDto)
+      // Cập nhật bài tập hội thoại đã tồn tại
+      this.dialogueExerciseService.updateDialogueExercise(payload)
         .pipe(finalize(() => this.submitting = false))
         .subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Cập nhật thành công:', response);
             this.exerciseSaved.emit();
           },
           error: (error) => {
-            console.error('Error updating dialogue exercise', error);
+            console.error('Lỗi khi cập nhật bài tập hội thoại:', error);
           }
         });
     } else {
-      // Create new dialogue exercise
-      const createDto = {
-        context: formValue.context,
-        exerciseId: this.exercise?.id,
-        dialogueLines: formValue.dialogueLines
-      };
-      
-      this.dialogueExerciseService.createDialogueExercise(createDto)
+      // Tạo mới bài tập hội thoại
+      this.dialogueExerciseService.createDialogueExercise(payload)
         .pipe(finalize(() => this.submitting = false))
         .subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Tạo mới thành công:', response);
             this.exerciseSaved.emit();
           },
           error: (error) => {
-            console.error('Error creating dialogue exercise', error);
+            console.error('Lỗi khi tạo mới bài tập hội thoại:', error);
           }
         });
     }
-    */
   }
 
   resetForm(): void {
