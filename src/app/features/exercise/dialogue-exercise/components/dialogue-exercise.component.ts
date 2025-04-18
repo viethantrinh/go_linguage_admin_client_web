@@ -29,61 +29,9 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
 
   dialogueForm!: FormGroup;
   submitting = false;
+  errorMessage = '';
   existingDialogueExercise: DialogueExercise | null = null;
   
-  // Dữ liệu mẫu cho dialogue exercise
-  sampleDialogueExercise: DialogueExercise = {
-    id: 1,
-    context: 'Đây là một cuộc hội thoại tại nhà hàng',
-    exerciseId: 1,
-    dialogueLines: [
-      {
-        id: 1,
-        dialogueExerciseId: 1,
-        speaker: 'A',
-        englishText: 'Good evening! Welcome to our restaurant. Do you have a reservation?',
-        vietnameseText: 'Chào buổi tối! Chào mừng đến nhà hàng của chúng tôi. Bạn có đặt bàn trước không?',
-        displayOrder: 1,
-        hasBlank: true,
-        blankWord: 'reservation',
-        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138948/485df7a4-b664-4136-8a3d-b8ecac9150d4.ogg'
-      },
-      {
-        id: 2,
-        dialogueExerciseId: 1,
-        speaker: 'B',
-        englishText: 'Yes, I reserved a table for two under the name Johnson.',
-        vietnameseText: 'Vâng, tôi đã đặt bàn cho hai người với tên Johnson.',
-        displayOrder: 2,
-        hasBlank: false,
-        blankWord: null,
-        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138950/7918b7a6-42c4-425d-8dbd-93e0edbc9ffb.ogg'
-      },
-      {
-        id: 3,
-        dialogueExerciseId: 1,
-        speaker: 'A',
-        englishText: 'Let me check... Ah, yes, here it is. Please follow me to your table.',
-        vietnameseText: 'Để tôi kiểm tra... À, vâng, đây rồi. Xin mời theo tôi đến bàn của bạn.',
-        displayOrder: 3,
-        hasBlank: false,
-        blankWord: null,
-        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138954/7b262b96-c1ee-45c5-8c68-20a0e0fc236f.ogg'
-      },
-      {
-        id: 4,
-        dialogueExerciseId: 1,
-        speaker: 'B',
-        englishText: 'Thank you. Could we get a table by the window?',
-        vietnameseText: 'Cảm ơn bạn. Chúng tôi có thể có bàn gần cửa sổ không?',
-        displayOrder: 4,
-        hasBlank: true,
-        blankWord: 'window',
-        audioUrl: 'https://res.cloudinary.com/golinguage/video/upload/v1742138958/56200d35-37ac-4ecf-9bca-ee91bdc2d0fb.ogg'
-      }
-    ]
-  };
-
   constructor(
     private fb: FormBuilder, 
     private dialogueExerciseService: DialogueExerciseService
@@ -91,20 +39,11 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initForm();
-    
-    // Để xem trước chức năng, sử dụng dữ liệu mẫu
-    this.existingDialogueExercise = this.sampleDialogueExercise;
-    this.patchForm(this.sampleDialogueExercise);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['exercise'] && this.exercise?.id) {
-      // Khi ở chế độ xem trước, sử dụng dữ liệu mẫu
-      this.existingDialogueExercise = this.sampleDialogueExercise;
-      this.patchForm(this.sampleDialogueExercise);
-      
-      // Trong trường hợp thực, sẽ gọi API
-      // this.loadDialogueExercise();
+      this.loadDialogueExercise();
     }
   }
 
@@ -211,7 +150,7 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
     this.dialogueExerciseService.getDialogueExerciseByExerciseId(this.exercise.id)
       .subscribe({
         next: (response) => {
-          if (response && response.result) {
+          if (response && response.code === 1000 && response.result) {
             this.existingDialogueExercise = response.result;
             this.patchForm(this.existingDialogueExercise);
           } else {
@@ -275,6 +214,7 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
     }
     
     this.submitting = true;
+    this.errorMessage = '';
     
     // Lấy dữ liệu form và xử lý giá trị blankWord
     const formValue = this.dialogueForm.value;
@@ -300,17 +240,31 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
       dialogueLines: formValue.dialogueLines
     };
     
+    // Kiểm tra xem có phải đang cập nhật không bằng cách so sánh exerciseId
+    // Đảm bảo cả hai giá trị đều tồn tại và khớp với nhau
+    const isUpdate = !!this.exercise?.id && 
+                   !!this.existingDialogueExercise && 
+                   this.existingDialogueExercise.exerciseId === this.exercise.id;
+    
+    console.log('Đang lưu bài tập hội thoại:', payload, 'isUpdate:', isUpdate);
+    
     // Gọi API từ service
-    if (this.existingDialogueExercise?.id) {
+    if (isUpdate) {
       // Cập nhật bài tập hội thoại đã tồn tại
       this.dialogueExerciseService.updateDialogueExercise(payload)
         .pipe(finalize(() => this.submitting = false))
         .subscribe({
           next: (response) => {
-            console.log('Cập nhật thành công:', response);
-            this.exerciseSaved.emit();
+            if (response.code === 1000) {
+              console.log('Cập nhật thành công:', response);
+              this.exerciseSaved.emit();
+            } else {
+              this.errorMessage = `Lỗi: ${response.message}`;
+              console.error('Lỗi khi cập nhật:', response);
+            }
           },
           error: (error) => {
+            this.errorMessage = 'Đã xảy ra lỗi khi cập nhật bài tập hội thoại';
             console.error('Lỗi khi cập nhật bài tập hội thoại:', error);
           }
         });
@@ -320,10 +274,16 @@ export class DialogueExerciseComponent implements OnInit, OnChanges {
         .pipe(finalize(() => this.submitting = false))
         .subscribe({
           next: (response) => {
-            console.log('Tạo mới thành công:', response);
-            this.exerciseSaved.emit();
+            if (response.code === 1000) {
+              console.log('Tạo mới thành công:', response);
+              this.exerciseSaved.emit();
+            } else {
+              this.errorMessage = `Lỗi: ${response.message}`;
+              console.error('Lỗi khi tạo mới:', response);
+            }
           },
           error: (error) => {
+            this.errorMessage = 'Đã xảy ra lỗi khi tạo mới bài tập hội thoại';
             console.error('Lỗi khi tạo mới bài tập hội thoại:', error);
           }
         });
