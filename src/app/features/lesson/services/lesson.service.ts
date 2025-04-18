@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {
   CreateLessonRequest,
   DeleteLessonResponse,

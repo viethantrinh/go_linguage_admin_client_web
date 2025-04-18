@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { ApiResponse } from '../../../../core/models/api-response.model';
-import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
-import { MatchingExerciseDetail, MatchingExerciseRequest, Word } from '../models/matching-exercise.model';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable, of} from 'rxjs';
+import {ApiResponse} from '../../../../core/models/api-response.model';
+import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
+import {MatchingExerciseDetail, MatchingExerciseRequest, Word} from '../models/matching-exercise.model';
 
 @Injectable({
   providedIn: 'root'

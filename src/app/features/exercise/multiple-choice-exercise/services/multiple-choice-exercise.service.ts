@@ -1,8 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiResponse } from '../../../../core/models/api-response.model';
-import { BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY } from '../../../../shared/utils/app.constants';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {ApiResponse} from '../../../../core/models/api-response.model';
+import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 import {
   MultipleChoiceExerciseDetail,
   MultipleChoiceExerciseRequest,

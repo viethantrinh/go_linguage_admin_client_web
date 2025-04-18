@@ -1,4 +1,4 @@
-import { ApiResponse } from '../../../core/models/api-response.model';
+import {ApiResponse} from '../../../core/models/api-response.model';
 
 // Word model as returned from API
 export interface Word {

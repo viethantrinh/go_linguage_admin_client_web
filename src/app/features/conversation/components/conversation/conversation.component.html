@@ -1,0 +1,207 @@
+<c-container fluid>
+  <!-- Header with title, button, and search control -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <h1>Quản lý đoạn hội thoại</h1>
+      <!-- Add new conversation button -->
+      <button cButton class="btn me-3 border-0" color="primary" style="background: rgba(78, 205, 196, 0.7)"
+              (click)="openCreateModal()">
+        <svg cIcon name="cilPlus" class="me-1"></svg>
+        Tạo hội thoại mới
+      </button>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <!-- Search input -->
+      <div class="input-group" style="width: 450px;">
+        <span class="input-group-text">
+          <svg cIcon name="cilSearch"></svg>
+        </span>
+        <input cFormControl placeholder="Tìm kiếm hội thoại..." (input)="onSearch($event)"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversation list card -->
+  <c-card class="mb-4">
+    <c-card-body>
+      <!-- Loading spinner with mock data notice -->
+      <div *ngIf="loading" class="text-center my-3">
+        <div class="spinner-border" style="color: rgba(78, 205, 196, 0.7);" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Đang tải dữ liệu mẫu...</p>
+      </div>
+
+      <!-- Conversation table -->
+      <table cTable hover *ngIf="!loading">
+        <thead>
+        <tr>
+          <th scope="col">Mã ID</th>
+          <th scope="col">Tên hội thoại</th>
+          <th scope="col">Thứ tự hiển thị</th>
+          <th scope="col">Số dòng hội thoại</th>
+          <th scope="col">Ngày tạo</th>
+          <th scope="col">Hình ảnh</th>
+          <th scope="col">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let conversation of filteredConversations | slice: (currentPage-1) * itemsPerPage : currentPage * itemsPerPage">
+          <th scope="row">{{ conversation.id }}</th>
+          <td>{{ conversation.name }}</td>
+          <td>{{ conversation.displayOrder }}</td>
+          <td>{{ conversation.lineCount }}</td>
+          <td>{{ conversation.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <button *ngIf="conversation.imageUrl" class="btn btn-sm" 
+                    [ngStyle]="{'background-color': 'rgba(118, 120, 237, 0.7)', 'color': '#fff', 'border': 'none'}"
+                    (click)="openImagePreview(conversation)">
+              <svg cIcon name="cilImage"></svg>
+            </button>
+            <span *ngIf="!conversation.imageUrl">-</span>
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              <!-- Delete button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(255, 107, 107, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openDeleteModal(conversation)">
+                <svg cIcon name="cilTrash"></svg>
+              </button>
+              <!-- View details button -->
+              <button class="btn btn-sm"
+                      [ngStyle]="{'background-color': 'rgba(86, 86, 198, 0.7)', 'color': '#fff', 'border': 'none'}"
+                      (click)="openViewDetailsModal(conversation)">
+                <svg cIcon name="cilInfo"></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- Dữ liệu mẫu notification -->
+      <div *ngIf="!loading" class="alert alert-info mt-3">
+        <strong>Chú ý:</strong> Đây là dữ liệu mẫu được tạo để hiển thị giao diện. Các thao tác như tạo mới, xóa sẽ chỉ tác động đến dữ liệu tạm thời trong bộ nhớ.
+      </div>
+
+      <!-- Pagination controls -->
+      <div *ngIf="!loading && filteredConversations.length > 0" class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          <span>Hiển thị {{ Math.min((currentPage - 1) * itemsPerPage + 1, filteredConversations.length) }}
+            đến {{ Math.min(currentPage * itemsPerPage, filteredConversations.length) }}
+            trên tổng số {{ filteredConversations.length }}
+            hội thoại
+          </span>
+        </div>
+        <c-pagination aria-label="Page navigation">
+          <li cPageItem [disabled]="currentPage === 1">
+            <a cPageLink (click)="changePage(currentPage - 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === 1 ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === 1 ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Previous</a>
+          </li>
+          <li cPageItem *ngFor="let page of getPageNumbers()" [active]="page === currentPage">
+            <a cPageLink (click)="changePage(page)"
+               style="cursor: pointer"
+               [ngStyle]="{'background-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : 'transparent',
+                            'color': page === currentPage ? '#fff' : 'rgba(78, 205, 196, 0.9)',
+                            'border-color': page === currentPage ? 'rgba(78, 205, 196, 0.7)' : '#dee2e6'}">{{ page }}</a>
+          </li>
+          <li cPageItem [disabled]="currentPage === totalPages">
+            <a cPageLink (click)="changePage(currentPage + 1)"
+               style="cursor: pointer"
+               [tabindex]="currentPage === totalPages ? -1 : undefined"
+               [ngStyle]="{'color': currentPage === totalPages ? '#6c757d' : 'rgba(78, 205, 196, 0.9)'}">Next</a>
+          </li>
+        </c-pagination>
+      </div>
+
+      <!-- No conversations found message -->
+      <div *ngIf="!loading && filteredConversations.length === 0" class="text-center my-3">
+        <p>Không tìm thấy hội thoại nào.</p>
+      </div>
+    </c-card-body>
+  </c-card>
+
+  <!-- Create Conversation Modal containing the conversation-creation component -->
+  <c-modal [visible]="createModalVisible" (visibleChange)="createModalVisible = $event" size="xl">
+    <c-modal-header>
+      <h5 cModalTitle>Tạo hội thoại mới</h5>
+      <button cButtonClose (click)="createModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body>
+      <gl-conversation-creation></gl-conversation-creation>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="handleCreateModalClosed()">Đóng</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Delete Confirmation Modal -->
+  <c-modal [visible]="deleteModalVisible" (visibleChange)="deleteModalVisible = $event">
+    <c-modal-header>
+      <h5 cModalTitle>Xác nhận xóa</h5>
+      <button cButtonClose (click)="deleteModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body>
+      Bạn có chắc chắn muốn xóa hội thoại <strong>{{ selectedConversation?.name }}</strong>?
+      Hành động này không thể hoàn tác.
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="deleteModalVisible = false">Hủy</button>
+      <button cButton color="danger" (click)="deleteConversation()">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Xóa
+      </button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- View Details Modal -->
+  <c-modal [visible]="viewDetailsModalVisible" (visibleChange)="viewDetailsModalVisible = $event" size="lg">
+    <c-modal-header>
+      <h5 cModalTitle>Chi tiết hội thoại</h5>
+      <button cButtonClose (click)="viewDetailsModalVisible = false"></button>
+    </c-modal-header>
+    <c-modal-body *ngIf="selectedConversation">
+      <div class="mb-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>{{ selectedConversation.name }}</strong>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">ID:</div>
+              <div class="col-md-9">{{ selectedConversation.id }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">Thứ tự hiển thị:</div>
+              <div class="col-md-9">{{ selectedConversation.displayOrder }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">Số dòng hội thoại:</div>
+              <div class="col-md-9">{{ selectedConversation.lineCount }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-3 text-muted">Ngày tạo:</div>
+              <div class="col-md-9">{{ selectedConversation.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+            <div class="row mb-3" *ngIf="selectedConversation.imageUrl">
+              <div class="col-md-3 text-muted">Hình ảnh:</div>
+              <div class="col-md-9">
+                <img [src]="selectedConversation.imageUrl" alt="Conversation Image" class="img-fluid rounded" style="max-height: 200px;">
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <small>Lưu ý: Đây là dữ liệu mẫu. Trong môi trường sản xuất, chi tiết hội thoại sẽ hiển thị đầy đủ các đoạn hội thoại.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="viewDetailsModalVisible = false">Đóng</button>
+    </c-modal-footer>
+  </c-modal>
+</c-container>

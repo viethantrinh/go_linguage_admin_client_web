@@ -1,0 +1,93 @@
+<form [formGroup]="conversationForm" (ngSubmit)="onSubmit()" class="p-4">
+   <div class="mb-3">
+      <label for="name" class="form-label">Tên hội thoại</label>
+      <input id="name" cFormControl formControlName="name" class="form-control" placeholder="Nhập tên hội thoại" />
+      <div *ngIf="conversationForm.get('name')?.invalid && conversationForm.get('name')?.touched"
+         class="text-danger small">Tên bắt buộc.</div>
+   </div>
+   <div class="mb-3">
+      <label for="displayOrder" class="form-label">Thứ tự hiển thị</label>
+      <input type="number" id="displayOrder" cFormControl formControlName="displayOrder" class="form-control" min="1" />
+      <div *ngIf="conversationForm.get('displayOrder')?.invalid && conversationForm.get('displayOrder')?.touched"
+         class="text-danger small">Cần là số >= 1.</div>
+   </div>
+   <div class="mb-4">
+      <label for="imageUrl" class="form-label">Ảnh (URL)</label>
+      <input id="imageUrl" cFormControl formControlName="imageUrl" class="form-control" placeholder="Nhập URL ảnh" />
+   </div>
+   <hr />
+   <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5>Dòng hội thoại</h5>
+      <button cButton color="primary" type="button" (click)="addLine()">Thêm dòng</button>
+   </div>
+   <div formArrayName="lines">
+      <div *ngFor="let line of lines.controls; let i = index" [formGroupName]="i" class="border rounded p-3 mb-3">
+         <div class="d-flex justify-content-between mb-2">
+            <strong>Dòng {{ i + 1 }}</strong>
+            <button cButton color="danger" size="sm" type="button" (click)="removeLine(i)">Xóa dòng</button>
+         </div>
+         <div class="mb-2">
+            <label class="form-label">Loại</label>
+            <select cFormControl formControlName="type" class="form-select">
+               <option [ngValue]="LineType.SYSTEM">Hệ thống</option>
+               <option [ngValue]="LineType.USER">Người dùng</option>
+            </select>
+         </div>
+         <div class="mb-2">
+            <label class="form-label">Tiếng Anh</label>
+            <input cFormControl formControlName="englishText" class="form-control" />
+         </div>
+         <div class="mb-2">
+            <label class="form-label">Tiếng Việt</label>
+            <input cFormControl formControlName="vietnameseText" class="form-control" />
+         </div>
+         <div class="mb-2">
+            <label class="form-label">Audio</label>
+            <input type="file" accept="audio/*" class="form-control" (change)="onLineAudioSelected($event, i)" />
+            <span *ngIf="uploadingAudio[i]" class="spinner-border spinner-border-sm"></span>
+            <div *ngIf="lines.at(i).get('audioUrl')?.value" class="text-success small mt-1">Đã tải lên: {{
+               lines.at(i).get('audioUrl')?.value }}</div>
+         </div>
+         <div *ngIf="lines.at(i).get('type')?.value === LineType.USER" class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+               <h6>Lựa chọn</h6>
+               <button cButton color="secondary" size="sm" type="button" (click)="addOption(i)">Thêm lựa chọn</button>
+            </div>
+            <div formArrayName="options">
+               <div *ngFor="let opt of getOptions(i).controls; let j = index" [formGroupName]="j"
+                  class="border rounded p-2 mb-2">
+                  <div class="d-flex justify-content-between mb-1">
+                     <strong>Lựa chọn {{ j + 1 }}</strong>
+                     <button cButton color="danger" size="sm" type="button" (click)="removeOption(i, j)">Xóa</button>
+                  </div>
+                  <div class="mb-1">
+                     <label class="form-label">Tiếng Anh</label>
+                     <input cFormControl formControlName="englishText" class="form-control" />
+                  </div>
+                  <div class="mb-1">
+                     <label class="form-label">Tiếng Việt</label>
+                     <input cFormControl formControlName="vietnameseText" class="form-control" />
+                  </div>
+                  <div class="mb-1">
+                     <label class="form-label">Audio</label>
+                     <input type="file" accept="audio/*" class="form-control"
+                        (change)="onOptionAudioSelected($event, i, j)" />
+                     <span *ngIf="uploadingOptionAudio[i][j]" class="spinner-border spinner-border-sm"></span>
+                     <div *ngIf="getOptions(i).at(j).get('audioUrl')?.value" class="text-success small mt-1">Đã tải lên:
+                        {{ getOptions(i).at(j).get('audioUrl')?.value }}</div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <hr />
+   <div class="d-flex gap-2">
+      <button cButton color="primary" type="submit" [disabled]="conversationForm.invalid || submitting">
+         <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+         Tạo hội thoại
+      </button>
+      <button cButton color="secondary" type="button" (click)="conversationForm.reset(); lines.clear()">Xóa tất
+         cả</button>
+   </div>
+</form>

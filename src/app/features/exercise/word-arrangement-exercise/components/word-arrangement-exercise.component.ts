@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   AlertComponent,
   ButtonDirective,
@@ -14,10 +14,10 @@ import {
   SpinnerComponent,
   TextColorDirective
 } from '@coreui/angular';
-import { IconDirective } from '@coreui/icons-angular';
-import { finalize } from 'rxjs';
-import { LanguageType, Sentence, WordArrangementExerciseDetail, WordArrangementOption } from '../models/word-arrangement-exercise.model';
-import { WordArrangementExerciseService } from '../services/word-arrangement-exercise.service';
+import {IconDirective} from '@coreui/icons-angular';
+import {finalize} from 'rxjs';
+import {LanguageType, Sentence, WordArrangementExerciseDetail} from '../models/word-arrangement-exercise.model';
+import {WordArrangementExerciseService} from '../services/word-arrangement-exercise.service';
 
 /**
  * @description

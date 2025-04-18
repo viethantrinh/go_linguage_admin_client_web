@@ -21,7 +21,8 @@ import {IconDirective} from '@coreui/icons-angular';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {finalize} from 'rxjs';
 import {WordService} from '../services/word.service';
-import {Topic, Sentence as ApiSentence, Word} from '../models/word.model';
+import {Sentence as ApiSentence, Topic} from '../models/word.model';
+
 // Interface for internal component use
 interface WordDisplay {
   id: number;
@@ -77,12 +78,12 @@ export class WordComponent implements OnInit {
   topics: Topic[] = [];
   sentences: Sentence[] = [];
   wordForm: FormGroup;
-  
+
   editModalVisible = false;
   deleteModalVisible = false;
   selectedWord: WordDisplay | null = null;
   isEditing = false;
-  
+
   loading = false;
   formLoading = false;
 
@@ -107,7 +108,7 @@ export class WordComponent implements OnInit {
       sentenceIds: this.formBuilder.array([])
     });
   }
-  
+
   // Image handling methods
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -118,22 +119,22 @@ export class WordComponent implements OnInit {
         alert('Vui lòng chọn file hình ảnh');
         return;
       }
-      
+
       // Save the file for later upload
       this.selectedFile = file;
-      
+
       // Create a preview URL
       this.previewImage = URL.createObjectURL(file);
     }
   }
-  
+
   removeImage(): void {
     // Clear the preview
     if (this.previewImage) {
       URL.revokeObjectURL(this.previewImage);
       this.previewImage = null;
     }
-    
+
     // Clear the selected file
     this.selectedFile = null;
   }
@@ -163,7 +164,7 @@ export class WordComponent implements OnInit {
               topicIds: word.topicIds || [],
               sentenceIds: word.sentenceIds || []
             }));
-            
+
             this.filteredWords = [...this.words];
             this.updatePagination();
           } else {
@@ -281,11 +282,11 @@ export class WordComponent implements OnInit {
   openEditModal(word: WordDisplay): void {
     this.isEditing = true;
     this.selectedWord = word;
-    
+
     // Reset form and sentences selection
     this.resetForm();
     this.sentences.forEach(sentence => sentence.isSelected = false);
-    
+
     // Get detailed word information from API
     this.loading = true;
     this.wordService.getWordDetail(word.id)
@@ -294,7 +295,7 @@ export class WordComponent implements OnInit {
         next: (response) => {
           if (response.code === 1000 && response.result) {
             const wordDetail = response.result;
-            
+
             // Populate form with word details
             this.wordForm.patchValue({
               id: wordDetail.id,
@@ -302,19 +303,19 @@ export class WordComponent implements OnInit {
               vietnameseText: wordDetail.vietnameseText,
               topicIds: wordDetail.topicIds || []
             });
-            
+
             // Set image URL for preview if available
             if (wordDetail.imageUrl) {
               this.previewImage = wordDetail.imageUrl;
             }
-            
+
             // Mark selected sentences
             if (wordDetail.sentenceIds && wordDetail.sentenceIds.length > 0) {
               this.sentences.forEach(sentence => {
                 sentence.isSelected = wordDetail.sentenceIds.includes(sentence.id);
               });
             }
-            
+
             this.editModalVisible = true;
           } else {
             console.error('Error loading word details:', response.message);
@@ -339,10 +340,10 @@ export class WordComponent implements OnInit {
       vietnameseText: '',
       topicIds: []
     });
-    
+
     // Reset sentences
     this.sentences.forEach(sentence => sentence.isSelected = false);
-    
+
     // Reset image
     if (this.previewImage) {
       URL.revokeObjectURL(this.previewImage);
@@ -357,17 +358,17 @@ export class WordComponent implements OnInit {
 
   saveWord(): void {
     if (this.wordForm.invalid) return;
-    
+
     // Get form values
     const formValue = this.wordForm.value;
-    
+
     // Get selected sentence IDs
     const selectedSentenceIds = this.sentences
       .filter(sentence => sentence.isSelected)
       .map(sentence => sentence.id);
-    
+
     this.formLoading = true;
-    
+
     // Prepare word data for API request
     const wordData = {
       englishText: formValue.englishText,
@@ -375,19 +376,19 @@ export class WordComponent implements OnInit {
       topicIds: formValue.topicIds || [],
       sentenceIds: selectedSentenceIds
     };
-    
+
     // Determine if it's an update or create operation
-    const apiCall = this.isEditing && this.selectedWord 
+    const apiCall = this.isEditing && this.selectedWord
       ? this.wordService.updateWord(this.selectedWord.id, wordData)
       : this.wordService.createWord(wordData);
-      
+
     apiCall
       .pipe(finalize(() => this.formLoading = false))
       .subscribe({
         next: (response) => {
           if (response.code === 1000 && response.result) {
             const savedWord = response.result;
-            
+
             // If we have a file to upload and the word was saved successfully
             if (this.selectedFile && savedWord.id) {
               this.uploadImage(savedWord.id, this.selectedFile);
@@ -409,7 +410,7 @@ export class WordComponent implements OnInit {
         }
       });
   }
-  
+
   /**
    * Upload image for a word
    * @param wordId The ID of the word
@@ -417,7 +418,7 @@ export class WordComponent implements OnInit {
    */
   uploadImage(wordId: number, file: File): void {
     this.formLoading = true;
-    
+
     this.wordService.uploadImage(wordId, file)
       .pipe(finalize(() => {
         this.formLoading = false;
@@ -446,9 +447,9 @@ export class WordComponent implements OnInit {
 
   deleteWord(): void {
     if (!this.selectedWord) return;
-    
+
     this.loading = true;
-    
+
     this.wordService.deleteWord(this.selectedWord.id)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
@@ -472,7 +473,7 @@ export class WordComponent implements OnInit {
 
   playAudio(audioUrl?: string): void {
     if (!audioUrl) return;
-    
+
     // Play the audio file
     const audio = new Audio(audioUrl);
     audio.play().catch(err => {

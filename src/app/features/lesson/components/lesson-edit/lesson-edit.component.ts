@@ -1,8 +1,8 @@
-import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
-import { NgForOf, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
+import {NgForOf, NgIf, NgStyle, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -22,19 +22,23 @@ import {
   TextColorDirective,
   ToastModule
 } from '@coreui/angular';
-import { IconDirective } from '@coreui/icons-angular';
-import { finalize, Subject, takeUntil } from 'rxjs';
-import { APP_ROUTE_TOKEN } from '../../../../core/routes/app.routes.constants';
-import { IconSubset } from '../../../../icons/icon-subset';
+import {IconDirective} from '@coreui/icons-angular';
+import {finalize, Subject, takeUntil} from 'rxjs';
+import {APP_ROUTE_TOKEN} from '../../../../core/routes/app.routes.constants';
+import {IconSubset} from '../../../../icons/icon-subset';
 import {
   VocabularyExerciseComponent
 } from '../../../exercise/vocabulary-exercise/components/vocabulary-exercise.component';
-import { LessonType } from '../../../topic/models/topic.model';
-import { TopicService } from '../../../topic/services/topic.service';
-import { CreateLessonRequest, UpdateLessonRequest } from '../../models/lesson.model';
-import { LessonService } from '../../services/lesson.service';
-import { MultipleChoiceExerciseComponent } from '../../../exercise/multiple-choice-exercise/components/multiple-choice-exercise.component';
-import { WordArrangementExerciseComponent } from "../../../exercise/word-arrangement-exercise/components/word-arrangement-exercise.component";
+import {LessonType} from '../../../topic/models/topic.model';
+import {TopicService} from '../../../topic/services/topic.service';
+import {CreateLessonRequest, UpdateLessonRequest} from '../../models/lesson.model';
+import {LessonService} from '../../services/lesson.service';
+import {
+  MultipleChoiceExerciseComponent
+} from '../../../exercise/multiple-choice-exercise/components/multiple-choice-exercise.component';
+import {
+  WordArrangementExerciseComponent
+} from "../../../exercise/word-arrangement-exercise/components/word-arrangement-exercise.component";
 import {MatchingExerciseComponent} from '../../../exercise/matching-exercise/components/matching-exercise.component';
 
 // Define an interface for exercises

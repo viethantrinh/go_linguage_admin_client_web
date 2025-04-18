@@ -1,17 +1,16 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { BASE_LOCAL_URL, TOKEN_KEY } from '../../../shared/utils/app.constants';
-import { ApiResponse } from '../../../core/models/api-response.model';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {ApiResponse} from '../../../core/models/api-response.model';
 import {
   CreateWordRequest,
-  UpdateWordRequest,
-  Word,
-  WordListResponse,
-  WordResponse,
-  TopicListResponse,
   SentenceListResponse,
-  UploadImageResponse
+  TopicListResponse,
+  UpdateWordRequest,
+  UploadImageResponse,
+  WordListResponse,
+  WordResponse
 } from '../models/word.model';
 
 @Injectable({
@@ -74,14 +73,14 @@ export class WordService {
    */
   uploadImage(wordId: number, file: File): Observable<ApiResponse<UploadImageResponse>> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('wordId', wordId.toString());
-    
+
     return this.http.post<ApiResponse<UploadImageResponse>>(
-      `${this.baseUrl}/words/upload-image`, 
-      formData, 
+      `${this.baseUrl}/words/upload-image`,
+      formData,
       { headers }
     );
   }

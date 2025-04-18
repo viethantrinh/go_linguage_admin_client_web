@@ -50,7 +50,7 @@ export const routes: Routes = [
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_CONVERSATION,
-        loadComponent: () => import('./features/conversation/components/conversation.component').then(c => c.ConversationComponent)
+        loadComponent: () => import('./features/conversation/components/conversation/conversation.component').then(c => c.ConversationComponent)
       },
       {
         path: APP_ROUTE_TOKEN.LEARN_MATERIAL_SONG,

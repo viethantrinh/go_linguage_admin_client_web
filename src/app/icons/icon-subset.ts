@@ -57,6 +57,7 @@ import {
   cilGrid,
   cilHamburgerMenu,
   cilHome,
+  cilImage,
   cilInbox,
   cilIndentDecrease,
   cilIndentIncrease,
@@ -221,7 +222,8 @@ export const iconSubset = {
   cilReload,
   cilArrowLeft,
   cilCheckAlt,
-  cilMediaPause
+  cilMediaPause,
+  cilImage,
 };
 
 export enum IconSubset {
