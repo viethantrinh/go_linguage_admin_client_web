@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {ApiResponse} from '../../../core/models/api-response.model';
 import {
   CreateWordRequest,
@@ -17,7 +17,7 @@ import {
   providedIn: 'root'
 })
 export class WordService {
-  private readonly baseUrl = `${BASE_LOCAL_URL}`;
+  private readonly baseUrl = `${BASE_URL}`;
 
   constructor(private http: HttpClient) {}
 

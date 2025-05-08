@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {Topic} from '../models/topic.model';
 import {ApiResponse} from '../../../core/models/api-response.model';
 
@@ -11,7 +11,7 @@ import {ApiResponse} from '../../../core/models/api-response.model';
   providedIn: 'root'
 })
 export class TopicService {
-  private readonly BASE_URL = `${BASE_REMOTE_URL}/topics/admin`;
+  private readonly BASE_URL = `${BASE_URL}/topics/admin`;
   private readonly http = inject(HttpClient);
 
   /**

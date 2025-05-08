@@ -3,7 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of, throwError} from 'rxjs';
 import {catchError, delay, map} from 'rxjs/operators';
 import {Song, SongCreateDto, SongList, SongStatusResponse, SongUpdateDto, WordTimestamp} from '../models/song.model';
-import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {ApiResponse} from '../../../core/models/api-response.model';
 
 export interface LyricsData {
@@ -15,7 +15,7 @@ export interface LyricsData {
   providedIn: 'root'
 })
 export class SongService {
-  private apiUrl = BASE_LOCAL_URL + '/songs';
+  private apiUrl = BASE_URL + '/songs';
 
   constructor(private http: HttpClient) { }
 

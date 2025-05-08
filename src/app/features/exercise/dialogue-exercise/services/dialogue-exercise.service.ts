@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DialogueExerciseCreateDto, DialogueExerciseUpdateDto } from '../models/dialogue-exercise.model';
-import { BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY } from '../../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 import { ApiResponse } from '../../../../core/models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DialogueExerciseService {
-  private baseUrl = `${BASE_LOCAL_URL}/exercises/dialogue`;
+  private baseUrl = `${BASE_URL}/exercises/dialogue`;
 
   constructor(private http: HttpClient) {}
 

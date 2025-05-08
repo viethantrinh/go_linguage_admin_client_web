@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {ApiResponse} from '../../../core/models/api-response.model';
-import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {
   Conversation,
   ConversationCreateDto,
@@ -15,7 +15,7 @@ import {
   providedIn: 'root'
 })
 export class ConversationService {
-  private apiUrl = `${BASE_LOCAL_URL}/conversations`;
+  private apiUrl = `${BASE_URL}/conversations`;
 
   constructor(private http: HttpClient) { }
 

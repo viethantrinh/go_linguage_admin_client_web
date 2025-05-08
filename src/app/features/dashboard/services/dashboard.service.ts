@@ -3,7 +3,7 @@ import {inject, Injectable} from '@angular/core';
 import {map, Observable} from 'rxjs';
 import {DashboardData} from '../models/dashboard-data';
 import {ApiResponse} from '../../../core/models/api-response.model';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class DashboardService {
   getDashboardData(): Observable<DashboardData> {
     let headers = new HttpHeaders();
     headers = headers.append('Authorization', `Bearer ${localStorage.getItem(TOKEN_KEY)}`);
-    return this.http.get<ApiResponse<DashboardData>>(`${BASE_REMOTE_URL}/dashboards`, {
+    return this.http.get<ApiResponse<DashboardData>>(`${BASE_URL}/dashboards`, {
       headers: headers
     })
       .pipe(

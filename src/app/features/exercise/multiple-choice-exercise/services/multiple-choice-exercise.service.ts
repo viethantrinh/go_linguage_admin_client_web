@@ -2,7 +2,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ApiResponse} from '../../../../core/models/api-response.model';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 import {
   MultipleChoiceExerciseDetail,
   MultipleChoiceExerciseRequest,
@@ -14,7 +14,7 @@ import {
   providedIn: 'root'
 })
 export class MultipleChoiceExerciseService {
-  private readonly baseUrl = `${BASE_REMOTE_URL}`;
+  private readonly baseUrl = `${BASE_URL}`;
 
   constructor(private http: HttpClient) { }
 

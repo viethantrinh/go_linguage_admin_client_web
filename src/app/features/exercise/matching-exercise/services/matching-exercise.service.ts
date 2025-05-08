@@ -2,14 +2,14 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {ApiResponse} from '../../../../core/models/api-response.model';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 import {MatchingExerciseDetail, MatchingExerciseRequest, Word} from '../models/matching-exercise.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MatchingExerciseService {
-  private readonly baseUrl = `${BASE_REMOTE_URL}`;
+  private readonly baseUrl = `${BASE_URL}`;
 
   // Sample data for development/testing
   private sampleWords: Word[] = [

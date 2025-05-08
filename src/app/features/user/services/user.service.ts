@@ -4,13 +4,13 @@ import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {User, UserUpdateRequest} from '../models/user.model';
 import {ApiResponse} from '../../../core/models/api-response.model';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private BASE_URL = `${BASE_REMOTE_URL}/users/admin`;
+  private BASE_URL = `${BASE_URL}/users/admin`;
   readonly http = inject(HttpClient);
 
   /**

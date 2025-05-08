@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {BASE_LOCAL_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {Sentence, SentencePayload, Topic, Word} from '../models/sentence.model';
 import {ApiResponse} from '../../../core/models/api-response.model';
 
@@ -11,7 +11,7 @@ import {ApiResponse} from '../../../core/models/api-response.model';
   providedIn: 'root'
 })
 export class SentenceService {
-  private apiUrl = BASE_LOCAL_URL;
+  private apiUrl = BASE_URL;
 
   constructor(private http: HttpClient) { }
 

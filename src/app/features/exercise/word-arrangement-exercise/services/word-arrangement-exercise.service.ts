@@ -3,13 +3,13 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 // Using window.location.origin as base URL since the environment file might not be accessible
 import {WordArrangementExerciseRequest} from '../models/word-arrangement-exercise.model';
-import {BASE_REMOTE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
+import {BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../../shared/utils/app.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WordArrangementExerciseService {
-  private BASE_API_URL = BASE_REMOTE_URL;
+  private BASE_API_URL = BASE_URL;
   constructor(private http: HttpClient) { }
 
   // Get word arrangement exercise details by ID

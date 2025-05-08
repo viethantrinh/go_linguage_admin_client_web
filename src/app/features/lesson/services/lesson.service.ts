@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {BASE_LOCAL_URL, BASE_REMOTE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
+import {BASE_LOCAL_URL, BASE_REMOTE_URL, BASE_URL, TOKEN_KEY} from '../../../shared/utils/app.constants';
 import {
   CreateLessonRequest,
   DeleteLessonResponse,
@@ -16,7 +16,7 @@ import {ApiResponse} from '../../../core/models/api-response.model';
   providedIn: 'root'
 })
 export class LessonService {
-  private readonly baseUrl = `${BASE_LOCAL_URL}/lessons/admin`;
+  private readonly baseUrl = `${BASE_URL}/lessons/admin`;
 
   constructor(private http: HttpClient) {
   }
