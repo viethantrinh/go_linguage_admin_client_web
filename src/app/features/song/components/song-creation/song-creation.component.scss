@@ -8,11 +8,11 @@
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: #e9ecef;
   }
-  
+
   &.active {
     background-color: var(--cui-primary);
     color: white;
@@ -30,20 +30,33 @@
   height: 220px;
   overflow-y: auto;
   line-height: 1.7;
-  
+  scroll-behavior: smooth;
+
   .word-highlight {
-    display: inline-block;
-    padding: 2px 4px;
-    margin: 0 2px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    cursor: default;
-    
+    display: inline;
+    padding: 3px 5px;
+    margin: 0 1px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
     &.active {
       background-color: #4f5d73;
       color: white;
-      font-weight: 500;
+      font-weight: 600;
       transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(79, 93, 115, 0.3);
+      z-index: 1;
+      position: relative;
+    }
+
+    &:hover:not(.active) {
+      background-color: rgba(79, 93, 115, 0.15);
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
     }
   }
 }
@@ -66,7 +79,9 @@ c-card {
 
 // For spinning animation
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner-border {
