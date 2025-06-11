@@ -1,6 +1,6 @@
 export const BASE_REMOTE_URL = 'https://go-linguage-server-9ab98bbccd59.herokuapp.com/api';
 export const BASE_LOCAL_URL = 'http://localhost:8080/api';
-export const BASE_URL = BASE_LOCAL_URL;
+export const BASE_URL = BASE_REMOTE_URL;
 
 // auth
 export const TOKEN_KEY = 'auth_token';
