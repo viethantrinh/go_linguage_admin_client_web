@@ -226,7 +226,7 @@
         <h2 class="h5 mb-4">Bước 4: Phát bài hát với lời được đồng bộ</h2>
 
         <div class="mb-4">
-          <div class="d-flex justify-content-center mb-3">
+          <div class="d-flex justify-content-center mb-3 gap-3">
             <button cButton class="border-0" (click)="playAudio()"
               [ngStyle]="{'background-color': 'rgba(78, 205, 196, 0.7)', 'color': '#fff'}">
               <svg cIcon name="cilMediaPlay" class="me-1"></svg> Phát
@@ -247,9 +247,7 @@
                   class="word-highlight english-word-{{lineIndex * 20 + wordIndex}}"
                   [ngClass]="{'active': currentHighlightedWordIndex === (lineIndex * 20 + wordIndex)}"
                   [title]="'Line: ' + lineIndex + ', Word: ' + wordIndex + ', Display Index: ' + (lineIndex * 20 + wordIndex)"
-                  (click)="onWordClick(lineIndex, wordIndex)" style="cursor: pointer;">
-                  {{word}}<span *ngIf="wordIndex < line.split(' ').length - 1">&nbsp;</span>
-                </span>
+                  (click)="onWordClick(lineIndex, wordIndex)" style="cursor: pointer;">{{word}}</span>
               </div>
             </div>
           </div>
@@ -260,9 +258,7 @@
                 <span *ngFor="let word of line.split(' '); let wordIndex = index"
                   class="word-highlight vietnamese-word-{{lineIndex * 20 + wordIndex}}"
                   [ngClass]="{'active': currentHighlightedWordIndex === (lineIndex * 20 + wordIndex)}"
-                  [title]="'Line: ' + lineIndex + ', Word: ' + wordIndex + ', Display Index: ' + (lineIndex * 20 + wordIndex)">
-                  {{word}}<span *ngIf="wordIndex < line.split(' ').length - 1">&nbsp;</span>
-                </span>
+                  [title]="'Line: ' + lineIndex + ', Word: ' + wordIndex + ', Display Index: ' + (lineIndex * 20 + wordIndex)">{{word}}</span>
               </div>
             </div>
           </div>
