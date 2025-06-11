@@ -280,7 +280,8 @@ export class SongCreationComponent implements OnInit, OnDestroy {
       .subscribe((song: Song) => {
         this.currentSong = song;
         this.cloudinaryUrl = song.audioUrl || '';
-        this.nextStep();
+        // Don't auto-navigate, stay on step 5 to show results
+        console.log('Upload to Cloudinary completed:', this.cloudinaryUrl);
       });
   }
 
